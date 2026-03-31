@@ -25,8 +25,17 @@ export default function Home() {
   const [productos, setProductos] = useState([])
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState(null)
-  const [heroImages, setHeroImages] = useState(['/hero-1.jpg', '/hero-ver-todo.jpg', '/hero-3.jpg'])
-  const [familyImages, setFamilyImages] = useState(COMMUNITY_FALLBACK)
+  const [heroImages, setHeroImages] = useState([])
+  const [familyImages, setFamilyImages] = useState([])
+  const [heroLoaded, setHeroLoaded] = useState([false, false, false])
+
+  const handleHeroLoad = (index) => {
+    setHeroLoaded(prev => {
+      const next = [...prev]
+      next[index] = true
+      return next
+    })
+  }
 
   useEffect(() => {
     getProductos({ soloPublicados: true })
@@ -91,20 +100,41 @@ export default function Home() {
       <section className="hero">
         <div className="hero__grid">
           <div className="hero__col">
-            <img src={heroImages[0]} alt="Look 1" className="hero__img" />
+            {heroImages[0] && (
+              <img 
+                src={heroImages[0]} 
+                alt="Look 1" 
+                className={`hero__img ${heroLoaded[0] ? 'is-loaded' : ''}`} 
+                onLoad={() => handleHeroLoad(0)}
+              />
+            )}
           </div>
           <div className="hero__col hero__col--center">
-            <img src={heroImages[1]} alt="Look 2" className="hero__img hero__img--ver-todo" />
+            {heroImages[1] && (
+              <img 
+                src={heroImages[1]} 
+                alt="Look 2" 
+                className={`hero__img hero__img--ver-todo ${heroLoaded[1] ? 'is-loaded' : ''}`} 
+                onLoad={() => handleHeroLoad(1)}
+              />
+            )}
             <div className="hero__cta">
               <p className="hero__label">Nueva temporada</p>
               <h1 className="hero__title">Nueva<br />Colección</h1>
-              <Link to="/tienda" className="btn btn-filled">
+              <Link to="/tienda" className="btn btn-filled" style={{ transition: 'all 0.3s' }}>
                 Ver Colección →
               </Link>
             </div>
           </div>
           <div className="hero__col">
-            <img src={heroImages[2]} alt="Look 3" className="hero__img" />
+            {heroImages[2] && (
+              <img 
+                src={heroImages[2]} 
+                alt="Look 3" 
+                className={`hero__img ${heroLoaded[2] ? 'is-loaded' : ''}`} 
+                onLoad={() => handleHeroLoad(2)}
+              />
+            )}
           </div>
         </div>
       </section>

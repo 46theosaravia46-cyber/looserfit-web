@@ -14,6 +14,7 @@
 .hero__col {
   position: relative;
   overflow: hidden;
+  background: #111; /* Dark placeholder while loading */
 }
 
 .hero__img {
@@ -21,9 +22,14 @@
   height: 100%;
   object-fit: cover;
   filter: none;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.8s ease;
   transform-origin: center center;
-  will-change: transform;
+  will-change: transform, opacity;
+  opacity: 0;
+}
+
+.hero__img.is-loaded {
+  opacity: 1;
 }
 
 .hero__img--ver-todo {
