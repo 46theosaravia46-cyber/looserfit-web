@@ -140,6 +140,7 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
 
         res.json({ 
             mensaje: `SUPER-UNIÓN ÉXITO: Tenías ${fotosMantener.length}, sumaste ${fotosNuevas.length}. El producto ahora tiene ${actualizado.imagenes.length} fotos totales.`, 
+            bodyKeys: Object.keys(req.body),
             producto: actualizado 
         });
     } catch (error) {

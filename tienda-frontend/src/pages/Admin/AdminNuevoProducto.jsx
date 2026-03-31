@@ -233,6 +233,12 @@ export default function AdminNuevoProducto() {
       }
 
       const data = new FormData()
+
+      // --- PRIORIDAD MÁXIMA: Mandamos las viejas PRIMERO para que el servidor no las pierda ---
+      if (esEdicion) {
+        imgExistentes.forEach(url => data.append('galeriaPersistente', url))
+      }
+
       Object.entries(form).forEach(([k, v]) => {
         if (Array.isArray(v)) {
           v.forEach(item => data.append(k, item))
@@ -242,11 +248,6 @@ export default function AdminNuevoProducto() {
       })
       imagenes.forEach(img => data.append('imagenes', img))
       
-      // CAMBIAMOS EL NOMBRE A 'galeriaPersistente' PARA EVITAR CONFLICTOS
-      if (esEdicion) {
-        imgExistentes.forEach(url => data.append('galeriaPersistente', url))
-      }
-
       if (guiaTallesImg) {
         data.append('guiaTallesImg', guiaTallesImg)
       }
@@ -266,7 +267,7 @@ export default function AdminNuevoProducto() {
       if (!res.ok) {
         throw new Error(resData.mensaje || resData.error || 'Error al guardar producto')
       }
-      alert(resData.mensaje || '¡Producto guardado!')
+      alert(`${resData.mensaje}\n\nDatos recibidos por el servidor: ${resData.bodyKeys?.join(', ')}`)
       setExito(true)
       setTimeout(() => navigate('/admin/productos'), 1500)
     } catch (err) {
