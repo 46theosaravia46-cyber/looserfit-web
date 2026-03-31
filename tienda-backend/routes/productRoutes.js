@@ -92,7 +92,8 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
         fs.appendFileSync('diag_log.txt', logEntry);
 
         // --- LÓGICA DE PERSISTENCIA ---
-        const { imagenesExistentes, ...otrosCampos } = req.body;
+        // Extraemos 'imagenes' del body para que NUNCA pise nuestra lógica de mezcla
+        const { imagenesExistentes, imagenes, ...otrosCampos } = req.body;
         const imagenesExistentesAlt = req.body['imagenesExistentes[]'];
 
         // 1. Decidir qué fotos mantener
@@ -103,29 +104,31 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
             fotosMantener = Array.isArray(rawExistentes) ? rawExistentes : [rawExistentes];
         } else {
             // SIEMPRE mantenemos las anteriores si no se envió una lista de "borrado" explícita
+            // (esto es un salvavidas por si el frontend falla al enviar la lista)
             fotosMantener = existente.imagenes || [];
         }
 
-        // 2. Agregar fotos nuevas
+        // 2. Agregar fotos nuevas (Cloudinary)
         let fotosNuevas = [];
-        if (req.files['imagenes'] && req.files['imagenes'].length > 0) {
+        if (req.files && req.files['imagenes'] && req.files['imagenes'].length > 0) {
             fotosNuevas = req.files['imagenes'].map(f => f.path);
         }
 
         // 3. Aplicar cambios al documento (USANDO .save() QUE ES MÁS SEGURO)
-        Object.assign(existente, otrosCampos);
+        Object.assign(existente, otrosCampos); // Ahora 'otrosCampos' no tiene 'imagenes'
         existente.imagenes = [...fotosMantener, ...fotosNuevas];
 
         // Manejo guía talles
-        if (req.files['guiaTallesImg'] && req.files['guiaTallesImg'].length > 0) {
+        if (req.files && req.files['guiaTallesImg'] && req.files['guiaTallesImg'].length > 0) {
             existente.guiaTalles = req.files['guiaTallesImg'][0].path;
         }
 
         const actualizado = await existente.save();
 
-        fs.appendFileSync('diag_log.txt', `- Resultado: Guardadas ${actualizado.imagenes.length} fotos totales.\n`);
-
-        res.json({ mensaje: 'Producto actualizado con éxito (Modo Seguro)', producto: actualizado });
+        res.json({ 
+            mensaje: `Producto actualizado: se mantuvieron ${fotosMantener.length} fotos y se agregaron ${fotosNuevas.length}.`, 
+            producto: actualizado 
+        });
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al actualizar producto', error: error.message });
     }

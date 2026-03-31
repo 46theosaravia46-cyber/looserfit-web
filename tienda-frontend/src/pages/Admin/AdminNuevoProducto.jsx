@@ -223,6 +223,15 @@ export default function AdminNuevoProducto() {
     setError('')
 
     try {
+      // --- DIAGNÓSTICO DE ÚLTIMA INSTANCIA ---
+      if (esEdicion) {
+        const confirmed = window.confirm(`Estás guardando:\n- ${imgExistentes.length} fotos anteriores\n- ${imagenes.length} fotos nuevas\n\n¿Confirmar?`)
+        if (!confirmed) {
+          setLoading(false)
+          return
+        }
+      }
+
       const data = new FormData()
       Object.entries(form).forEach(([k, v]) => {
         if (Array.isArray(v)) {
