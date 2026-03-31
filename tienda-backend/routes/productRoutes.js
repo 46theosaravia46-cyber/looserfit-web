@@ -120,7 +120,7 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
             existente.talles = Array.isArray(otrosCampos.talles) ? otrosCampos.talles : otrosCampos.talles.split(',');
         }
 
-        // LÓGICA DE SUMA TOTAL: Si el admin NO apretó ninguna X, el total es VIEJAS + NUEVAS
+        // --- LÓGICA DE SUMA TOTAL ---
         // Filtramos cualquier valor nulo o vacío por seguridad
         const todas = [...fotosMantener, ...fotosNuevas].filter(f => f && typeof f === 'string');
         const totalFinal = [...new Set(todas)];
@@ -136,10 +136,21 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
             existente.markModified('guiaTalles');
         }
 
+        // --- SÚPER-BLOQUEO DE SEGURIDAD PARA DORMIR TRANQUILO ---
+        // Si el resultado final es 0 fotos, pero es un producto que YA TENÍA fotos,
+        // vamos a BLOQUEAR el guardado para que no se borren por error.
+        if (esEdicion && totalFinal.length === 0 && existente.imagenes.length > 0) {
+            return res.status(400).json({ 
+                mensaje: '⚠️ ERROR DE SEGURIDAD: El servidor intentó borrar toda la galería por error. Operación cancelada para proteger tus fotos.',
+                debug_version: 'v1.0.7 - PROTECTOR'
+            });
+        }
+
         const actualizado = await existente.save();
 
         res.json({ 
             mensaje: `SUPER-UNIÓN ÉXITO: Tenías ${fotosMantener.length}, sumaste ${fotosNuevas.length}. El producto ahora tiene ${actualizado.imagenes.length} fotos totales.`, 
+            debug_version: 'v1.0.7 - PROTECTOR',
             bodyKeys: Object.keys(req.body),
             producto: actualizado 
         });
