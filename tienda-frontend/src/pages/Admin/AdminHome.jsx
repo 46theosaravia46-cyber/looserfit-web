@@ -41,19 +41,55 @@ export default function AdminHome() {
       .catch(() => setError('No se pudo cargar el home actual'))
   }, [])
 
-  const handleHeroFiles = (e) => {
+  const compressImage = (file, maxWidth = 1200, quality = 0.8) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = (maxWidth / width) * height;
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          }, 'image/jpeg', quality);
+        };
+      };
+    });
+  };
+
+  const handleHeroFiles = async (e) => {
     const files = Array.from(e.target.files)
-    const newItems = files.map((f, i) => ({
+    setLoading(true)
+    const compressedFiles = await Promise.all(files.map(f => compressImage(f)))
+    const newItems = compressedFiles.map((f, i) => ({
       id: `new-h-${Date.now()}-${i}`,
       src: URL.createObjectURL(f),
       file: f
     }))
-    setHeroItems(prev => [...prev, ...newItems].slice(0, 3)) // Hero only supports up to 3 images max 
+    setHeroItems(prev => [...prev, ...newItems].slice(0, 3))
+    setLoading(false)
   }
 
-  const handleFamilyFiles = (e) => {
+  const handleFamilyFiles = async (e) => {
     const files = Array.from(e.target.files)
-    const newItems = files.map((f, i) => ({
+    setFamilyLoading(true)
+    const compressedFiles = await Promise.all(files.map(f => compressImage(f)))
+    const newItems = compressedFiles.map((f, i) => ({
       id: `new-f-${Date.now()}-${i}`,
       src: URL.createObjectURL(f),
       titulo: '',
@@ -61,6 +97,7 @@ export default function AdminHome() {
       file: f
     }))
     setFamilyItems(prev => [...prev, ...newItems])
+    setFamilyLoading(false)
   }
 
   const removeHeroItem = (id) => setHeroItems(p => p.filter(x => x.id !== id))

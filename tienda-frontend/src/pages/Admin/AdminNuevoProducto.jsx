@@ -161,18 +161,59 @@ export default function AdminNuevoProducto() {
     })
   }
 
-  const handleImagenes = (e) => {
+  const compressImage = (file, maxWidth = 1200, quality = 0.8) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Redimensionar si es más ancho que maxWidth
+          if (width > maxWidth) {
+            height = (maxWidth / width) * height;
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob((blob) => {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          }, 'image/jpeg', quality);
+        };
+      };
+    });
+  };
+
+  const handleImagenes = async (e) => {
     const files = Array.from(e.target.files)
-    setImagenes(prev => [...prev, ...files])
-    const urls = files.map(f => URL.createObjectURL(f))
+    setLoading(true) // Show loading during compression
+    const compressedFiles = await Promise.all(files.map(f => compressImage(f)))
+    setImagenes(prev => [...prev, ...compressedFiles])
+    const urls = compressedFiles.map(f => URL.createObjectURL(f))
     setPreviews(prev => [...prev, ...urls])
+    setLoading(false)
   }
 
-  const handleGuiaTallesImg = (e) => {
+  const handleGuiaTallesImg = async (e) => {
     const file = e.target.files[0]
     if (file) {
-      setGuiaTallesImg(file)
-      setGuiaTallesPreview(URL.createObjectURL(file))
+      setLoading(true)
+      const compressed = await compressImage(file)
+      setGuiaTallesImg(compressed)
+      setGuiaTallesPreview(URL.createObjectURL(compressed))
+      setLoading(false)
     }
   }
 

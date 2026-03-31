@@ -32,7 +32,8 @@ app.use(cors({
         return callback(new Error('Origen no permitido por CORS'));
     }
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // 2. USAMOS LAS RUTAS (Acá le decimos: "Cualquier link que empiece con /api/products, mandalo al ayudante")
 app.use('/api/products', productRoutes);
