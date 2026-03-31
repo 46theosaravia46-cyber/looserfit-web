@@ -553,6 +553,7 @@ export default function AdminNuevoProducto() {
           <button
             type="submit"
             className="admin-btn-primary"
+            style={{ background: '#7b1fa2' }}
             disabled={loading}
           >
             {loading ? 'Subiendo fotos (no cierres)...' : (esEdicion ? 'Guardar Cambios' : 'Guardar Producto')}

@@ -45,7 +45,7 @@ export default function AdminLayout() {
             <img src="/logo3.0.png" alt="Looserfit" />
           </div>
           <h2 className="admin-login__title">Panel Admin</h2>
-          <p style={{background: '#ffeb3b', color: '#000', padding: '10px', textAlign: 'center', fontWeight: 'bold', border: '2px solid #000'}}>v1.0.5 - F5 LIMPIAR CACHÉ</p>
+          <p style={{background: '#ffeb3b', color: '#000', padding: '10px', textAlign: 'center', fontWeight: 'bold', border: '5px solid #000'}}>v1.0.6 - PARCHE FINAL (F5 SI NO VES EL 6)</p>
           <p className="admin-login__sub">Ingresá a tu panel de control</p>
 
           <form onSubmit={handleLogin} className="admin-login__form">
@@ -125,7 +125,7 @@ export default function AdminLayout() {
           <button className="admin-sidebar__logout" onClick={handleLogout}>
             Cerrar sesión
           </button>
-          <p style={{fontSize:'0.6rem', color:'var(--gray-3)', marginTop:'1rem', textAlign:'center', opacity: 0.6}}>v1.0.4 - Live</p>
+          <p style={{fontSize:'0.6rem', color:'#ffc107', marginTop:'1rem', textAlign:'center', fontWeight: 'bold'}}>v1.0.6 - FINAL</p>
         </div>
       </aside>
 
