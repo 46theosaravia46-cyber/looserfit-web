@@ -125,7 +125,7 @@ export default function AdminLayout() {
           <button className="admin-sidebar__logout" onClick={handleLogout}>
             Cerrar sesión
           </button>
-          <p style={{fontSize:'0.6rem', color:'var(--gray-3)', marginTop:'1rem', textAlign:'center', opacity: 0.6}}>v1.0.3 - Live</p>
+          <p style={{fontSize:'0.6rem', color:'var(--gray-3)', marginTop:'1rem', textAlign:'center', opacity: 0.6}}>v1.0.4 - Live</p>
         </div>
       </aside>
 
