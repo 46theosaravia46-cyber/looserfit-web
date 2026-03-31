@@ -45,6 +45,7 @@ export default function AdminLayout() {
             <img src="/logo3.0.png" alt="Looserfit" />
           </div>
           <h2 className="admin-login__title">Panel Admin</h2>
+          <p style={{background: 'red', color: 'white', padding: '5px', textAlign: 'center', fontWeight: 'bold'}}>LOOSERFIT V1.0.4 - SOPORTE</p>
           <p className="admin-login__sub">Ingresá a tu panel de control</p>
 
           <form onSubmit={handleLogin} className="admin-login__form">
