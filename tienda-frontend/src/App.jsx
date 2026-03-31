@@ -73,7 +73,7 @@ function ComingSoonScreen({ launchDate, message, subtitle, onAuthClick }) {
 }
 
 function PublicGate({ children, homeLoading, comingSoon, onAuthClick }) {
-  if (homeLoading) return children
+  if (homeLoading) return <div style={{ height: '100vh', background: '#0a0a0a' }} />;
   const active = Boolean(comingSoon?.enabled && comingSoon?.launchDate && new Date(comingSoon.launchDate) > new Date())
   
   // Si está en modo lanzamiento, mostrar solo Home con overlay bloqueador

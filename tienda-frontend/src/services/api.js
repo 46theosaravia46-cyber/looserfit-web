@@ -57,7 +57,9 @@ export async function crearPedido(datosPedido) {
 }
 
 export async function getPedidos() {
-  const res = await fetch(`${BASE_URL}/orders/all`)
+  const res = await fetch(`${BASE_URL}/orders/all`, {
+    headers: { ...getAuthHeaders() }
+  })
   if (!res.ok) throw new Error('Error al obtener pedidos')
   return res.json()
 }
@@ -84,7 +86,10 @@ export async function getPedidoById(id) {
 export async function actualizarEstadoPedido(id, estado) {
   const res = await fetch(`${BASE_URL}/orders/${id}/estado`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
     body: JSON.stringify({ estado }),
   })
   if (!res.ok) throw new Error('No se pudo actualizar estado')
@@ -111,7 +116,10 @@ export async function getMisPedidos(email) {
 export async function actualizarTrackingPedido(id, trackingNumber) {
   const res = await fetch(`${BASE_URL}/orders/${id}/tracking`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
     body: JSON.stringify({ trackingNumber }),
   })
   if (!res.ok) throw new Error('No se pudo actualizar seguimiento')
@@ -119,13 +127,19 @@ export async function actualizarTrackingPedido(id, trackingNumber) {
 }
 
 export async function eliminarProducto(id) {
-  const res = await fetch(`${BASE_URL}/products/${id}`, { method: 'DELETE' })
+  const res = await fetch(`${BASE_URL}/products/${id}`, { 
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() }
+  })
   if (!res.ok) throw new Error('No se pudo eliminar')
   return res.json()
 }
 
 export async function togglePublicadoProducto(id) {
-  const res = await fetch(`${BASE_URL}/products/${id}/toggle`, { method: 'PATCH' })
+  const res = await fetch(`${BASE_URL}/products/${id}/toggle`, { 
+    method: 'PATCH',
+    headers: { ...getAuthHeaders() }
+  })
   if (!res.ok) throw new Error('No se pudo actualizar visibilidad')
   return res.json()
 }

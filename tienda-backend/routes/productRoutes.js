@@ -1,10 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const Product = require('../models/product'); // Asegurate que la P sea mayúscula si el archivo es Product.js
-const upload = require('../config/cloudinary'); 
+const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // 1. RUTA PARA CREAR PRODUCTO (Con diagnóstico de errores)
-router.post('/create', upload.fields([{ name: 'imagenes', maxCount: 5 }, { name: 'guiaTallesImg', maxCount: 1 }]), async (req, res) => {
+router.post('/create', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCount: 5 }, { name: 'guiaTallesImg', maxCount: 1 }]), async (req, res) => {
     try {
         // Estos logs aparecerán en tu terminal de VS Code
         console.log("--- INTENTO DE CARGA ---");
@@ -76,7 +73,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // 5. EDITAR PRODUCTO POR ID
-router.put('/:id', upload.fields([{ name: 'imagenes', maxCount: 5 }, { name: 'guiaTallesImg', maxCount: 1 }]), async (req, res) => {
+router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCount: 5 }, { name: 'guiaTallesImg', maxCount: 1 }]), async (req, res) => {
     try {
         const existente = await Product.findById(req.params.id);
         if (!existente) {
@@ -108,7 +105,7 @@ router.put('/:id', upload.fields([{ name: 'imagenes', maxCount: 5 }, { name: 'gu
 });
 
 // 6. ELIMINAR PRODUCTO POR ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, adminOnly, async (req, res) => {
     try {
         const eliminado = await Product.findByIdAndDelete(req.params.id);
         if (!eliminado) {
@@ -121,7 +118,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // 7. TOGGLE PUBLICADO/OCULTO
-router.patch('/:id/toggle', async (req, res) => {
+router.patch('/:id/toggle', protect, adminOnly, async (req, res) => {
     try {
         const producto = await Product.findById(req.params.id);
         if (!producto) {

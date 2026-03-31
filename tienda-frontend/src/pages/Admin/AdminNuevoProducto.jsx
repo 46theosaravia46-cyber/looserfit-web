@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { BASE_URL } from '../../services/api'
+import { BASE_URL, getAuthHeaders } from '../../services/api'
 import './Admin.css'
 
 const INITIAL_CATEGORIAS = ['Outerwear / Abrigos','Tops / Remeras','Bottoms / Pantalones','Footwear / Calzado','Accessories / Accesorios']
@@ -200,7 +200,11 @@ export default function AdminNuevoProducto() {
         : `${BASE_URL}/products/create`
       const method = esEdicion ? 'PUT' : 'POST'
 
-      const res = await fetch(url, { method, body: data })
+      const res = await fetch(url, { 
+        method, 
+        headers: { ...getAuthHeaders() },
+        body: data 
+      })
       if (!res.ok) throw new Error('Error al guardar')
 
       setExito(true)

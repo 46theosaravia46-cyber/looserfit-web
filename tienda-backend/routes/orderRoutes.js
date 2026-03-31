@@ -3,6 +3,7 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/product');
 const upload = require('../config/cloudinary');
+const { protect, adminOnly } = require('../middleware/authMiddleware');
 const { enviarEmailPedido, enviarEmailSeguimiento, enviarEmailNotificacionAdmin } = require('../config/email');
 
 // Subir comprobante de pago
@@ -131,8 +132,8 @@ router.post('/create', async (req, res) => {
     }
 });
 
-// Ver todos los pedidos (Para que el cliente vea los rótulos)
-router.get('/all', async (req, res) => {
+// Ver todos los pedidos (Solo Admin)
+router.get('/all', protect, adminOnly, async (req, res) => {
     try {
         const pedidos = await Order.find().sort({ createdAt: -1 });
         res.json(pedidos);
@@ -154,8 +155,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Cambiar estado del pedido
-router.patch('/:id/estado', async (req, res) => {
+// Cambiar estado del pedido (Solo Admin)
+router.patch('/:id/estado', protect, adminOnly, async (req, res) => {
     try {
         const { estado } = req.body;
         const permitidos = ['Pendiente', 'Pagado', 'Empaquetado', 'Enviado', 'Entregado', 'Cancelado'];
@@ -179,8 +180,8 @@ router.patch('/:id/estado', async (req, res) => {
     }
 });
 
-// Actualizar número de seguimiento
-router.patch('/:id/tracking', async (req, res) => {
+// Actualizar número de seguimiento (Solo Admin)
+router.patch('/:id/tracking', protect, adminOnly, async (req, res) => {
     try {
         const { trackingNumber } = req.body;
         const pedido = await Order.findByIdAndUpdate(
