@@ -1,7 +1,7 @@
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // 1. RUTA PARA CREAR PRODUCTO (Con diagnóstico de errores)
-router.post('/create', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCount: 5 }, { name: 'guiaTallesImg', maxCount: 1 }]), async (req, res) => {
+router.post('/create', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCount: 20 }, { name: 'guiaTallesImg', maxCount: 1 }]), async (req, res) => {
     try {
         // Estos logs aparecerán en tu terminal de VS Code
         console.log("--- INTENTO DE CARGA ---");
@@ -73,7 +73,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // 5. EDITAR PRODUCTO POR ID
-router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCount: 5 }, { name: 'guiaTallesImg', maxCount: 1 }]), async (req, res) => {
+router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCount: 20 }, { name: 'guiaTallesImg', maxCount: 1 }]), async (req, res) => {
     try {
         const existente = await Product.findById(req.params.id);
         if (!existente) {
