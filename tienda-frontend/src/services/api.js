@@ -6,7 +6,7 @@ const isLocal = window.location.hostname === 'localhost' || window.location.host
 export const BASE_URL = import.meta.env.VITE_API_URL || (isLocal ? 'http://localhost:3000/api' : 'https://looserfit-api.onrender.com/api')
 
 // Helper para obtener el token guardado
-const getAuthHeaders = () => {
+export const getAuthHeaders = () => {
   const token = localStorage.getItem('looserfit_token')
   return token ? { 'Authorization': `Bearer ${token}` } : {}
 }
