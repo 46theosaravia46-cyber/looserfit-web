@@ -92,8 +92,9 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
         if (rawExistentes) {
             fotosMantener = Array.isArray(rawExistentes) ? rawExistentes : [rawExistentes];
         } else {
-            // SALVAVIDAS: Si no viene nada del panel, mantenemos lo que ya hay en la DB 
-            // para evitar que un bug del frontend borre la galería.
+            // SALVAVIDAS FINAL: Si subiste fotos nuevas, pero el panel no mandó la lista de las viejas
+            // vamos a asumir que QUERÉS MANTENER las fotos que ya tenías en la base de datos.
+            // Solo borraremos fotos si mandás una lista vacía intencionalmente (un caso raro).
             fotosMantener = existente.imagenes || [];
         }
 
@@ -107,20 +108,21 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
         if (otrosCampos.nombre) existente.nombre = otrosCampos.nombre;
         if (otrosCampos.descripcion) existente.descripcion = otrosCampos.descripcion;
         if (otrosCampos.precio) existente.precio = Number(otrosCampos.precio);
-        if (otrosCampos.precioOferta) existente.precioOferta = otrosCampos.precioOferta ? Number(otrosCampos.precioOferta) : undefined;
+        if (otrosCampos.precioOferta) existente.precioOferta = otrosCampos.precioOferta && otrosCampos.precioOferta !== 'null' ? Number(otrosCampos.precioOferta) : undefined;
         if (otrosCampos.categoria) existente.categoria = otrosCampos.categoria;
         if (otrosCampos.tipo) existente.tipo = otrosCampos.tipo;
         if (otrosCampos.stock) existente.stock = Number(otrosCampos.stock);
         if (otrosCampos.publicado !== undefined) existente.publicado = otrosCampos.publicado === 'true' || otrosCampos.publicado === true;
         if (otrosCampos.esNuevoDrop !== undefined) existente.esNuevoDrop = otrosCampos.esNuevoDrop === 'true' || otrosCampos.esNuevoDrop === true;
         
-        // Manejo de talles (si viene como string separado por comas o array)
+        // Manejo de talles
         if (otrosCampos.talles) {
             existente.talles = Array.isArray(otrosCampos.talles) ? otrosCampos.talles : otrosCampos.talles.split(',');
         }
 
-        // SUMA FINAL DE IMÁGENES
-        existente.imagenes = [...fotosMantener, ...fotosNuevas];
+        // LÓGICA DE SUMA TOTAL: Si el admin NO apretó ninguna X, el total es VIEJAS + NUEVAS
+        const totalFinal = [...new Set([...fotosMantener, ...fotosNuevas])];
+        existente.imagenes = totalFinal;
 
         // Guía de talles
         if (req.files && req.files['guiaTallesImg'] && req.files['guiaTallesImg'].length > 0) {
@@ -130,7 +132,7 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
         const actualizado = await existente.save();
 
         res.json({ 
-            mensaje: `DEBUG-LOOSERFIT: Mantuvimos ${fotosMantener.length} y sumamos ${fotosNuevas.length}. Total en DB: ${actualizado.imagenes.length}`, 
+            mensaje: `SUPER-UNIÓN ÉXITO: Tenías ${fotosMantener.length}, sumaste ${fotosNuevas.length}. El producto ahora tiene ${actualizado.imagenes.length} fotos totales.`, 
             producto: actualizado 
         });
     } catch (error) {
