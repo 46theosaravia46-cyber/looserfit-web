@@ -1,0 +1,4 @@
+# Root gitignore
+node_modules/
+.env
+.env.local

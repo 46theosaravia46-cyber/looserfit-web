@@ -1,0 +1,221 @@
+// ============================================
+// API.JS — Todas las llamadas al backend
+// ============================================
+
+const defaultApiHost = window.location.hostname || 'localhost'
+export const BASE_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${defaultApiHost}:3000/api`
+
+// Helper para obtener el token guardado
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('looserfit_token')
+  return token ? { 'Authorization': `Bearer ${token}` } : {}
+}
+
+// --- Traer todos los productos ---
+export async function getProductos(filtros = {}) {
+  const params = new URLSearchParams()
+
+  if (filtros.categoria)      params.append('categoria', filtros.categoria)
+  if (filtros.corte)          params.append('corte', filtros.corte)
+  if (filtros.soloPublicados) params.append('soloPublicados', 'true')
+
+  const query = params.toString()
+  const url   = query
+    ? `${BASE_URL}/products/search?${query}`
+    : `${BASE_URL}/products/all`
+
+  const res = await fetch(url)
+  if (!res.ok) throw new Error('Error al obtener productos')
+  return res.json()
+}
+
+// --- Traer un producto por ID ---
+export async function getProductoById(id) {
+  const res = await fetch(`${BASE_URL}/products/${id}`)
+  if (!res.ok) throw new Error('Producto no encontrado')
+  return res.json()
+}
+
+// --- Crear pedido ---
+export async function crearPedido(datosPedido) {
+  const res = await fetch(`${BASE_URL}/orders/create`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(datosPedido)
+  })
+  if (!res.ok) {
+    let mensaje = 'Error al crear el pedido'
+    try {
+      const data = await res.json()
+      mensaje = data.mensaje || data.error || mensaje
+    } catch {
+      // dejamos mensaje por defecto
+    }
+    throw new Error(mensaje)
+  }
+  return res.json()
+}
+
+export async function getPedidos() {
+  const res = await fetch(`${BASE_URL}/orders/all`)
+  if (!res.ok) throw new Error('Error al obtener pedidos')
+  return res.json()
+}
+
+// --- Crear preferencia de pago (Mercado Pago) ---
+export async function crearPreferenciaPago(orderId) {
+  const res = await fetch(`${BASE_URL}/payments/create-preference`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ orderId })
+  })
+  if (!res.ok) {
+    throw new Error('Error al generar el link de pago')
+  }
+  return res.json()
+}
+
+export async function getPedidoById(id) {
+  const res = await fetch(`${BASE_URL}/orders/${id}`)
+  if (!res.ok) throw new Error('Pedido no encontrado')
+  return res.json()
+}
+
+export async function actualizarEstadoPedido(id, estado) {
+  const res = await fetch(`${BASE_URL}/orders/${id}/estado`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ estado }),
+  })
+  if (!res.ok) throw new Error('No se pudo actualizar estado')
+  return res.json()
+}
+
+export async function subirComprobante(orderId, formData) {
+  const res = await fetch(`${BASE_URL}/orders/upload-comprobante/${orderId}`, {
+    method: 'POST',
+    body: formData, // No seteamos headers de JSON, el navegador lo hace solo para FormData
+  })
+  if (!res.ok) {
+    throw new Error('No se pudo subir el comprobante')
+  }
+  return res.json()
+}
+
+export async function getMisPedidos(email) {
+  const res = await fetch(`${BASE_URL}/orders/user/${email}`)
+  if (!res.ok) throw new Error('Error al obtener tus pedidos')
+  return res.json()
+}
+
+export async function actualizarTrackingPedido(id, trackingNumber) {
+  const res = await fetch(`${BASE_URL}/orders/${id}/tracking`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ trackingNumber }),
+  })
+  if (!res.ok) throw new Error('No se pudo actualizar seguimiento')
+  return res.json()
+}
+
+export async function eliminarProducto(id) {
+  const res = await fetch(`${BASE_URL}/products/${id}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error('No se pudo eliminar')
+  return res.json()
+}
+
+export async function togglePublicadoProducto(id) {
+  const res = await fetch(`${BASE_URL}/products/${id}/toggle`, { method: 'PATCH' })
+  if (!res.ok) throw new Error('No se pudo actualizar visibilidad')
+  return res.json()
+}
+
+export async function getHomeContent() {
+  const res = await fetch(`${BASE_URL}/home?_t=${Date.now()}`)
+  if (!res.ok) throw new Error('No se pudo cargar contenido home')
+  return res.json()
+}
+
+export async function updateHeroImages(formData) {
+  const res = await fetch(`${BASE_URL}/home/hero`, {
+    method: 'PUT',
+    body: formData,
+  })
+  if (!res.ok) throw new Error('No se pudo actualizar el hero')
+  return res.json()
+}
+
+export async function updateFamilyImages(formData) {
+  const res = await fetch(`${BASE_URL}/home/family`, {
+    method: 'PUT',
+    body: formData,
+  })
+  if (!res.ok) throw new Error('No se pudo actualizar las fotos')
+  return res.json()
+}
+
+export async function updateHomeSettings(settings) {
+  const res = await fetch(`${BASE_URL}/home/settings`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify(settings)
+  })
+  if (!res.ok) {
+    let mensaje = 'Error al guardar la configuración de lanzamiento'
+    try {
+      const data = await res.json()
+      mensaje = data.mensaje || data.error || mensaje
+    } catch {
+      // mantengo el mensaje por defecto
+    }
+    throw new Error(mensaje)
+  }
+  return res.json()
+}
+
+// --- AUTH ---
+export async function login(email, password) {
+  const res = await fetch(`${BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  })
+  if (!res.ok) {
+    const data = await res.json()
+    throw new Error(data.error || 'Error al iniciar sesión')
+  }
+  return res.json()
+}
+
+export async function register(userData) {
+  const res = await fetch(`${BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData)
+  })
+  if (!res.ok) {
+    const data = await res.json()
+    throw new Error(data.error || 'Error al registrarse')
+  }
+  return res.json()
+}
+
+// --- ADMIN NEWSLETTER ---
+export async function sendNewsletter(asunto, contenido) {
+  const res = await fetch(`${BASE_URL}/admin/newsletter`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify({ asunto, contenido })
+  })
+  if (!res.ok) {
+    const data = await res.json()
+    throw new Error(data.error || 'Error al enviar noticia')
+  }
+  return res.json()
+}

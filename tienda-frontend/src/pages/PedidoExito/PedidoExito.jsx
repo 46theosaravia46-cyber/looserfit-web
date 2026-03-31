@@ -1,0 +1,126 @@
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { getPedidoById, subirComprobante } from '../../services/api'
+import './PedidoExito.css'
+
+const WHATSAPP_NUMBER = '5493484663187'
+
+export default function PedidoExito() {
+  const location = useLocation()
+  const { state } = location
+  const [pedido, setPedido] = useState(state?.pedido || null)
+  const [pedidoNotFound, setPedidoNotFound] = useState(false)
+  const whatsappText = state?.whatsappText || 'Hola! Quiero consultar por mi pedido.'
+  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`
+
+  const [file, setFile] = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [errorUpload, setErrorUpload] = useState('')
+  const [comprobanteUrl, setComprobanteUrl] = useState(state?.pedido?.comprobante || '')
+
+  useEffect(() => {
+    if (pedido) return
+
+    const params = new URLSearchParams(location.search)
+    const orderId = params.get('external_reference') || params.get('orderId') || params.get('id')
+
+    if (!orderId) return
+
+    getPedidoById(orderId)
+      .then(data => {
+        setPedido(data)
+        setComprobanteUrl(data.comprobante || '')
+      })
+      .catch(() => setPedidoNotFound(true))
+  }, [location.search, pedido])
+
+  const handleUpload = async () => {
+    if (!file) return alert('Selecciona un archivo primero')
+    if (!pedido) return setErrorUpload('No se pudo identificar el pedido.')
+
+    setUploading(true)
+    setErrorUpload('')
+    
+    const formData = new FormData()
+    formData.append('comprobante', file)
+
+    try {
+      const res = await subirComprobante(pedido._id, formData)
+      setComprobanteUrl(res.pedido.comprobante)
+      setPedido(res.pedido)
+      setSuccess(true)
+      setFile(null)
+    } catch {
+      setErrorUpload('Error al subir el comprobante.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="pedido-exito-page">
+      <div className="container">
+        <div className="pedido-exito-card">
+          <h1>Pedido generado</h1>
+          <p>Tu pedido fue creado correctamente.</p>
+
+          {pedido && (
+            <div className="pedido-resumen">
+              <p><strong>Orden:</strong> {pedido.orderNumber || '-'} </p>
+              <p><strong>ID:</strong> {pedido._id}</p>
+              <p><strong>Estado:</strong> {pedido.estado}</p>
+              <p><strong>Total:</strong> ${Number(pedido.total).toLocaleString('es-AR')}</p>
+            </div>
+          )}
+
+          {/* Sección de comprobante */}
+          <div className="comprobante-section">
+            <hr />
+            <h3>Subir comprobante de pago</h3>
+            {pedidoNotFound && (
+              <p className="error-msg">No se pudo encontrar el pedido. Si llegaste desde Mercado Pago, intenta recargar la página o contactanos.</p>
+            )}
+            {pedido ? (
+              comprobanteUrl ? (
+                <div className="comprobante-preview">
+                  <p className="success-msg">✅ Comprobante ya subido</p>
+                  <img src={comprobanteUrl} alt="Comprobante" className="img-comprobante" />
+                </div>
+              ) : (
+                <div className="upload-box">
+                  <p>Si pagaste por transferencia, subí aquí tu foto o captura.</p>
+                  <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.8rem' }}>
+                    Si pagaste con tarjeta de crédito o con Mercado Pago, no es necesario subir comprobante.
+                  </p>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => setFile(e.target.files[0])} 
+                    className="file-input"
+                  />
+                  {errorUpload && <p className="error-msg">{errorUpload}</p>}
+                  {success && <p className="success-msg">¡Subido con éxito!</p>}
+                  <button 
+                    onClick={handleUpload} 
+                    className="btn btn-filled" 
+                    disabled={uploading || !file}
+                  >
+                    {uploading ? 'Subiendo...' : 'Subir Comprobante'}
+                  </button>
+                </div>
+              )
+            ) : (
+              <p>Estamos buscando tu pedido. Si el problema persiste, volvé a cargar la página o contactanos.</p>
+            )}
+          </div>
+
+          <div className="pedido-exito-actions">
+            <a href={waUrl} className="btn btn-filled" target="_blank" rel="noreferrer">Enviar por WhatsApp</a>
+            <Link to="/tienda" className="btn">Volver a tienda</Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

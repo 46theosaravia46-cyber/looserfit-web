@@ -1,0 +1,13 @@
+.notfound-page {
+  margin-top: 64px;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+}
+
+.notfound-card {
+  border: var(--border-thin);
+  background: var(--white);
+  padding: 2rem;
+  text-align: center;
+}

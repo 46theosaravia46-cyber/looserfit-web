@@ -1,0 +1,35 @@
+.pedido-exito-page {
+  margin-top: 64px;
+  padding: 4rem 0;
+}
+
+.pedido-exito-card {
+  border: var(--border-thin);
+  background: var(--white);
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.pedido-exito-card h1 {
+  margin-bottom: 0.4rem;
+}
+
+.pedido-resumen {
+  margin-top: 1rem;
+  border-top: var(--border-thin);
+  border-bottom: var(--border-thin);
+  padding: 1rem 0;
+}
+
+.pedido-exito-actions {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 600px) {
+  .pedido-exito-actions {
+    flex-direction: column;
+  }
+}
