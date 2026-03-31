@@ -139,6 +139,7 @@ export async function getHomeContent() {
 export async function updateHeroImages(formData) {
   const res = await fetch(`${BASE_URL}/home/hero`, {
     method: 'PUT',
+    headers: { ...getAuthHeaders() },
     body: formData,
   })
   if (!res.ok) throw new Error('No se pudo actualizar el hero')
@@ -148,6 +149,7 @@ export async function updateHeroImages(formData) {
 export async function updateFamilyImages(formData) {
   const res = await fetch(`${BASE_URL}/home/family`, {
     method: 'PUT',
+    headers: { ...getAuthHeaders() },
     body: formData,
   })
   if (!res.ok) throw new Error('No se pudo actualizar las fotos')

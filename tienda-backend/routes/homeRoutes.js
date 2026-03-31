@@ -65,7 +65,7 @@ router.get('/', async (_req, res) => {
     }
 });
 
-router.put('/hero', upload.array('newHeroImages', 10), async (req, res) => {
+router.put('/hero', protect, adminOnly, upload.array('newHeroImages', 10), async (req, res) => {
     try {
         let doc = await HomeContent.findOne();
         if (!doc) {
@@ -74,7 +74,14 @@ router.put('/hero', upload.array('newHeroImages', 10), async (req, res) => {
 
         let finalImages = [];
         if (req.body.heroData) {
-            finalImages = JSON.parse(req.body.heroData);
+            try {
+                finalImages = typeof req.body.heroData === 'string' 
+                    ? JSON.parse(req.body.heroData) 
+                    : req.body.heroData;
+            } catch (pErr) {
+                console.error('Error parseando heroData:', pErr);
+                finalImages = [];
+            }
         }
 
         let fileIndex = 0;
@@ -95,14 +102,21 @@ router.put('/hero', upload.array('newHeroImages', 10), async (req, res) => {
     }
 });
 
-router.put('/family', upload.array('newFamilyImages', 20), async (req, res) => {
+router.put('/family', protect, adminOnly, upload.array('newFamilyImages', 20), async (req, res) => {
     try {
         let doc = await HomeContent.findOne();
         if (!doc) doc = await HomeContent.create({});
 
         let finalConfig = [];
         if (req.body.familyData) {
-            finalConfig = JSON.parse(req.body.familyData);
+            try {
+                finalConfig = typeof req.body.familyData === 'string' 
+                    ? JSON.parse(req.body.familyData) 
+                    : req.body.familyData;
+            } catch (pErr) {
+                console.error('Error parseando familyData:', pErr);
+                finalConfig = [];
+            }
         }
 
         let fileIndex = 0;
