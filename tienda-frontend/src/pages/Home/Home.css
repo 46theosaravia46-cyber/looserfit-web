@@ -261,8 +261,8 @@
 
 .family-item {
   flex-shrink: 0;
-  width: 420px;
-  aspect-ratio: 4 / 3;
+  width: 340px;
+  aspect-ratio: 3 / 4;
   height: auto;
   overflow: hidden;
   position: relative;
@@ -424,7 +424,7 @@
   }
 
   .family-item {
-    width: 320px;
+    width: 280px;
   }
 }
 
@@ -450,11 +450,11 @@
   }
 
   .family-carousel {
-    gap: 1rem; /* Muy poco espacio en móviles */
+    gap: 1.5rem; /* Ajustado para móviles */
   }
 
   .family-item {
-    width: 85vw; /* Casi todo el ancho */
+    width: 75vw; /* Reducido un poco para no ser tan alto */
   }
 
   .family-item__title {
