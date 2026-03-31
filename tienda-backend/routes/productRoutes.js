@@ -82,17 +82,30 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
 
         const updateData = { ...req.body };
 
-        // Si llegan imágenes nuevas, las SUMAMOS a las que ya tiene el producto
-        if (req.files['imagenes'] && req.files['imagenes'].length > 0) {
-            const nuevasFotos = req.files['imagenes'].map(file => file.path);
-            const fotosActuales = existente.imagenes || [];
-            updateData.imagenes = [...fotosActuales, ...nuevasFotos];
+        // --- LÓGICA DE PERSISTENCIA DE IMÁGENES ---
+        let fotosMantener = [];
+        if (req.body.imagenesExistentes) {
+            fotosMantener = Array.isArray(req.body.imagenesExistentes) 
+                ? req.body.imagenesExistentes 
+                : [req.body.imagenesExistentes];
         } else {
-            // Si no hay fotos nuevas, mantenemos las que ya estaban
-            updateData.imagenes = existente.imagenes;
+            // Si el frontend no envió la lista (por ejemplo, primera vez editando con el nuevo panel)
+            // mantenemos las fotos que ya tenía el producto por defecto.
+            fotosMantener = existente.imagenes || [];
         }
 
-        // Si llega una nueva guía de talles
+        // Fotos NUEVAS subidas a Cloudinary
+        let nuevasFotos = [];
+        if (req.files['imagenes'] && req.files['imagenes'].length > 0) {
+            nuevasFotos = req.files['imagenes'].map(file => file.path);
+        }
+
+        // Combinamos ambas listas
+        updateData.imagenes = [...fotosMantener, ...nuevasFotos];
+
+        console.log(`[Update] Prod: ${req.params.id} | Mantener: ${fotosMantener.length} | Nuevas: ${nuevasFotos.length} | Total: ${updateData.imagenes.length}`);
+
+        // Guía de talles (si sube imagen nueva, pisa el anterior)
         if (req.files['guiaTallesImg'] && req.files['guiaTallesImg'].length > 0) {
             updateData.guiaTalles = req.files['guiaTallesImg'][0].path;
         }
@@ -103,7 +116,7 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
             { new: true, runValidators: true }
         );
 
-        res.json({ mensaje: 'Producto actualizado', producto: actualizado });
+        res.json({ mensaje: 'Producto actualizado con éxito', producto: actualizado });
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al actualizar producto', error: error.message });
     }

@@ -232,6 +232,12 @@ export default function AdminNuevoProducto() {
         }
       })
       imagenes.forEach(img => data.append('imagenes', img))
+      
+      // Enviar las que ya existen para que el backend sepa cuáles mantener
+      if (esEdicion) {
+        imgExistentes.forEach(url => data.append('imagenesExistentes', url))
+      }
+
       if (guiaTallesImg) {
         data.append('guiaTallesImg', guiaTallesImg)
       }
@@ -479,6 +485,12 @@ export default function AdminNuevoProducto() {
                 <div key={i} className="img-preview img-preview--existente">
                   <img src={url} alt={`Imagen ${i+1}`} />
                   <span className="img-preview__tag">Guardada</span>
+                  <button 
+                    type="button" 
+                    className="img-preview__remove" 
+                    onClick={() => setImgExistentes(prev => prev.filter(x => x !== url))}
+                    title="Eliminar de la galería"
+                  >✕</button>
                 </div>
               ))}
             </div>
