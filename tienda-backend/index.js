@@ -16,9 +16,11 @@ const app = express();
 // Middleware para entender JSON (importante para recibir productos)
 const allowedOrigins = [
     'http://localhost:5173',
-    'http://localhost:5174', // <--- AGREGADO: Nueva variante de puerto Vite
+    'http://localhost:5174',
     'http://192.168.0.14:5173',
-    'https://looserfit-app-final.loca.lt', // <--- NUEVO: Túnel remoto definitivo
+    'https://looserfit-web-eight.vercel.app',
+    'https://looserfit.com',
+    'https://www.looserfit.com',
     process.env.FRONTEND_URL
 ].filter(Boolean);
 
