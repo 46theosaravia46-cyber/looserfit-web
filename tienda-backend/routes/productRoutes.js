@@ -82,12 +82,12 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
         }
 
         // --- LÓGICA DE PERSISTENCIA MANUAL Y PROTECTORA ---
-        const { imagenesExistentes, imagenes, ...otrosCampos } = req.body;
+        const { galeriaPersistente, imagenesExistentes, imagenes, ...otrosCampos } = req.body;
         const imagenesExistentesAlt = req.body['imagenesExistentes[]'];
 
-        // 1. Identificar fotos anteriores
+        // 1. Identificar fotos anteriores (Usamos la nueva clave de prioridad 'galeriaPersistente')
         let fotosMantener = [];
-        const rawExistentes = imagenesExistentes || imagenesExistentesAlt;
+        const rawExistentes = galeriaPersistente || imagenesExistentes || imagenesExistentesAlt;
 
         if (rawExistentes) {
             fotosMantener = Array.isArray(rawExistentes) ? rawExistentes : [rawExistentes];

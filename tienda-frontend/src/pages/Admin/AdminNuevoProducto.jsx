@@ -225,7 +225,7 @@ export default function AdminNuevoProducto() {
     try {
       // --- DIAGNÓSTICO DE ÚLTIMA INSTANCIA ---
       if (esEdicion) {
-        const confirmed = window.confirm(`Estás guardando:\n- ${imgExistentes.length} fotos anteriores\n- ${imagenes.length} fotos nuevas\n\n¿Confirmar?`)
+        const confirmed = window.confirm(`MODO v1.0.7 - DIAGNÓSTICO:\n\n- Vamos a MANTENER (fotos viejas): ${imgExistentes.length}\n- Vamos a SUMAR (fotos nuevas): ${imagenes.length}\n\n¿Es correcto? Si dice 0 anteriores y hay fotos en pantalla, ¡CANCELÁ!`)
         if (!confirmed) {
           setLoading(false)
           return
@@ -242,10 +242,9 @@ export default function AdminNuevoProducto() {
       })
       imagenes.forEach(img => data.append('imagenes', img))
       
-      // Enviar las que ya existen para que el backend sepa cuáles mantener
+      // CAMBIAMOS EL NOMBRE A 'galeriaPersistente' PARA EVITAR CONFLICTOS
       if (esEdicion) {
-        console.log("Enviando fotos existentes:", imgExistentes.length)
-        imgExistentes.forEach(url => data.append('imagenesExistentes[]', url))
+        imgExistentes.forEach(url => data.append('galeriaPersistente', url))
       }
 
       if (guiaTallesImg) {
