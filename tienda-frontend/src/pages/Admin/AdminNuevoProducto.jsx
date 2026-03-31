@@ -161,7 +161,7 @@ export default function AdminNuevoProducto() {
     })
   }
 
-  const compressImage = (file, maxWidth = 1200, quality = 0.8) => {
+  const compressImage = (file, maxWidth = 1000, quality = 0.7) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -533,7 +533,7 @@ export default function AdminNuevoProducto() {
             className="admin-btn-primary"
             disabled={loading}
           >
-            {loading ? 'Guardando...' : (esEdicion ? 'Guardar Cambios' : 'Guardar Producto')}
+            {loading ? 'Subiendo fotos (no cierres)...' : (esEdicion ? 'Guardar Cambios' : 'Guardar Producto')}
           </button>
         </div>
 
