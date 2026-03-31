@@ -81,44 +81,48 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
             return res.status(404).json({ mensaje: 'Producto no encontrado' });
         }
 
-        // --- DIAGNÓSTICO DE EMERGENCIA (Caja Negra) ---
-        const logEntry = `
-[${new Date().toISOString()}] PRODUCT UPDATE ID: ${req.params.id}
-- Body Keys: ${Object.keys(req.body).join(", ")}
-- Existentes en Body: ${req.body.imagenesExistentes ? (Array.isArray(req.body.imagenesExistentes) ? req.body.imagenesExistentes.length : 1) : 0}
-- Nuevas en File: ${req.files['imagenes'] ? req.files['imagenes'].length : 0}
-- Fotos en DB antes: ${existente.imagenes.length}
-`;
-        fs.appendFileSync('diag_log.txt', logEntry);
-
-        // --- LÓGICA DE PERSISTENCIA ---
-        // Extraemos 'imagenes' del body para que NUNCA pise nuestra lógica de mezcla
+        // --- LÓGICA DE PERSISTENCIA MANUAL Y PROTECTORA ---
         const { imagenesExistentes, imagenes, ...otrosCampos } = req.body;
         const imagenesExistentesAlt = req.body['imagenesExistentes[]'];
 
-        // 1. Decidir qué fotos mantener
+        // 1. Identificar fotos anteriores
         let fotosMantener = [];
         const rawExistentes = imagenesExistentes || imagenesExistentesAlt;
 
         if (rawExistentes) {
             fotosMantener = Array.isArray(rawExistentes) ? rawExistentes : [rawExistentes];
         } else {
-            // SIEMPRE mantenemos las anteriores si no se envió una lista de "borrado" explícita
-            // (esto es un salvavidas por si el frontend falla al enviar la lista)
+            // SALVAVIDAS: Si no viene nada del panel, mantenemos lo que ya hay en la DB 
+            // para evitar que un bug del frontend borre la galería.
             fotosMantener = existente.imagenes || [];
         }
 
-        // 2. Agregar fotos nuevas (Cloudinary)
+        // 2. Identificar fotos nuevas
         let fotosNuevas = [];
-        if (req.files && req.files['imagenes'] && req.files['imagenes'].length > 0) {
+        if (req.files && req.files['imagenes']) {
             fotosNuevas = req.files['imagenes'].map(f => f.path);
         }
 
-        // 3. Aplicar cambios al documento (USANDO .save() QUE ES MÁS SEGURO)
-        Object.assign(existente, otrosCampos); // Ahora 'otrosCampos' no tiene 'imagenes'
+        // 3. ASIGNACIÓN MANUAL CAMPO POR CAMPO (A prueba de balas)
+        if (otrosCampos.nombre) existente.nombre = otrosCampos.nombre;
+        if (otrosCampos.descripcion) existente.descripcion = otrosCampos.descripcion;
+        if (otrosCampos.precio) existente.precio = Number(otrosCampos.precio);
+        if (otrosCampos.precioOferta) existente.precioOferta = otrosCampos.precioOferta ? Number(otrosCampos.precioOferta) : undefined;
+        if (otrosCampos.categoria) existente.categoria = otrosCampos.categoria;
+        if (otrosCampos.tipo) existente.tipo = otrosCampos.tipo;
+        if (otrosCampos.stock) existente.stock = Number(otrosCampos.stock);
+        if (otrosCampos.publicado !== undefined) existente.publicado = otrosCampos.publicado === 'true' || otrosCampos.publicado === true;
+        if (otrosCampos.esNuevoDrop !== undefined) existente.esNuevoDrop = otrosCampos.esNuevoDrop === 'true' || otrosCampos.esNuevoDrop === true;
+        
+        // Manejo de talles (si viene como string separado por comas o array)
+        if (otrosCampos.talles) {
+            existente.talles = Array.isArray(otrosCampos.talles) ? otrosCampos.talles : otrosCampos.talles.split(',');
+        }
+
+        // SUMA FINAL DE IMÁGENES
         existente.imagenes = [...fotosMantener, ...fotosNuevas];
 
-        // Manejo guía talles
+        // Guía de talles
         if (req.files && req.files['guiaTallesImg'] && req.files['guiaTallesImg'].length > 0) {
             existente.guiaTalles = req.files['guiaTallesImg'][0].path;
         }
@@ -126,7 +130,7 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
         const actualizado = await existente.save();
 
         res.json({ 
-            mensaje: `Producto actualizado: se mantuvieron ${fotosMantener.length} fotos y se agregaron ${fotosNuevas.length}.`, 
+            mensaje: `DEBUG-LOOSERFIT: Mantuvimos ${fotosMantener.length} y sumamos ${fotosNuevas.length}. Total en DB: ${actualizado.imagenes.length}`, 
             producto: actualizado 
         });
     } catch (error) {
