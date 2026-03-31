@@ -82,9 +82,14 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
 
         const updateData = { ...req.body };
 
-        // Si llegan imágenes nuevas
+        // Si llegan imágenes nuevas, las SUMAMOS a las que ya tiene el producto
         if (req.files['imagenes'] && req.files['imagenes'].length > 0) {
-            updateData.imagenes = req.files['imagenes'].map(file => file.path);
+            const nuevasFotos = req.files['imagenes'].map(file => file.path);
+            const fotosActuales = existente.imagenes || [];
+            updateData.imagenes = [...fotosActuales, ...nuevasFotos];
+        } else {
+            // Si no hay fotos nuevas, mantenemos las que ya estaban
+            updateData.imagenes = existente.imagenes;
         }
 
         // Si llega una nueva guía de talles
