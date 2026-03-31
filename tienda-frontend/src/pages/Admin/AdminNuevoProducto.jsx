@@ -235,7 +235,8 @@ export default function AdminNuevoProducto() {
       
       // Enviar las que ya existen para que el backend sepa cuáles mantener
       if (esEdicion) {
-        imgExistentes.forEach(url => data.append('imagenesExistentes', url))
+        console.log("Enviando fotos existentes:", imgExistentes.length)
+        imgExistentes.forEach(url => data.append('imagenesExistentes[]', url))
       }
 
       if (guiaTallesImg) {

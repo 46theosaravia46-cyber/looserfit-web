@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // 1. RUTA PARA CREAR PRODUCTO (Con diagnóstico de errores)
@@ -80,43 +81,51 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
             return res.status(404).json({ mensaje: 'Producto no encontrado' });
         }
 
-        const updateData = { ...req.body };
+        // --- DIAGNÓSTICO DE EMERGENCIA (Caja Negra) ---
+        const logEntry = `
+[${new Date().toISOString()}] PRODUCT UPDATE ID: ${req.params.id}
+- Body Keys: ${Object.keys(req.body).join(", ")}
+- Existentes en Body: ${req.body.imagenesExistentes ? (Array.isArray(req.body.imagenesExistentes) ? req.body.imagenesExistentes.length : 1) : 0}
+- Nuevas en File: ${req.files['imagenes'] ? req.files['imagenes'].length : 0}
+- Fotos en DB antes: ${existente.imagenes.length}
+`;
+        fs.appendFileSync('diag_log.txt', logEntry);
 
-        // --- LÓGICA DE PERSISTENCIA DE IMÁGENES ---
+        // --- LÓGICA DE PERSISTENCIA ---
+        const { imagenesExistentes, ...otrosCampos } = req.body;
+        const imagenesExistentesAlt = req.body['imagenesExistentes[]'];
+
+        // 1. Decidir qué fotos mantener
         let fotosMantener = [];
-        if (req.body.imagenesExistentes) {
-            fotosMantener = Array.isArray(req.body.imagenesExistentes) 
-                ? req.body.imagenesExistentes 
-                : [req.body.imagenesExistentes];
+        const rawExistentes = imagenesExistentes || imagenesExistentesAlt;
+
+        if (rawExistentes) {
+            fotosMantener = Array.isArray(rawExistentes) ? rawExistentes : [rawExistentes];
         } else {
-            // Si el frontend no envió la lista (por ejemplo, primera vez editando con el nuevo panel)
-            // mantenemos las fotos que ya tenía el producto por defecto.
+            // SIEMPRE mantenemos las anteriores si no se envió una lista de "borrado" explícita
             fotosMantener = existente.imagenes || [];
         }
 
-        // Fotos NUEVAS subidas a Cloudinary
-        let nuevasFotos = [];
+        // 2. Agregar fotos nuevas
+        let fotosNuevas = [];
         if (req.files['imagenes'] && req.files['imagenes'].length > 0) {
-            nuevasFotos = req.files['imagenes'].map(file => file.path);
+            fotosNuevas = req.files['imagenes'].map(f => f.path);
         }
 
-        // Combinamos ambas listas
-        updateData.imagenes = [...fotosMantener, ...nuevasFotos];
+        // 3. Aplicar cambios al documento (USANDO .save() QUE ES MÁS SEGURO)
+        Object.assign(existente, otrosCampos);
+        existente.imagenes = [...fotosMantener, ...fotosNuevas];
 
-        console.log(`[Update] Prod: ${req.params.id} | Mantener: ${fotosMantener.length} | Nuevas: ${nuevasFotos.length} | Total: ${updateData.imagenes.length}`);
-
-        // Guía de talles (si sube imagen nueva, pisa el anterior)
+        // Manejo guía talles
         if (req.files['guiaTallesImg'] && req.files['guiaTallesImg'].length > 0) {
-            updateData.guiaTalles = req.files['guiaTallesImg'][0].path;
+            existente.guiaTalles = req.files['guiaTallesImg'][0].path;
         }
 
-        const actualizado = await Product.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            { new: true, runValidators: true }
-        );
+        const actualizado = await existente.save();
 
-        res.json({ mensaje: 'Producto actualizado con éxito', producto: actualizado });
+        fs.appendFileSync('diag_log.txt', `- Resultado: Guardadas ${actualizado.imagenes.length} fotos totales.\n`);
+
+        res.json({ mensaje: 'Producto actualizado con éxito (Modo Seguro)', producto: actualizado });
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al actualizar producto', error: error.message });
     }
