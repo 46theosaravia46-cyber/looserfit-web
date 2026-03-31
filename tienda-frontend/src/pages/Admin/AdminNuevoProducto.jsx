@@ -263,11 +263,11 @@ export default function AdminNuevoProducto() {
         body: data 
       })
 
+      const resData = await res.json()
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.mensaje || data.error || 'Error al guardar producto')
+        throw new Error(resData.mensaje || resData.error || 'Error al guardar producto')
       }
-
+      alert(resData.mensaje || '¡Producto guardado!')
       setExito(true)
       setTimeout(() => navigate('/admin/productos'), 1500)
     } catch (err) {
