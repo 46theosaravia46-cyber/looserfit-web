@@ -158,8 +158,9 @@ export default function AdminHome() {
       const data = await updateHeroImages(formData)
       setHeroItems((data.home.heroImages || []).map((url, i) => ({ id: `existing-h-${i}`, src: url, file: null })))
       setMsg('Hero actualizado correctamente')
-    } catch {
-      setError('No se pudo actualizar el hero')
+    } catch (err) {
+      console.error('Error saving hero:', err)
+      setError(err.message || 'No se pudo actualizar el hero')
     } finally {
       setLoading(false)
     }
@@ -195,8 +196,9 @@ export default function AdminHome() {
       })
       setFamilyItems(fImgs)
       setFamilyMsg('Family actualizado correctamente')
-    } catch {
-      setError('No se pudo actualizar o agregar imagenes family')
+    } catch (err) {
+      console.error('Error saving family:', err)
+      setError(err.message || 'No se pudo actualizar o agregar imagenes family')
     } finally {
       setFamilyLoading(false)
     }

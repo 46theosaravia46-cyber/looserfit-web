@@ -246,12 +246,19 @@ export default function AdminNuevoProducto() {
         headers: { ...getAuthHeaders() },
         body: data 
       })
-      if (!res.ok) throw new Error('Error al guardar')
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.mensaje || data.error || 'Error al guardar producto')
+      }
 
       setExito(true)
       setTimeout(() => navigate('/admin/productos'), 1500)
-    } catch {
-      setError('Hubo un error al guardar. Verificá que el backend esté corriendo.')
+    } catch (err) {
+      console.error('Error saving product:', err)
+      setError(err.message === 'Failed to fetch' 
+        ? 'No se pudo conectar con el servidor. Revisá tu conexión a internet.' 
+        : err.message)
       setLoading(false)
     }
   }
