@@ -121,12 +121,19 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
         }
 
         // LÓGICA DE SUMA TOTAL: Si el admin NO apretó ninguna X, el total es VIEJAS + NUEVAS
-        const totalFinal = [...new Set([...fotosMantener, ...fotosNuevas])];
+        // Filtramos cualquier valor nulo o vacío por seguridad
+        const todas = [...fotosMantener, ...fotosNuevas].filter(f => f && typeof f === 'string');
+        const totalFinal = [...new Set(todas)];
+        
         existente.imagenes = totalFinal;
+        
+        // FORZAR A MONGOOSE A VER EL CAMBIO
+        existente.markModified('imagenes');
 
         // Guía de talles
         if (req.files && req.files['guiaTallesImg'] && req.files['guiaTallesImg'].length > 0) {
             existente.guiaTalles = req.files['guiaTallesImg'][0].path;
+            existente.markModified('guiaTalles');
         }
 
         const actualizado = await existente.save();
