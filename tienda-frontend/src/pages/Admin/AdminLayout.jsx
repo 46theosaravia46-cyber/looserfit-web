@@ -4,6 +4,10 @@ import { useAuth } from '../../context/AuthContext'
 import './AdminLayout.css'
 
 export default function AdminLayout() {
+  useEffect(() => {
+    document.title = 'Panel Admin - Looserfit'
+    return () => { document.title = 'looserfit' }
+  }, [])
   const { user, login, logout, loading } = useAuth()
   const [usuario,     setUsuario]     = useState('')
   const [contrasena,  setContrasena]  = useState('')

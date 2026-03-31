@@ -5,6 +5,8 @@ import App from './App.jsx'
 import { CartProvider } from './context/CartContext.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 
+document.title = 'looserfit'
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
