@@ -2,8 +2,8 @@
 // API.JS — Todas las llamadas al backend
 // ============================================
 
-const defaultApiHost = window.location.hostname || 'localhost'
-export const BASE_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${defaultApiHost}:3000/api`
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+export const BASE_URL = import.meta.env.VITE_API_URL || (isLocal ? 'http://localhost:3000/api' : 'https://looserfit-api.onrender.com/api')
 
 // Helper para obtener el token guardado
 const getAuthHeaders = () => {
