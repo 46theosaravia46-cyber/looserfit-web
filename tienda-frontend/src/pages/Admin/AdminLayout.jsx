@@ -40,12 +40,12 @@ export default function AdminLayout() {
   if (!user || !user.isAdmin) {
     return (
       <div className="admin-login">
-        <div className="admin-login__box">
+        <div className="admin-login__box" style={{background: '#fff9c4', border: '5px solid #000'}}>
           <div className="admin-login__logo">
             <img src="/logo3.0.png" alt="Looserfit" />
           </div>
           <h2 className="admin-login__title">Panel Admin</h2>
-          <p style={{background: '#ffeb3b', color: '#000', padding: '10px', textAlign: 'center', fontWeight: 'bold', border: '5px solid #000'}}>v1.0.6 - PARCHE FINAL (F5 SI NO VES EL 6)</p>
+          <p style={{background: '#000', color: '#ffeb3b', padding: '15px', textAlign: 'center', fontWeight: 'bold', border: '2px solid #000', fontSize: '1.2rem'}}>v1.0.7 - CACHE LIMPIA (F5 SI NO VES EL 7)</p>
           <p className="admin-login__sub">Ingresá a tu panel de control</p>
 
           <form onSubmit={handleLogin} className="admin-login__form">
@@ -125,7 +125,7 @@ export default function AdminLayout() {
           <button className="admin-sidebar__logout" onClick={handleLogout}>
             Cerrar sesión
           </button>
-          <p style={{fontSize:'0.6rem', color:'#ffc107', marginTop:'1rem', textAlign:'center', fontWeight: 'bold'}}>v1.0.6 - FINAL</p>
+          <p style={{fontSize:'0.6rem', color:'#ffc107', marginTop:'1rem', textAlign:'center', fontWeight: 'bold'}}>v1.0.7 - FINAL</p>
         </div>
       </aside>
 
