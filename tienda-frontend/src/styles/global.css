@@ -164,3 +164,75 @@ img {
 @media (max-width: 768px) {
   .section { padding: 3rem 0; }
 }
+
+/* --- Coming soon overlay responsive --- */
+.coming-soon-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.72);
+  color: #fff;
+  text-align: center;
+  padding: 2rem;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.coming-soon-grid {
+  width: 100%;
+  max-width: 980px;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+  align-items: center;
+  pointer-events: all;
+}
+
+.coming-soon-box {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  padding: 1.5rem;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.coming-soon-button {
+  margin-top: 1.5rem;
+  background: #ffffff;
+  color: #111;
+  border: none;
+  border-radius: 999px;
+  padding: 0.85rem 1.2rem;
+  cursor: pointer;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.coming-soon-button:hover {
+  opacity: 0.95;
+}
+
+@media (max-width: 820px) {
+  .coming-soon-overlay {
+    padding: 1rem;
+  }
+
+  .coming-soon-grid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  .coming-soon-box {
+    padding: 1.2rem;
+  }
+
+  .coming-soon-button {
+    width: 100%;
+    white-space: normal;
+  }
+}

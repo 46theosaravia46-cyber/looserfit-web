@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar/Navbar'
 import Footer from './components/Footer/Footer'
 import Home from './pages/Home/Home'
@@ -44,44 +44,15 @@ function ComingSoonScreen({ launchDate, message, subtitle, onAuthClick }) {
   const formatted = `${days > 0 ? `${days}d ` : ''}${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'rgba(0,0,0,0.72)',
-      color: '#fff',
-      textAlign: 'center',
-      padding: '2rem',
-      zIndex: 100,
-      pointerEvents: 'none'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '980px',
-        display: 'grid',
-        gap: '2rem',
-        gridTemplateColumns: 'minmax(0, 1.5fr) minmax(280px, 1fr)',
-        alignItems: 'center',
-        pointerEvents: 'all'
-      }}>
+    <div className="coming-soon-overlay">
+      <div className="coming-soon-grid">
         <div>
           <h1 style={{ fontSize: 'clamp(2.5rem, 4vw, 4.5rem)', margin: '0 0 1rem', lineHeight: 1.05 }}>{message || ''}</h1>
           {subtitle && <p style={{ fontSize: '1rem', color: '#d3d3d3', marginBottom: '1.8rem' }}>{subtitle}</p>}
           <p style={{ fontSize: 'clamp(2rem, 3vw, 3rem)', fontWeight: 700, marginBottom: '1rem', color: '#ffffff' }}>{formatted}</p>
         </div>
 
-        <div style={{
-          background: 'rgba(255,255,255,0.08)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          borderRadius: '18px',
-          padding: '1.5rem',
-          minHeight: '200px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
+        <div className="coming-soon-box">
           <div>
             <h2 style={{ fontSize: '1.1rem', margin: '0 0 0.75rem' }}>Aviso por email</h2>
             <p style={{ margin: 0, color: '#ddd', lineHeight: 1.7 }}>
@@ -91,17 +62,7 @@ function ComingSoonScreen({ launchDate, message, subtitle, onAuthClick }) {
           <button
             type="button"
             onClick={onAuthClick}
-            style={{
-              marginTop: '1.5rem',
-              background: '#ffffff',
-              color: '#111',
-              border: 'none',
-              borderRadius: '999px',
-              padding: '0.85rem 1.2rem',
-              cursor: 'pointer',
-              fontWeight: 700,
-              whiteSpace: 'nowrap'
-            }}
+            className="coming-soon-button"
           >
             Recibir aviso por Gmail
           </button>
@@ -151,21 +112,6 @@ function App() {
   const comingSoon = homeContent?.comingSoon
   const isLaunchActive = Boolean(comingSoon?.enabled && comingSoon?.launchDate && new Date(comingSoon.launchDate) > new Date())
 
-  // Bloquear scroll cuando está en modo lanzamiento
-  useEffect(() => {
-    if (isLaunchActive) {
-      document.body.style.overflow = 'hidden'
-      document.documentElement.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-      document.documentElement.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-      document.documentElement.style.overflow = ''
-    }
-  }, [isLaunchActive])
-
   // Verificar cada segundo si el lanzamiento terminó
   useEffect(() => {
     if (!isLaunchActive) return
@@ -183,14 +129,32 @@ function App() {
     return () => clearInterval(interval)
   }, [isLaunchActive, comingSoon?.launchDate])
 
+  const location = useLocation()
   const publicGateProps = {
     homeLoading,
     comingSoon,
     onAuthClick: () => setAuthOpen(true)
   }
 
+  useEffect(() => {
+    const isAdminRoute = location.pathname.startsWith('/admin')
+
+    if (isLaunchActive && !isAdminRoute) {
+      document.body.style.overflow = 'hidden'
+      document.documentElement.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
+    }
+  }, [isLaunchActive, location.pathname])
+
   return (
-    <BrowserRouter>
+    <>
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />} 
       <Routes>
 
@@ -253,7 +217,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
 
       </Routes>
-    </BrowserRouter>
+    </>
   )
 }
 

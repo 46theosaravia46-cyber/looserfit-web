@@ -83,7 +83,8 @@
 .admin-wrapper {
   display: grid;
   grid-template-columns: 220px 1fr;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: #f0ede8;
 }
 
@@ -197,7 +198,9 @@
 .admin-content {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  position: relative;
 }
 
 .admin-topbar {
