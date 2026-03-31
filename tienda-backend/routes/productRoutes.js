@@ -1,4 +1,8 @@
+const express = require('express');
+const router = express.Router();
 const fs = require('fs');
+const upload = require('../config/cloudinary');
+const Product = require('../models/product');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // 1. RUTA PARA CREAR PRODUCTO (Con diagnóstico de errores)
@@ -139,7 +143,7 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
         // --- SÚPER-BLOQUEO DE SEGURIDAD PARA DORMIR TRANQUILO ---
         // Si el resultado final es 0 fotos, pero es un producto que YA TENÍA fotos,
         // vamos a BLOQUEAR el guardado para que no se borren por error.
-        if (esEdicion && totalFinal.length === 0 && existente.imagenes.length > 0) {
+        if (totalFinal.length === 0 && existente.imagenes.length > 0) {
             return res.status(400).json({ 
                 mensaje: '⚠️ ERROR DE SEGURIDAD: El servidor intentó borrar toda la galería por error. Operación cancelada para proteger tus fotos.',
                 debug_version: 'v1.0.7 - PROTECTOR'
