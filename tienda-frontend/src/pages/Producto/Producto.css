@@ -307,25 +307,27 @@
   }
 
   .producto-info__cta {
-    width: 100% !important;
-    max-width: 100%;
+    width: 90% !important;
+    max-width: 400px;
     box-sizing: border-box !important;
-    padding: 1rem 0.5rem !important;
-    font-size: 0.85rem !important;
-    margin-top: 1.5rem !important;
+    padding: 0.8rem 1.2rem !important;
+    font-size: 0.8rem !important;
+    margin: 1.5rem auto !important;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
+    border-radius: 4px;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 485px) {
   .producto-info__cta {
-    padding: 0.9rem 0.5rem !important;
-    font-size: 0.78rem !important;
+    width: 92% !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.75rem !important;
     letter-spacing: 0.04em;
   }
 }
