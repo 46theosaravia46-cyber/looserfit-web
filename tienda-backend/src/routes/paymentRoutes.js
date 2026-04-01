@@ -96,8 +96,10 @@ router.post('/webhook', async (req, res) => {
             const paymentData = await response.json();
             const orderId = paymentData.external_reference || req.body.data?.object?.external_reference || req.body.external_reference;
 
+            console.log(`[Webhook MP] Pago ${paymentId} - Estado: ${paymentData.status} - Detalle: ${paymentData.status_detail}`);
+
             if (!orderId) {
-                console.warn('Webhook recibido sin external_reference válido:', paymentData);
+                console.warn('Webhook recibido sin external_reference válido:', paymentId);
                 return res.sendStatus(200);
             }
 
@@ -112,10 +114,12 @@ router.post('/webhook', async (req, res) => {
                     }
 
                     await Order.findByIdAndUpdate(orderId, { estado: 'Pagado' });
-                    console.log(`✅ Pedido ${orderId} marcado como Pagado y stock descontado.`);
+                    console.log(`✅ [Webhook MP] Pedido ${orderId} marcado como Pagado.`);
                 }
+            } else if (['pending', 'in_process'].includes(paymentData.status)) {
+                console.log(`⏳ [Webhook MP] Pedido ${orderId} está pendiente de acreditación (${paymentData.status_detail})`);
             } else {
-                console.log(`Notificación Mercado Pago recibida: estado=${paymentData.status} order=${orderId}`);
+                console.log(`❌ [Webhook MP] Pedido ${orderId} falló o fue rechazado: ${paymentData.status}`);
             }
         }
 

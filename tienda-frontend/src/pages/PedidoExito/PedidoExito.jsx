@@ -18,6 +18,7 @@ export default function PedidoExito() {
   const [success, setSuccess] = useState(false)
   const [errorUpload, setErrorUpload] = useState('')
   const [comprobanteUrl, setComprobanteUrl] = useState(state?.pedido?.comprobante || '')
+  const [isDragging, setIsDragging] = useState(false)
 
   useEffect(() => {
     if (pedido) return
@@ -58,6 +59,21 @@ export default function PedidoExito() {
     }
   }
 
+  const onDragOver = (e) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+  const onDragLeave = () => setIsDragging(false)
+  const onDrop = (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0])
+    }
+  }
+
+  const gmailUrl = `mailto:looserfit2004@gmail.com?subject=Comprobante de Pago - Orden ${pedido?.orderNumber || pedido?._id || ''}&body=Hola! Adjunto mi comprobante de pago para la orden ${pedido?.orderNumber || pedido?._id || ''}.`
+
   return (
     <div className="pedido-exito-page">
       <div className="container">
@@ -88,25 +104,38 @@ export default function PedidoExito() {
                   <img src={comprobanteUrl} alt="Comprobante" className="img-comprobante" />
                 </div>
               ) : (
-                <div className="upload-box">
-                  <p>Si pagaste por transferencia, subí aquí tu foto o captura.</p>
-                  <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.8rem' }}>
-                    Si pagaste con tarjeta de crédito o con Mercado Pago, no es necesario subir comprobante.
+                <div 
+                  className={`upload-box ${isDragging ? 'upload-box--dragging' : ''}`}
+                  onDragOver={onDragOver}
+                  onDragLeave={onDragLeave}
+                  onDrop={onDrop}
+                >
+                  <p><strong>Arrastrá tu comprobante aquí</strong> o seleccioná un archivo.</p>
+                  <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.8rem' }}>
+                    Si pagaste con tarjeta de crédito desde Mercado Pago, no es necesario subir comprobante.
                   </p>
                   <input 
                     type="file" 
+                    id="file-upload"
                     accept="image/*" 
                     onChange={(e) => setFile(e.target.files[0])} 
                     className="file-input"
+                    style={{ display: 'none' }}
                   />
+                  <label htmlFor="file-upload" className="btn btn-secondary-outline" style={{ marginBottom: '0.8rem', display: 'inline-block', cursor: 'pointer' }}>
+                    {file ? `Archivo: ${file.name}` : 'Seleccionar archivo'}
+                  </label>
+
                   {errorUpload && <p className="error-msg">{errorUpload}</p>}
                   {success && <p className="success-msg">¡Subido con éxito!</p>}
+                  
                   <button 
                     onClick={handleUpload} 
                     className="btn btn-filled" 
+                    style={{ width: '100%' }}
                     disabled={uploading || !file}
                   >
-                    {uploading ? 'Subiendo...' : 'Subir Comprobante'}
+                    {uploading ? 'Subiendo...' : 'Confirmar y Subir'}
                   </button>
                 </div>
               )
@@ -116,7 +145,7 @@ export default function PedidoExito() {
           </div>
 
           <div className="pedido-exito-actions">
-            <a href={waUrl} className="btn btn-filled" target="_blank" rel="noreferrer">Enviar por WhatsApp</a>
+            <a href={gmailUrl} className="btn btn-filled" style={{ background: '#ea4335', borderColor: '#ea4335' }}>Mandar por Gmail</a>
             <Link to="/tienda" className="btn">Volver a tienda</Link>
           </div>
         </div>

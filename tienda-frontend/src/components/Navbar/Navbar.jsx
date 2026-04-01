@@ -101,7 +101,7 @@ export default function Navbar() {
                       <p className="no-notif">No tienes pedidos recientes.</p>
                     ) : (
                       (misPedidos || []).map(p => (
-                        <div key={p._id} className="notification-item">
+                        <div key={p._id} className={`notification-item ${p.estado === 'Pendiente' && !p.comprobante ? 'notification-item--alert' : ''}`}>
                           <p><strong>Pedido #</strong>{p.orderNumber || p._id.slice(-6).toUpperCase()}</p>
                           <p>
                             <strong>Estado: </strong>
@@ -110,6 +110,14 @@ export default function Navbar() {
                                p.estado === 'Pagado' ? '✅ Pago aprobado' : p.estado}
                             </span>
                           </p>
+                          {p.estado === 'Pendiente' && !p.comprobante && (
+                            <div className="notif-alert-box">
+                              <p>⚠️ Falta subir el comprobante de pago</p>
+                              <Link to={`/pedido-exito?orderId=${p._id}`} className="notif-alert-link" onClick={() => setNotificationsOpen(false)}>
+                                Subir ahora →
+                              </Link>
+                            </div>
+                          )}
                           {p.estado === 'Enviado' && p.trackingNumber && (
                             <div className="notif-tracking">
                               <p>Cód Seg: <strong>{p.trackingNumber}</strong></p>

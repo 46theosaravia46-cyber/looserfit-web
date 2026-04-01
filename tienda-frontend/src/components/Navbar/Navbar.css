@@ -528,4 +528,32 @@
   }
 }
 
+/* Alertas de comprobante */
+.notification-item--alert {
+  border-left: 3px solid #e74c3c;
+}
+
+.notif-alert-box {
+  background: #fdf2f2;
+  border-radius: 6px;
+  padding: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.notif-alert-box p {
+  color: #c0392b;
+  font-size: 0.75rem !important;
+  font-weight: 600;
+  margin-bottom: 0.3rem !important;
+}
+
+.notif-alert-link {
+  color: #c0392b !important;
+  font-size: 0.75rem !important;
+  text-decoration: underline !important;
+  font-weight: 700 !important;
+  display: inline-block;
+  margin-top: 0.2rem;
+}
+
 
