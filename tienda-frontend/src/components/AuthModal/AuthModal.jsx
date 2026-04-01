@@ -161,6 +161,10 @@ export default function AuthModal({ onClose }) {
             </div>
             {error && <p className="auth-error">{error}</p>}
             <button type="submit" className="auth-btn">Crear cuenta</button>
+            <p className="auth-legal">
+              Al registrarte, aceptás nuestros términos y condiciones y el envío 
+              de novedades y promociones de Looserfit.
+            </p>
           </form>
         )}
 

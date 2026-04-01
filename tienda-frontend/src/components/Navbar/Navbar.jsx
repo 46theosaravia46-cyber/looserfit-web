@@ -85,7 +85,7 @@ export default function Navbar() {
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                   </svg>
-                  {(misPedidos || []).some(p => p.estado === 'Enviado') && <span className="notif-badge"></span>}
+                  {(misPedidos || []).some(p => ['Pagado', 'Empaquetado', 'Enviado'].includes(p.estado)) && <span className="notif-badge"></span>}
                 </button>
 
                 {notificationsOpen && (
@@ -96,28 +96,26 @@ export default function Navbar() {
                     ) : (
                       (misPedidos || []).map(p => (
                         <div key={p._id} className="notification-item">
-                          <p><strong>Pedido #</strong>{p._id.slice(-6).toUpperCase()}</p>
+                          <p><strong>Pedido #</strong>{p.orderNumber || p._id.slice(-6).toUpperCase()}</p>
                           <p>
                             <strong>Estado: </strong>
                             <span className={`status-badge status-${p.estado.toLowerCase()}`}>
-                              {p.estado}
+                              {p.estado === 'Empaquetado' ? '📦 Listo para despacho' : 
+                               p.estado === 'Pagado' ? '✅ Pago aprobado' : p.estado}
                             </span>
                           </p>
-                          {p.trackingNumber && (
-                            <a 
-                              href={`https://www.correoargentino.com.ar/seguimiento-de-envios`} 
-                              target="_blank" 
-                              rel="noreferrer"
-                              className="tracking-link"
-                            >
-                              <span>📦</span>
-                              <span>Seguir en Correo Argentino</span>
-                            </a>
-                          )}
-                          {p.trackingNumber && (
-                            <p style={{marginTop: '0.4rem', fontSize: '0.7rem', color: '#999'}}>
-                              Cód: {p.trackingNumber}
-                            </p>
+                          {p.estado === 'Enviado' && p.trackingNumber && (
+                            <div className="notif-tracking">
+                              <p>Cód Seg: <strong>{p.trackingNumber}</strong></p>
+                              <a 
+                                href={`https://www.correoargentino.com.ar/seguimiento-de-envios`} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="tracking-link-btn"
+                              >
+                                Rastrear envío
+                              </a>
+                            </div>
                           )}
                         </div>
                       ))

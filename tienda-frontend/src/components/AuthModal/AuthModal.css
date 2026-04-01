@@ -184,6 +184,16 @@
   margin-bottom: 0.5rem;
 }
 
+.auth-legal {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  line-height: 1.4;
+  color: var(--gray-3);
+  text-align: center;
+  margin-top: 0.5rem;
+  letter-spacing: 0.02em;
+}
+
 /* Mobile */
 @media (max-width: 480px) {
   .auth-modal {
