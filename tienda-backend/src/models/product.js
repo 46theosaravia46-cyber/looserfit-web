@@ -6,7 +6,8 @@ const productSchema = new mongoose.Schema({
     precio: { type: Number, required: true },
     precioOferta: { type: Number },
     categoria: { 
-        type: String, 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
         required: true 
     },
     tipo: { 

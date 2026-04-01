@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 const Order = require('../models/Order');
+const Product = require('../models/product');
 
 // Configurar Mercado Pago
 const client = new MercadoPagoConfig({
@@ -16,6 +17,19 @@ router.post('/create-preference', async (req, res) => {
 
         if (!pedido) {
             return res.status(404).json({ mensaje: 'Pedido no encontrado' });
+        }
+
+        // --- VERIFICAR STOCK ANTES DE MERCADO PAGO ---
+        for (const item of pedido.productos) {
+            const productoDB = await Product.findById(item.productoId);
+            if (!productoDB) {
+                return res.status(400).json({ mensaje: `Producto no encontrado: ${item.nombre}` });
+            }
+            if (productoDB.stock < item.cantidad) {
+                return res.status(400).json({ 
+                    mensaje: `Lo sentimos, ya no queda stock suficiente de "${item.nombre}". Stock disponible: ${productoDB.stock}` 
+                });
+            }
         }
 
         const items = pedido.productos.map(p => ({
@@ -37,16 +51,17 @@ router.post('/create-preference', async (req, res) => {
         }
 
         const preference = new Preference(client);
+        const frontendUrl = process.env.FRONTEND_URL || 'https://looserfit-app-final.loca.lt';
         const body = {
             items,
             back_urls: {
-                success: `https://looserfit-app-final.loca.lt/pedido-exito`,
-                failure: `https://looserfit-app-final.loca.lt/carrito`,
-                pending: `https://looserfit-app-final.loca.lt/pedido-exito`
+                success: `${frontendUrl}/pedido-exito`,
+                failure: `${frontendUrl}/carrito`,
+                pending: `${frontendUrl}/pedido-exito`
             },
             auto_return: 'all',
             external_reference: orderId,
-            notification_url: `${process.env.BACKEND_URL || 'https://looserfit-app-final.loca.lt'}/api/payments/webhook`
+            notification_url: `${process.env.BACKEND_URL || 'https://looserfit-api.onrender.com'}/api/payments/webhook`
         };
 
         console.log('Enviando body a Mercado Pago:', JSON.stringify(body, null, 2));
@@ -89,8 +104,15 @@ router.post('/webhook', async (req, res) => {
             if (paymentData.status === 'approved') {
                 const pedido = await Order.findById(orderId);
                 if (pedido && pedido.estado !== 'Pagado') {
+                    // --- DESCONTAR STOCK AL CONFIRMAR PAGO ---
+                    for (const item of pedido.productos) {
+                        await Product.findByIdAndUpdate(item.productoId, { 
+                            $inc: { stock: -item.cantidad } 
+                        });
+                    }
+
                     await Order.findByIdAndUpdate(orderId, { estado: 'Pagado' });
-                    console.log(`✅ Pedido ${orderId} marcado como Pagado.`);
+                    console.log(`✅ Pedido ${orderId} marcado como Pagado y stock descontado.`);
                 }
             } else {
                 console.log(`Notificación Mercado Pago recibida: estado=${paymentData.status} order=${orderId}`);

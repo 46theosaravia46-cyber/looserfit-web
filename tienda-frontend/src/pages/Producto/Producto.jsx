@@ -11,7 +11,9 @@ export default function Producto() {
   const [error,       setError]       = useState(null)
   const [imgActiva,   setImgActiva]   = useState(0)
   const [talleElegido,setTalleElegido]= useState('')
-  const [showGuia, setShowGuia] = useState(false)
+  const [showGuia,    setShowGuia]    = useState(false)
+  const [lightbox,    setLightbox]    = useState(false)
+  const [lbZoom,      setLbZoom]      = useState(1)
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -20,6 +22,16 @@ export default function Producto() {
       .then(data => { setProducto(data); setLoading(false) })
       .catch(err  => { setError(err.message); setLoading(false) })
   }, [id])
+
+  // Bloquear scroll cuando el lightbox está abierto
+  useEffect(() => {
+    if (lightbox) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'auto'
+      setLbZoom(1)
+    }
+  }, [lightbox])
 
   const agregarAlCarrito = () => {
     if (!talleElegido) return alert('Elegí un talle primero')
@@ -51,6 +63,7 @@ export default function Producto() {
   )
 
   const precio = producto.precio?.toLocaleString('es-AR')
+  const categoriaNombre = typeof producto.categoria === 'object' ? producto.categoria?.name : producto.categoria
 
   return (
     <div className="producto-page">
@@ -72,11 +85,16 @@ export default function Producto() {
             {producto.precioOferta && producto.precioOferta > 0 && (
               <span className="producto-galeria__badge--oferta">OFERTA</span>
             )}
-            <div className="galeria__main">
+            <div 
+              className="galeria__main"
+              onClick={() => setLightbox(true)}
+            >
               <img
                 src={producto.imagenes?.[imgActiva] || '/placeholder.jpg'}
                 alt={producto.nombre}
+                className="galeria__img-main"
               />
+              <div className="galeria__zoom-hint">Hacé click para ampliar</div>
             </div>
             {producto.imagenes?.length > 1 && (
               <div className="galeria__thumbs">
@@ -95,7 +113,7 @@ export default function Producto() {
 
           {/* Info */}
           <div className="producto-info" style={{ display: 'flex', flexDirection: 'column' }}>
-            <p className="producto-info__cat">{producto.categoria}</p>
+            <p className="producto-info__cat">{categoriaNombre}</p>
             <h1 className="producto-info__nombre">{producto.nombre}</h1>
             {producto.precioOferta ? (
               <div className="producto-info__precio-wrap">
@@ -150,7 +168,7 @@ export default function Producto() {
               {producto.stock === 0 ? 'Sin stock' : `${producto.stock} disponibles`}
             </p>
 
-            {/* Spacer para empujar CTA al fondo */}
+            {/* Spacer */}
             <div style={{ flex: 1 }} />
 
             {/* Botón agregar */}
@@ -175,6 +193,24 @@ export default function Producto() {
           </div>
         </div>
       </div>
+
+      {/* Lightbox / Full screen photo */}
+      {lightbox && (
+        <div className="lightbox-overlay" onClick={() => setLightbox(false)}>
+          <button className="lightbox-close">✕</button>
+          <div className="lightbox-content" onClick={e => e.stopPropagation()}>
+            <img 
+              src={producto.imagenes?.[imgActiva]} 
+              alt="Zoom view" 
+              className="lightbox-img"
+              style={{ transform: `scale(${lbZoom})` }}
+              onClick={() => setLbZoom(lbZoom === 1 ? 2 : 1)}
+            />
+            <p className="lightbox-hint">Tocá la foto para hacer zoom</p>
+          </div>
+        </div>
+      )}
+
       {/* Modal Guía de Talles */}
       {showGuia && (
         <div className="guia-modal-overlay" onClick={() => setShowGuia(false)}>

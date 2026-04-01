@@ -19,6 +19,7 @@ export async function getProductos(filtros = {}) {
 
   if (filtros.categoria)      params.append('categoria', filtros.categoria)
   if (filtros.corte)          params.append('corte', filtros.corte)
+  if (filtros.q)              params.append('q', filtros.q)
   if (filtros.soloPublicados) params.append('soloPublicados', 'true')
 
   const query = params.toString()
@@ -74,7 +75,14 @@ export async function crearPreferenciaPago(orderId) {
     body: JSON.stringify({ orderId })
   })
   if (!res.ok) {
-    throw new Error('Error al generar el link de pago')
+    let mensaje = 'Error al generar el link de pago'
+    try {
+      const data = await res.json()
+      mensaje = data.mensaje || data.error || mensaje
+    } catch {
+      // dejamos mensaje genérico
+    }
+    throw new Error(mensaje)
   }
   return res.json()
 }
@@ -235,5 +243,12 @@ export async function sendNewsletter(asunto, contenido) {
     const data = await res.json()
     throw new Error(data.error || 'Error al enviar noticia')
   }
+  return res.json()
+}
+
+// --- CATEGORIAS ---
+export async function getCategories() {
+  const res = await fetch(`${BASE_URL}/categories`)
+  if (!res.ok) throw new Error('Error al obtener categorías')
   return res.json()
 }

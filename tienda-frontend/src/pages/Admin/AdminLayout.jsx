@@ -1,18 +1,33 @@
 import { useState, useEffect } from 'react'
-import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import './AdminLayout.css'
 
 export default function AdminLayout() {
+  const { user, login, logout, loading } = useAuth()
+  const [usuario, setUsuario] = useState('')
+  const [contrasena, setContrasena] = useState('')
+  const [error, setError] = useState('')
+  const [menuOpen, setMenuOpen] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // Cerrar el drawer cada vez que cambia de página
+  useEffect(() => {
+    setMenuOpen(false)
+    document.body.style.overflow = ''
+  }, [location])
+
+  // Bloquear scroll del body cuando el menú mobile está abierto
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [menuOpen])
+
   useEffect(() => {
     document.title = 'Panel Admin - Looserfit'
-    return () => { document.title = 'looserfit' }
+    return () => { document.title = 'Looserfit' }
   }, [])
-  const { user, login, logout, loading } = useAuth()
-  const [usuario,     setUsuario]     = useState('')
-  const [contrasena,  setContrasena]  = useState('')
-  const [error,       setError]       = useState('')
-  const navigate = useNavigate()
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -34,18 +49,26 @@ export default function AdminLayout() {
     navigate('/admin')
   }
 
-  if (loading) return <div className="admin-loading">Cargando...</div>
+  const openMenu = () => setMenuOpen(true)
+  const closeMenu = () => setMenuOpen(false)
+
+  if (loading) {
+    return (
+      <div className="admin-loading">
+        <p>Cargando...</p>
+      </div>
+    )
+  }
 
   // ── LOGIN ──
   if (!user || !user.isAdmin) {
     return (
       <div className="admin-login">
-        <div className="admin-login__box" style={{background: '#fff9c4', border: '5px solid #000'}}>
+        <div className="admin-login__box">
           <div className="admin-login__logo">
             <img src="/logo3.0.png" alt="Looserfit" />
           </div>
           <h2 className="admin-login__title">Panel Admin</h2>
-          <p style={{background: '#000', color: '#ffeb3b', padding: '15px', textAlign: 'center', fontWeight: 'bold', border: '2px solid #000', fontSize: '1.2rem'}}>v1.0.7 - CACHE LIMPIA (F5 SI NO VES EL 7)</p>
           <p className="admin-login__sub">Ingresá a tu panel de control</p>
 
           <form onSubmit={handleLogin} className="admin-login__form">
@@ -81,39 +104,67 @@ export default function AdminLayout() {
 
   // ── PANEL ──
   return (
-    <div className="admin-wrapper">
+    <div className={`admin-wrapper ${menuOpen ? 'admin-wrapper--menu-open' : ''}`}>
 
-      {/* Sidebar */}
+      {/* Overlay para cerrar en mobile — solo se renderiza si está abierto */}
+      <div
+        className="admin-sidebar-overlay"
+        onClick={closeMenu}
+        aria-hidden="true"
+      />
+
+      {/* ── SIDEBAR ── */}
       <aside className="admin-sidebar">
         <div className="admin-sidebar__top">
           <img src="/logo3.0.png" alt="Looserfit" className="admin-sidebar__logo" />
           <span className="admin-sidebar__tag">Admin</span>
+          <button className="admin-sidebar__close" onClick={() => setMenuOpen(false)}>✕</button>
         </div>
 
         <nav className="admin-nav">
-          <NavLink to="/admin" end className={({isActive}) =>
-            `admin-nav__link ${isActive ? 'admin-nav__link--active' : ''}`
-          }>
+          <NavLink
+            to="/admin"
+            end
+            className={({ isActive }) =>
+              `admin-nav__link ${isActive ? 'admin-nav__link--active' : ''}`
+            }
+          >
             <IconGrid /> Panel
           </NavLink>
-          <NavLink to="/admin/productos" className={({isActive}) =>
-            `admin-nav__link ${isActive ? 'admin-nav__link--active' : ''}`
-          }>
+
+          <NavLink
+            to="/admin/productos"
+            className={({ isActive }) =>
+              `admin-nav__link ${isActive ? 'admin-nav__link--active' : ''}`
+            }
+          >
             <IconBox /> Productos
           </NavLink>
-          <NavLink to="/admin/home" className={({isActive}) =>
-            `admin-nav__link ${isActive ? 'admin-nav__link--active' : ''}`
-          }>
+
+          <NavLink
+            to="/admin/home"
+            className={({ isActive }) =>
+              `admin-nav__link ${isActive ? 'admin-nav__link--active' : ''}`
+            }
+          >
             <IconHome /> Home
           </NavLink>
-          <NavLink to="/admin/pedidos" className={({isActive}) =>
-            `admin-nav__link ${isActive ? 'admin-nav__link--active' : ''}`
-          }>
+
+          <NavLink
+            to="/admin/pedidos"
+            className={({ isActive }) =>
+              `admin-nav__link ${isActive ? 'admin-nav__link--active' : ''}`
+            }
+          >
             <IconOrders /> Pedidos
           </NavLink>
-          <NavLink to="/admin/newsletter" className={({isActive}) =>
-            `admin-nav__link ${isActive ? 'admin-nav__link--active' : ''}`
-          }>
+
+          <NavLink
+            to="/admin/newsletter"
+            className={({ isActive }) =>
+              `admin-nav__link ${isActive ? 'admin-nav__link--active' : ''}`
+            }
+          >
             <IconMail /> Noticias
           </NavLink>
         </nav>
@@ -125,18 +176,31 @@ export default function AdminLayout() {
           <button className="admin-sidebar__logout" onClick={handleLogout}>
             Cerrar sesión
           </button>
-          <p style={{fontSize:'0.6rem', color:'#ffc107', marginTop:'1rem', textAlign:'center', fontWeight: 'bold'}}>v1.0.7 - FINAL</p>
         </div>
       </aside>
 
-      {/* Contenido */}
+      {/* ── CONTENIDO ── */}
       <div className="admin-content">
+
+        {/* Topbar */}
         <div className="admin-topbar">
+          {/* Hamburger — solo visible en mobile por CSS */}
+          <button
+            className="admin-menu-toggle"
+            onClick={openMenu}
+            aria-label="Abrir menú"
+          >
+            <IconMenu />
+          </button>
+
           <span className="admin-topbar__title">Hola, Looser Fit 👑</span>
+
           <div className="admin-topbar__avatar">
             <img src="/logo3.0.png" alt="LF" />
           </div>
         </div>
+
+        {/* Cuerpo */}
         <div className="admin-body">
           <Outlet />
         </div>
@@ -146,12 +210,14 @@ export default function AdminLayout() {
   )
 }
 
-// Íconos SVG inline
+/* ── ÍCONOS ── */
 function IconGrid() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-      <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
     </svg>
   )
 }
@@ -159,7 +225,7 @@ function IconGrid() {
 function IconBox() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
     </svg>
   )
 }
@@ -186,7 +252,18 @@ function IconHome() {
 function IconMail() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+      <polyline points="22,6 12,13 2,6" />
+    </svg>
+  )
+}
+
+function IconMenu() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
     </svg>
   )
 }

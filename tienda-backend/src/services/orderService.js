@@ -1,0 +1,90 @@
+const Order = require('../models/Order');
+const Product = require('../models/product');
+const { enviarEmailPedido, enviarEmailSeguimiento, enviarEmailNotificacionAdmin } = require('../config/email');
+
+const createOrder = async (orderData) => {
+    const { productos = [], total, tipoEnvio, datosEnvio, usuario } = orderData;
+    
+    const productosPedido = [];
+    let totalCalculado = 0;
+
+    for (const item of productos) {
+        const productoDB = await Product.findById(item.productoId);
+        if (!productoDB) throw new Error(`Producto no encontrado: ${item.productoId}`);
+
+        const cantidad = Number(item.cantidad) || 0;
+        if (cantidad <= 0) throw new Error(`Cantidad inválida para ${productoDB.nombre}`);
+        if ((productoDB.stock || 0) < cantidad) throw new Error(`Stock insuficiente para ${productoDB.nombre}`);
+
+        productosPedido.push({
+            productoId: productoDB._id,
+            nombre: productoDB.nombre,
+            cantidad,
+            precio: productoDB.precio,
+            talle: item.talle || '',
+            imagen: item.imagen || (productoDB.imagenes && productoDB.imagenes[0]) || ''
+        });
+
+        totalCalculado += productoDB.precio * cantidad;
+    }
+
+    // El stock ya no se descuenta aquí, sino en el webhook tras el pago.
+    // Solo mantenemos la verificación inicial de stock arriba.
+
+    const totalPedidos = await Order.countDocuments();
+    const orderNumber = `#${String(totalPedidos + 1).padStart(3, '0')}`;
+    const shippingCost = tipoEnvio === 'domicilio' ? 9500 : 6500;
+    const totalFinal = totalCalculado + shippingCost;
+
+    const nuevoPedido = new Order({
+        productos: productosPedido,
+        total: totalFinal,
+        tipoEnvio,
+        datosEnvio,
+        usuario,
+        estado: 'Pendiente',
+        orderNumber,
+        shippingCost
+    });
+
+    await nuevoPedido.save();
+
+    // Enviar emails (asincrónico)
+    enviarEmailPedido(datosEnvio, nuevoPedido).catch(console.error);
+    enviarEmailNotificacionAdmin(nuevoPedido).catch(console.error);
+
+    return nuevoPedido;
+};
+
+const getAllOrders = async () => {
+    return await Order.find().sort({ createdAt: -1 });
+};
+
+const getOrderById = async (id) => {
+    return await Order.findById(id);
+};
+
+const updateOrderStatus = async (id, estado) => {
+    return await Order.findByIdAndUpdate(id, { estado }, { new: true });
+};
+
+const updateTracking = async (id, trackingNumber) => {
+    const pedido = await Order.findByIdAndUpdate(id, { trackingNumber }, { new: true });
+    if (pedido && trackingNumber) {
+        enviarEmailSeguimiento(pedido.datosEnvio, trackingNumber, pedido.orderNumber).catch(console.error);
+    }
+    return pedido;
+};
+
+const uploadComprobante = async (id, comprobantePath) => {
+    return await Order.findByIdAndUpdate(id, { comprobante: comprobantePath }, { new: true });
+};
+
+module.exports = {
+    createOrder,
+    getAllOrders,
+    getOrderById,
+    updateOrderStatus,
+    updateTracking,
+    uploadComprobante
+};

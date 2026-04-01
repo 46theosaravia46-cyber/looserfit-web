@@ -8,7 +8,14 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: process.env.EMAIL_USER || 'looserfit2004@gmail.com',
         pass: process.env.EMAIL_PASS || ''
-    }
+    },
+    tls: {
+       rejectUnauthorized: false
+    },
+    family: 4, // Forzar IPv4 para evitar errores ENETUNREACH en Render
+    connectionTimeout: 10000, // 10 segundos de timeout
+    greetingTimeout: 5000,
+    socketTimeout: 15000
 });
 
 // Verificar la conexión

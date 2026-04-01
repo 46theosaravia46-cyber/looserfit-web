@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ProductCard from '../../components/ProductCard/ProductCard'
-import { getProductos } from '../../services/api'
+import { getProductos, getCategories } from '../../services/api'
 import './Tienda.css'
 
-const CATEGORIAS = ['Abrigos', 'Remeras', 'Pantalones', 'Accesorios', 'Calzado']
 const TALLES     = ['S', 'M', 'L', 'XL', 'XXL']
 const TALLAS_POR_CATEGORIA = {
   Abrigos: ['S', 'M', 'L', 'XL', 'XXL'],
@@ -23,12 +22,20 @@ export default function Tienda() {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [productos,  setProductos]  = useState([])
+  const [categorias, setCategorias] = useState([])
   const [loading,    setLoading]    = useState(true)
   const [error,      setError]      = useState(null)
   const [catActiva,  setCatActiva]  = useState(searchParams.get('categoria') || '')
   const [talleActivo,setTalleActivo]= useState('')
   const [orden,      setOrden]      = useState('nuevo')
   const q = searchParams.get('q') || ''
+
+  // Cargar categorías desde el backend
+  useEffect(() => {
+    getCategories()
+      .then(setCategorias)
+      .catch(err => console.error('Error cargando categorías:', err))
+  }, [])
 
   const getStoredTallesMap = () => {
     try {
@@ -38,11 +45,15 @@ export default function Tienda() {
     }
   }
 
-  const getTallesForCategoria = (categoria) => {
-    if (!categoria) return []
-    const lowerCat = categoria.toLowerCase()
+  const getTallesForCategoria = (categoriaName) => {
+    if (!categoriaName) return []
+    const lowerCat = categoriaName.toLowerCase()
     const stored = getStoredTallesMap()
-    const storedKey = Object.keys(stored).find(key => key.toLowerCase() === lowerCat || key.toLowerCase().includes(lowerCat) || lowerCat.includes(key.toLowerCase()))
+    const storedKey = Object.keys(stored).find(key => 
+      key.toLowerCase() === lowerCat || 
+      key.toLowerCase().includes(lowerCat) || 
+      lowerCat.includes(key.toLowerCase())
+    )
     if (storedKey) {
       return stored[storedKey] || []
     }
@@ -50,11 +61,15 @@ export default function Tienda() {
     return defaultKey ? TALLAS_POR_CATEGORIA[defaultKey] : []
   }
 
-  const tallesPorCategoria = getTallesForCategoria(catActiva)
+  // Encontrar el nombre de la categoría activa para los talles
+  const activeCategoryObj = categorias.find(c => c._id === catActiva || c.name.toLowerCase() === catActiva.toLowerCase())
+  const tallesPorCategoria = getTallesForCategoria(activeCategoryObj?.name)
 
   useEffect(() => {
+    setLoading(true)
     const filtros = { soloPublicados: true }
     if (catActiva) filtros.categoria = catActiva
+    if (q) filtros.q = q
 
     getProductos(filtros)
       .then(data => {
@@ -66,12 +81,11 @@ export default function Tienda() {
         setError(true)
         setLoading(false)
       })
-  }, [catActiva])
+  }, [catActiva, q])
 
-  // Filtrar por talle, búsqueda y stock en el frontend
+  // Filtrar por talle y stock en el frontend (búsqueda ya viene del backend)
   const filtrados = productos.filter(p => {
     if ((p.stock || 0) <= 0) return false
-    if (q && !p.nombre?.toLowerCase().includes(q.toLowerCase())) return false
     if (!talleActivo) return true
     return p.talles?.includes(talleActivo)
   })
@@ -83,14 +97,19 @@ export default function Tienda() {
     return new Date(b.createdAt) - new Date(a.createdAt)
   })
 
-  const handleCategoria = (cat) => {
-    const nueva = cat === catActiva ? '' : cat
-    setLoading(true)
+  const handleCategoria = (catId, catName) => {
+    const nueva = catId === catActiva ? '' : catId
     setCatActiva(nueva)
     setTalleActivo('')
-    nueva
-      ? setSearchParams({ categoria: nueva.toLowerCase() })
-      : setSearchParams({})
+    if (nueva) {
+      const newParams = { categoria: catName.toLowerCase() }
+      if (q) newParams.q = q
+      setSearchParams(newParams)
+    } else {
+      const newParams = {}
+      if (q) newParams.q = q
+      setSearchParams(newParams)
+    }
   }
 
   return (
@@ -112,13 +131,13 @@ export default function Tienda() {
             <div className="filter-group">
               <h4 className="filter-group__title">Categorías</h4>
               <ul className="filter-list">
-                {CATEGORIAS.map(cat => (
-                  <li key={cat}>
+                {categorias.map(cat => (
+                  <li key={cat._id}>
                     <button
-                      className={`filter-btn ${catActiva.toLowerCase() === cat.toLowerCase() ? 'filter-btn--active' : ''}`}
-                      onClick={() => handleCategoria(cat)}
+                      className={`filter-btn ${catActiva === cat._id || catActiva.toLowerCase() === cat.name.toLowerCase() ? 'filter-btn--active' : ''}`}
+                      onClick={() => handleCategoria(cat._id, cat.name)}
                     >
-                      {cat}
+                      {cat.name}
                     </button>
                   </li>
                 ))}
@@ -142,11 +161,10 @@ export default function Tienda() {
               </div>
             )}
 
-            {(catActiva || talleActivo) && (
+            {(catActiva || talleActivo || q) && (
               <button
                 className="filter-reset"
                 onClick={() => {
-                  setLoading(true)
                   setCatActiva('')
                   setTalleActivo('')
                   setSearchParams({})
@@ -159,6 +177,12 @@ export default function Tienda() {
 
           {/* Grid productos */}
           <div className="tienda-main">
+            {q && (
+              <div className="search-results-info">
+                Buscando: "<strong>{q}</strong>"
+              </div>
+            )}
+
             <div className="tienda-toolbar">
               <span className="tienda-toolbar__label">Ordenar por:</span>
               {ORDEN_OPS.map(op => (
@@ -185,9 +209,9 @@ export default function Tienda() {
                       <button
                         className="btn"
                         onClick={() => {
-                          setLoading(true)
                           setCatActiva('')
                           setTalleActivo('')
+                          setSearchParams({})
                         }}
                       >
                         Ver todo

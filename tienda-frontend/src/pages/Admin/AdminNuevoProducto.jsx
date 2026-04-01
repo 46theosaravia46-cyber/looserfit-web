@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { BASE_URL, getAuthHeaders } from '../../services/api'
+import { BASE_URL, getAuthHeaders, getCategories } from '../../services/api'
 import './Admin.css'
 
 const INITIAL_CATEGORIAS = ['Outerwear / Abrigos','Tops / Remeras','Bottoms / Pantalones','Footwear / Calzado','Accessories / Accesorios']
@@ -45,9 +45,22 @@ export default function AdminNuevoProducto() {
     return map;
   })
   
+  const [realCategories, setRealCategories] = useState([])
   const [nuevaCat, setNuevaCat] = useState('')
   const [nuevoTipo, setNuevoTipo] = useState('')
   const [nuevoTalle, setNuevoTalle] = useState('')
+
+  // Cargar categorías reales del backend
+  useEffect(() => {
+    getCategories()
+      .then(data => {
+        setRealCategories(data)
+        if (!esEdicion && data.length > 0 && !form.categoria) {
+          setForm(p => ({ ...p, categoria: data[0]._id }))
+        }
+      })
+      .catch(err => console.error('Error al cargar categorías:', err))
+  }, [esEdicion, form.categoria])
 
   const currentTipos = tiposMap[form.categoria] || []
   const currentTalles = tallesMap[form.categoria] || []
@@ -343,9 +356,13 @@ export default function AdminNuevoProducto() {
               <label>Categoría</label>
               <div style={{display:'flex', gap:'0.5rem', marginBottom:'0.5rem'}}>
                 <select name="categoria" value={form.categoria} onChange={handleChange} style={{flex:1}}>
-                  {customCategorias.map(c => (
-                    <option key={c} value={c}>{c}</option>
+                  {realCategories.map(c => (
+                    <option key={c._id} value={c._id}>{c.name}</option>
                   ))}
+                  {/* Fallback por si hay categorías viejas en texto */}
+                  {form.categoria && !realCategories.find(c => c._id === form.categoria) && (
+                    <option value={form.categoria}>{form.categoria} (Antigua)</option>
+                  )}
                 </select>
                 <button type="button" className="admin-btn-secondary" style={{padding:'0 0.8rem'}} onClick={() => handleRemoveCustom(setCustomCategorias, 'lf_categorias', form.categoria)}>🗑</button>
               </div>

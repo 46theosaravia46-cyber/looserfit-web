@@ -239,7 +239,7 @@ export default function AdminProductos() {
                         : `${p.stock} en stock`
                       }
                     </td>
-                    <td className="table-mono">{p.categoria}</td>
+                    <td className="table-mono">{p.categoria?.name || p.categoria || 'Sin cat.'}</td>
                     <td className="table-mono">${p.precio?.toLocaleString('es-AR')}</td>
                     <td>
                       {/* ⋯ dropdown */}

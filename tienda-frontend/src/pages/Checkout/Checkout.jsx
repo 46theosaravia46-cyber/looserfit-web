@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 import { crearPedido, crearPreferenciaPago } from '../../services/api'
@@ -118,7 +118,10 @@ export default function Checkout() {
       })
       */
     } catch (err) {
-      setError(err.message || 'No se pudo generar el pedido. Revisa backend y campos.')
+      console.error('Error en checkout:', err);
+      // El backend ahora devuelve mensajes de stock específicos en err.response.data
+      const msg = err.response?.data?.mensaje || err.message || 'No se pudo generar el pedido. Revisa los datos.';
+      setError(msg)
       setLoading(false)
     }
   }
@@ -126,7 +129,10 @@ export default function Checkout() {
   return (
     <div className="checkout-page">
       <div className="container">
-        <h1>Checkout</h1>
+        <div className="checkout-header">
+          <Link to="/carrito" className="checkout-back">← Volver al carrito</Link>
+          <h1>Checkout</h1>
+        </div>
 
         <form className="checkout-form" onSubmit={handleSubmit}>
           <div className="checkout-layout">

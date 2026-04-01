@@ -3,8 +3,29 @@
   padding: 3rem 0 5rem;
 }
 
+.checkout-header {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkout-back {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray-3);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.checkout-back:hover {
+  color: var(--black);
+}
+
 .checkout-page h1 {
-  margin-bottom: 1.2rem;
+  margin-bottom: 0;
 }
 
 .checkout-layout {
@@ -129,6 +150,7 @@
 @media (max-width: 900px) {
   .checkout-layout {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .checkout-grid {
@@ -141,6 +163,21 @@
 
   .checkout-sucursal-info {
     grid-column: span 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkout-page {
+    padding-top: 1.5rem;
+  }
+  
+  .checkout-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .checkout-radio {
+    flex-direction: column;
+    gap: 0.8rem;
   }
 }
 

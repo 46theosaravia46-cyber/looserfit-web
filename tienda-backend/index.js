@@ -5,12 +5,13 @@ const cors = require('cors'); // <--- 1. Lo importás acá arriba con los demás
 
 
 // 1. IMPORTAMOS LAS RUTAS (Acá le avisamos que existe el archivo de rutas)
-const productRoutes = require('./routes/productRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const homeRoutes = require('./routes/homeRoutes');
-const authRoutes = require('./routes/authRoutes');
-const adminRoutes = require('./routes/adminRoutes'); // <--- NUEVO: Gestiones internas admin
-const paymentRoutes = require('./routes/paymentRoutes');
+const productRoutes = require('./src/routes/productRoutes');
+const orderRoutes = require('./src/routes/orderRoutes');
+const homeRoutes = require('./src/routes/homeRoutes');
+const authRoutes = require('./src/routes/authRoutes');
+const adminRoutes = require('./src/routes/adminRoutes'); // <--- NUEVO: Gestiones internas admin
+const paymentRoutes = require('./src/routes/paymentRoutes');
+const categoryRoutes = require('./src/routes/categoryRoutes'); // <--- NUEVO: Entidad categorías
 const app = express();
 
 // Middleware para entender JSON (importante para recibir productos)
@@ -42,6 +43,7 @@ app.use('/api/home', homeRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes); // <--- NUEVO: Newsletter y otros
 app.use('/api/payments', paymentRoutes);
+app.use('/api/categories', categoryRoutes); // <--- NUEVO
 
 // --- Conexión MongoDB ---
 const linkSeguro = process.env.MONGO_URI;
