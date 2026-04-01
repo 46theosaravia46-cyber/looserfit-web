@@ -57,7 +57,15 @@ export default function Navbar() {
 
           {/* Izquierda */}
           <div className="navbar__left">
-            {/* Icono usuario/login en lado izquierdo */}
+            <button
+              className={`hamburger ${drawerOpen ? 'hamburger--active' : ''}`}
+              onClick={openDrawer}
+              aria-label="Menú"
+            >
+              <span /><span /><span />
+            </button>
+
+            {/* Icono usuario/login */}
             <button className="icon-btn" aria-label="Mi cuenta" onClick={() => setAuthOpen(true)}>
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="2"
                    stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
@@ -118,13 +126,7 @@ export default function Navbar() {
                 )}
               </div>
             )}
-            <button
-              className={`hamburger ${drawerOpen ? 'hamburger--active' : ''}`}
-              onClick={openDrawer}
-              aria-label="Menú"
-            >
-              <span /><span /><span />
-            </button>
+            
             <ul className="navbar__links">
               <li><Link to="/tienda" onClick={closeDrawer}>Tienda</Link></li>
             </ul>

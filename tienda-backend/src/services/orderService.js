@@ -33,11 +33,7 @@ const createOrder = async (orderData) => {
 
     const totalPedidos = await Order.countDocuments();
     const orderNumber = `#${String(totalPedidos + 1).padStart(3, '0')}`;
-    
-    let shippingCost = 6000; // Default sucursal
-    if (tipoEnvio === 'domicilio') shippingCost = 9500;
-    else if (tipoEnvio === 'persona') shippingCost = 0;
-    
+    const shippingCost = tipoEnvio === 'domicilio' ? 9500 : 6500;
     const totalFinal = totalCalculado + shippingCost;
 
     const nuevoPedido = new Order({
@@ -69,7 +65,20 @@ const getOrderById = async (id) => {
 };
 
 const updateOrderStatus = async (id, estado) => {
-    return await Order.findByIdAndUpdate(id, { estado }, { new: true });
+    const pedido = await Order.findByIdAndUpdate(id, { estado }, { new: true });
+    
+    if (pedido) {
+        const { datosEnvio } = pedido;
+        if (estado === 'Empaquetado') {
+            const { enviarEmailEmpaquetado } = require('../config/email');
+            enviarEmailEmpaquetado(datosEnvio, pedido).catch(console.error);
+        } else if (estado === 'Pagado') {
+            const { enviarEmailPagoAprobado } = require('../config/email');
+            enviarEmailPagoAprobado(datosEnvio, pedido).catch(console.error);
+        }
+    }
+    
+    return pedido;
 };
 
 const updateTracking = async (id, trackingNumber) => {

@@ -46,11 +46,7 @@ export default function Checkout() {
   })), [items])
 
   useEffect(() => {
-    let shipping = 0
-    if (tipoEnvio === 'domicilio') shipping = 9500
-    else if (tipoEnvio === 'sucursal') shipping = 6000
-    else if (tipoEnvio === 'persona') shipping = 0
-
+    const shipping = tipoEnvio === 'domicilio' ? 9500 : 6500
     setShippingCost(shipping)
     setTotalWithShipping(subtotal + shipping)
   }, [tipoEnvio, subtotal])
@@ -77,7 +73,7 @@ export default function Checkout() {
     const calleNumero = form.calleNumero.trim()
 
     const localidadValida = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]{3,}$/
-    if (tipoEnvio !== 'persona' && !localidadValida.test(localidad)) {
+    if (!localidadValida.test(localidad)) {
       return setError('Localidad inválida: ingresa una localidad real.')
     }
 
@@ -149,34 +145,19 @@ export default function Checkout() {
               </div>
 
               <div className="checkout-radio">
-                <label>
-                  <input type="radio" checked={tipoEnvio === 'sucursal'} onChange={() => setTipoEnvio('sucursal')} /> 
-                  Retirar en sucursal
-                </label>
-                <label>
-                  <input type="radio" checked={tipoEnvio === 'domicilio'} onChange={() => setTipoEnvio('domicilio')} /> 
-                  Envío a domicilio
-                </label>
-                <label>
-                  <input type="radio" checked={tipoEnvio === 'persona'} onChange={() => setTipoEnvio('persona')} /> 
-                  Retiro en persona (Prueba $0)
-                </label>
+                <label><input type="radio" checked={tipoEnvio === 'sucursal'} onChange={() => setTipoEnvio('sucursal')} /> Retirar en sucursal</label>
+                <label><input type="radio" checked={tipoEnvio === 'domicilio'} onChange={() => setTipoEnvio('domicilio')} /> Envío a domicilio</label>
               </div>
 
               <p style={{ margin: '0.6rem 0', color: '#333', fontSize: '0.9rem', lineHeight: '1.35' }}>
-                Costo: <strong>$6.000</strong> (Sucursal) / <strong>$9.500</strong> (Domicilio) / <strong>Gratis</strong> (En persona).
+                Costo de envío: <strong>$6.500</strong> (sucursal) / <strong>$9.500</strong> (domicilio).
               </p>
               <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#666' }}>
                 Si no conocés la sucursal exacta, podés elegir una en el sitio oficial de Correo Argentino:
                 {' '}<a href="https://www.correoargentino.com.ar/sucursal" target="_blank" rel="noreferrer">Buscar sucursales</a>.
               </p>
 
-              {tipoEnvio === 'persona' ? (
-                <div className="checkout-info-box">
-                  <p>✓ Has seleccionado <strong>Retiro en Persona</strong>.</p>
-                  <p style={{fontSize: '0.85rem', color: '#666'}}>Coordinaremos el punto de encuentro una vez realizado el pago.</p>
-                </div>
-              ) : tipoEnvio === 'sucursal' ? (
+              {tipoEnvio === 'sucursal' ? (
                 <div className="checkout-grid">
                   {/* Selector de provincia */}
                   <select

@@ -9,6 +9,7 @@ export default function AdminPedido() {
   const { id } = useParams()
   const [pedido, setPedido] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -18,23 +19,29 @@ export default function AdminPedido() {
   }, [id])
 
   const handleEstado = async (estado) => {
+    setSaving(true)
     try {
       const actualizado = await actualizarEstadoPedido(id, estado)
       setPedido(actualizado.pedido)
+      setSaving(false)
     } catch {
       setError('No se pudo actualizar el estado')
+      setSaving(false)
     }
   }
 
   const handleTracking = async (e) => {
     e.preventDefault()
     const num = e.target.tracking.value
+    setSaving(true)
     try {
       const actualizado = await actualizarTrackingPedido(id, num)
       setPedido(actualizado.pedido)
+      setSaving(false)
       alert('Seguimiento actualizado')
     } catch {
       alert('Error al actualizar seguimiento')
+      setSaving(false)
     }
   }
 
@@ -62,8 +69,14 @@ export default function AdminPedido() {
         <p><strong>Estado:</strong> {pedido.estado}</p>
         <div className="table-actions" style={{ marginTop: '1rem' }}>
           {ESTADOS.map(e => (
-            <button key={e} type="button" className="admin-btn-secondary" onClick={() => handleEstado(e)}>
-              {e}
+            <button 
+              key={e} 
+              type="button" 
+              className={`admin-btn-secondary ${pedido.estado === e ? 'active' : ''}`} 
+              onClick={() => handleEstado(e)}
+              disabled={saving}
+            >
+              {saving && pedido.estado !== e ? '...' : e}
             </button>
           ))}
         </div>
@@ -96,7 +109,9 @@ export default function AdminPedido() {
             className="admin-input" 
             style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #444', background: '#222', color: '#fff' }}
           />
-          <button type="submit" className="admin-btn-secondary">Guardar</button>
+          <button type="submit" className="admin-btn-secondary" disabled={saving}>
+            {saving ? 'Guardando...' : 'Guardar'}
+          </button>
         </form>
       </div>
 
