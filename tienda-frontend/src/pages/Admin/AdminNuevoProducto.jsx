@@ -91,7 +91,7 @@ export default function AdminNuevoProducto() {
           descripcion: data.descripcion || '',
           precio:      data.precio      || '',
           precioOferta:data.precioOferta|| '',
-          categoria:   data.categoria   || customCategorias[0],
+          categoria:   data.categoria?._id || data.categoria || '',
           tipo:        data.tipo        || 'regular',
           publicado:   data.publicado   || false,
           esNuevoDrop: data.esNuevoDrop || false,
@@ -243,6 +243,10 @@ export default function AdminNuevoProducto() {
           setLoading(false)
           return
         }
+      }
+
+      if (!form.categoria) {
+        throw new Error('La categoría es obligatoria.');
       }
 
       const data = new FormData()
