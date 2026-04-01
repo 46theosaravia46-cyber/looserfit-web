@@ -270,6 +270,40 @@
   text-transform: uppercase;
 }
 
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: white;
+  font-size: 4rem;
+  cursor: pointer;
+  z-index: 5200;
+  padding: 1rem;
+  transition: opacity 0.3s;
+  opacity: 0.6;
+}
+
+.lightbox-nav:hover {
+  opacity: 1;
+}
+
+.lightbox-nav--prev {
+  left: 0.5rem;
+}
+
+.lightbox-nav--next {
+  right: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .lightbox-nav {
+    font-size: 3rem;
+    padding: 0.5rem;
+  }
+}
+
 /* ── RESPONSIVE REFINEMENTS (iPhone Focus) ── */
 @media (max-width: 900px) {
   .producto-layout {
@@ -286,10 +320,28 @@
     padding: 0;
     margin: 0;
     width: 100%;
+    min-width: 0; /* Important for grid containment */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    overflow-x: hidden;
+  }
+
+  .producto-info__desc {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    max-width: 100%;
+  }
+
+  .galeria__thumbs {
+    width: 100%;
+    max-width: calc(100vw - 2rem);
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Limit gallery height on mobile to keep info visible */
@@ -307,25 +359,26 @@
   }
 
   .producto-info__cta {
-    width: 80% !important;
-    max-width: 300px;
+    width: 260px !important;
+    max-width: 85% !important;
     box-sizing: border-box !important;
-    padding: 0.75rem 1rem !important;
-    font-size: 0.78rem !important;
-    margin: 1.5rem auto !important;
+    padding: 0.8rem 1rem !important;
+    font-size: 0.75rem !important;
+    margin: 2rem auto !important;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
     letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 }
 
 @media (max-width: 485px) {
   .producto-info__cta {
-    width: 85% !important;
-    padding: 0.65rem 0.8rem !important;
-    font-size: 0.72rem !important;
+    width: 240px !important;
+    padding: 0.7rem 0.8rem !important;
+    font-size: 0.7rem !important;
   }
 }
 

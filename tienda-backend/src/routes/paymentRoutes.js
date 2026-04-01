@@ -113,7 +113,8 @@ router.post('/webhook', async (req, res) => {
                         });
                     }
 
-                    await Order.findByIdAndUpdate(orderId, { estado: 'Pagado' });
+                    const orderService = require('../services/orderService');
+                    await orderService.updateOrderStatus(orderId, 'Pagado');
                     console.log(`✅ [Webhook MP] Pedido ${orderId} marcado como Pagado.`);
                 }
             } else if (['pending', 'in_process'].includes(paymentData.status)) {

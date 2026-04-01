@@ -198,6 +198,30 @@ export default function Producto() {
       {lightbox && (
         <div className="lightbox-overlay" onClick={() => setLightbox(false)}>
           <button className="lightbox-close">✕</button>
+          
+          {producto.imagenes?.length > 1 && (
+            <>
+              <button 
+                className="lightbox-nav lightbox-nav--prev" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setImgActiva(prev => (prev === 0 ? producto.imagenes.length - 1 : prev - 1));
+                }}
+              >
+                ‹
+              </button>
+              <button 
+                className="lightbox-nav lightbox-nav--next" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setImgActiva(prev => (prev === producto.imagenes.length - 1 ? 0 : prev + 1));
+                }}
+              >
+                ›
+              </button>
+            </>
+          )}
+
           <div className="lightbox-content" onClick={e => e.stopPropagation()}>
             <img 
               src={producto.imagenes?.[imgActiva]} 

@@ -73,8 +73,10 @@ const updateOrderStatus = async (id, estado) => {
             const { enviarEmailEmpaquetado } = require('../config/email');
             enviarEmailEmpaquetado(datosEnvio, pedido).catch(console.error);
         } else if (estado === 'Pagado') {
-            const { enviarEmailPagoAprobado } = require('../config/email');
+            const { enviarEmailPagoAprobado, enviarEmailNotificacionAdmin } = require('../config/email');
             enviarEmailPagoAprobado(datosEnvio, pedido).catch(console.error);
+            // Notificar al admin también que un pago fue aprobado
+            enviarEmailNotificacionAdmin(pedido).catch(console.error);
         }
     }
     
