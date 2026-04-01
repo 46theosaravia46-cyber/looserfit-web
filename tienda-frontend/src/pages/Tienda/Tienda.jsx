@@ -62,11 +62,14 @@ export default function Tienda() {
   }
 
   // Encontrar el nombre de la categoría activa para los talles (soporta nombres cortos de URL)
-  const activeCategoryObj = categorias.find(c => 
-    c._id === catActiva || 
-    c.name.toLowerCase() === catActiva.toLowerCase() ||
-    c.name.toLowerCase().includes(catActiva.toLowerCase())
-  )
+  const activeCategoryObj = (categorias || []).find(c => {
+    if (!catActiva) return false
+    return (
+      c._id === catActiva || 
+      c.name.toLowerCase() === catActiva.toLowerCase() ||
+      c.name.toLowerCase().includes(catActiva.toLowerCase())
+    )
+  })
   const tallesPorCategoria = getTallesForCategoria(activeCategoryObj?.name)
 
   useEffect(() => {
