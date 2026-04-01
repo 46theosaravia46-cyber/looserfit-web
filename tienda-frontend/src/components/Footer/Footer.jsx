@@ -86,7 +86,7 @@ export default function Footer() {
               Theo Saravia
             </a>
           </p>
-          <Link to="/admin" className="footer__admin-link" style={{display: 'inline-block', marginTop: '10px'}}>Panel Admin</Link>
+          <Link to="/admin" className="footer__admin-link" style={{ display: 'inline-block', marginTop: '10px' }}>Panel Admin</Link>
         </div>
       </div>
 
@@ -101,5 +101,4 @@ export default function Footer() {
       )}
     </footer>
   )
-}
 }
