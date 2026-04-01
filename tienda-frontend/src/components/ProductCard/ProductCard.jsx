@@ -46,7 +46,9 @@ export default function ProductCard({ producto, loading = false }) {
         </div>
       </div>
       <div className="product-card__info">
-        <p className="product-card__categoria">{producto.categoria}</p>
+        <p className="product-card__categoria">
+          {typeof producto.categoria === 'object' ? producto.categoria?.name : producto.categoria}
+        </p>
         <h3 className="product-card__nombre">{producto.nombre}</h3>
         {tieneOferta ? (
           <div className="product-card__precio-wrap">

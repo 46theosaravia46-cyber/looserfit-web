@@ -77,16 +77,16 @@ export default function Navbar() {
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                   </svg>
-                  {misPedidos.some(p => p.estado === 'Enviado') && <span className="notif-badge"></span>}
+                  {(misPedidos || []).some(p => p.estado === 'Enviado') && <span className="notif-badge"></span>}
                 </button>
 
                 {notificationsOpen && (
                   <div className="notifications-dropdown">
                     <h3>Mis Pedidos</h3>
-                    {misPedidos.length === 0 ? (
+                    {(!misPedidos || misPedidos.length === 0) ? (
                       <p className="no-notif">No tienes pedidos recientes.</p>
                     ) : (
-                      misPedidos.map(p => (
+                      (misPedidos || []).map(p => (
                         <div key={p._id} className="notification-item">
                           <p><strong>Pedido #</strong>{p._id.slice(-6).toUpperCase()}</p>
                           <p>
