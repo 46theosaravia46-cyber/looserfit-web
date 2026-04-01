@@ -295,6 +295,21 @@
   .producto-extra {
     margin-bottom: 2rem;
   }
+
+  .producto-info__cta {
+    padding: 0.65rem;
+    font-size: 0.72rem;
+    margin-top: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+@media (max-width: 480px) {
+  .producto-info__cta {
+    padding: 0.55rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+  }
 }
 
 /* OFERTAS */

@@ -249,3 +249,9 @@ img {
     white-space: normal;
   }
 }
+@media (max-width: 480px) {
+  .btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.7rem;
+  }
+}
