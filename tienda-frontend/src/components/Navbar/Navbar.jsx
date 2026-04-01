@@ -66,12 +66,18 @@ export default function Navbar() {
             </button>
 
             {/* Icono usuario/login */}
-            <button className="icon-btn" aria-label="Mi cuenta" onClick={() => setAuthOpen(true)}>
-              <svg viewBox="0 0 24 24" fill="none" strokeWidth="2"
-                   stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
+            <button className={`icon-btn ${user ? 'icon-btn--active' : ''}`} aria-label="Mi cuenta" onClick={() => setAuthOpen(true)}>
+              {user ? (
+                <div className="user-avatar-small">
+                  {user.nombre.charAt(0).toUpperCase()}
+                </div>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2"
+                    stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              )}
             </button>
 
             {/* Campana de Notificaciones */}
