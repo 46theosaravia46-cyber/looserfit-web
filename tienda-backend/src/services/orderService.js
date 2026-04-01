@@ -33,7 +33,11 @@ const createOrder = async (orderData) => {
 
     const totalPedidos = await Order.countDocuments();
     const orderNumber = `#${String(totalPedidos + 1).padStart(3, '0')}`;
-    const shippingCost = tipoEnvio === 'domicilio' ? 9500 : 6500;
+    
+    let shippingCost = 6000; // Default sucursal
+    if (tipoEnvio === 'domicilio') shippingCost = 9500;
+    else if (tipoEnvio === 'persona') shippingCost = 0;
+    
     const totalFinal = totalCalculado + shippingCost;
 
     const nuevoPedido = new Order({
