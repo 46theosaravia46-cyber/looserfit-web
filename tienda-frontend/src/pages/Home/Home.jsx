@@ -2,17 +2,18 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Ticker from '../../components/Ticker/Ticker'
 import ProductCard from '../../components/ProductCard/ProductCard'
-import { getProductos, getHomeContent } from '../../services/api'
+import { getProductos, getHomeContent, getCategories } from '../../services/api'
 import './Home.css'
 
-// Categorías
-const CATEGORIAS = [
-  { label: 'Calzado',    slug: 'calzado',    img: '/cat-calzado.jpg',    img2: '/cat-calzado.jpg' },
-  { label: 'Abrigos',    slug: 'abrigos',    img: '/cat-abrigos.jpg',    img2: '/cat-abrigos.jpg' },
-  { label: 'Pantalones', slug: 'pantalones', img: '/cat-pantalones.jpg', img2: '/cat-pantalones.jpg' },
-  { label: 'Remeras',    slug: 'remeras',    img: '/cat-remeras.jpg',    img2: '/cat-remeras.jpg' },
-  { label: 'Accesorios', slug: 'accesorios', img: '/cat-accesorios.jpg', img2: '/cat-accesorios.jpg' },
-]
+// Mapeo de imágenes para las categorías dinámicas
+const CATEGORY_IMAGES = {
+  'calzado':    { img: '/cat-calzado.jpg',    img2: '/cat-calzado.jpg' },
+  'abrigos':    { img: '/cat-abrigos.jpg',    img2: '/cat-abrigos.jpg' },
+  'pantalones': { img: '/cat-pantalones.jpg', img2: '/cat-pantalones.jpg' },
+  'remeras':    { img: '/cat-remeras.jpg',    img2: '/cat-remeras.jpg' },
+  'accesorios': { img: '/cat-accesorios.jpg', img2: '/cat-accesorios.jpg' },
+}
+const DEFAULT_IMAGE = { img: '/cat-remeras.jpg', img2: '/cat-remeras.jpg' }
 
 const COMMUNITY_FALLBACK = [
   { src: '/cat-remeras.jpg',    titulo: '',  descripcion: '' },
@@ -22,7 +23,8 @@ const COMMUNITY_FALLBACK = [
 ]
 
 export default function Home() {
-  const [productos, setProductos] = useState([])
+  const [productos,  setProductos]  = useState([])
+  const [categorias, setCategorias] = useState([])
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState(null)
   const [heroImages, setHeroImages] = useState([])
@@ -38,6 +40,7 @@ export default function Home() {
   }
 
   useEffect(() => {
+    // Cargar productos
     getProductos({ soloPublicados: true })
       .then(data => {
         setProductos(data.slice(0, 4))
@@ -47,6 +50,11 @@ export default function Home() {
         setError(err.message)
         setLoading(false)
       })
+
+    // Cargar categorías
+    getCategories()
+      .then(setCategorias)
+      .catch(err => console.error('Error cargando categorías:', err))
   }, [])
 
   useEffect(() => {
@@ -162,7 +170,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* ── CATEGORÍAS ── */}
       <section className="section home__cat-section">
         <div className="container">
@@ -170,19 +177,24 @@ export default function Home() {
             <span>Categorías</span>
           </div>
           <div className="cat-grid">
-            {CATEGORIAS.map(cat => (
-              <Link
-                key={cat.slug}
-                to={`/tienda?categoria=${cat.slug}`}
-                className="cat-card"
-              >
-                <div className="cat-card__img-wrap">
-                  <img src={cat.img}  alt={cat.label} className="cat-img-1" />
-                  <img src={cat.img2} alt={cat.label} className="cat-img-2" />
-                </div>
-                <span className="cat-card__label">{cat.label}</span>
-              </Link>
-            ))}
+            {categorias.map(cat => {
+              const lowerName = cat.name.toLowerCase()
+              const images = CATEGORY_IMAGES[lowerName] || DEFAULT_IMAGE
+              
+              return (
+                <Link
+                  key={cat._id}
+                  to={`/tienda?categoria=${lowerName}`}
+                  className="cat-card"
+                >
+                  <div className="cat-card__img-wrap">
+                    <img src={images.img}  alt={cat.name} className="cat-img-1" />
+                    <img src={images.img2} alt={cat.name} className="cat-img-2" />
+                  </div>
+                  <span className="cat-card__label">{cat.name}</span>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>
