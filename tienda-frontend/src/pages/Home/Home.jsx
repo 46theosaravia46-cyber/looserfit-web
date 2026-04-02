@@ -15,6 +15,16 @@ const CATEGORY_IMAGES = {
 }
 const DEFAULT_IMAGE = { img: '/cat-remeras.jpg', img2: '/cat-remeras.jpg' }
 
+const getCatImg = (name) => {
+  const n = name.toLowerCase()
+  if (n.includes('calzado') || n.includes('footwear')) return CATEGORY_IMAGES.calzado
+  if (n.includes('abrigos') || n.includes('outerwear')) return CATEGORY_IMAGES.abrigos
+  if (n.includes('pantalones') || n.includes('bottoms')) return CATEGORY_IMAGES.pantalones
+  if (n.includes('remeras') || n.includes('tops')) return CATEGORY_IMAGES.remeras
+  if (n.includes('accesorios') || n.includes('accessories')) return CATEGORY_IMAGES.accesorios
+  return DEFAULT_IMAGE
+}
+
 const COMMUNITY_FALLBACK = [
   { src: '/cat-remeras.jpg',    titulo: '',  descripcion: '' },
   { src: '/cat-abrigos.jpg',    titulo: '',  descripcion: '' },
@@ -178,20 +188,21 @@ export default function Home() {
           </div>
           <div className="cat-grid">
             {categorias.map(cat => {
-              const lowerName = cat.name.toLowerCase()
-              const images = CATEGORY_IMAGES[lowerName] || DEFAULT_IMAGE
+              const images = getCatImg(cat.name)
+              // Mostrar solo la parte en español si hay "/"
+              const label = cat.name.includes('/') ? cat.name.split('/')[1].trim() : cat.name
               
               return (
                 <Link
                   key={cat._id}
-                  to={`/tienda?categoria=${lowerName}`}
+                  to={`/tienda?categoria=${cat._id}`}
                   className="cat-card"
                 >
                   <div className="cat-card__img-wrap">
                     <img src={images.img}  alt={cat.name} className="cat-img-1" />
                     <img src={images.img2} alt={cat.name} className="cat-img-2" />
                   </div>
-                  <span className="cat-card__label">{cat.name}</span>
+                  <span className="cat-card__label">{label}</span>
                 </Link>
               )
             })}
