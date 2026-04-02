@@ -61,6 +61,21 @@ router.post('/create-preference', async (req, res) => {
             },
             auto_return: 'all',
             external_reference: orderId,
+            statement_descriptor: 'LOOSERFIT',
+            payer: {
+                name: pedido.datosEnvio?.nombreCompleto?.split(' ')[0] || '',
+                surname: pedido.datosEnvio?.nombreCompleto?.split(' ').slice(1).join(' ') || '',
+                email: pedido.datosEnvio?.email,
+                phone: {
+                    area_code: '',
+                    number: pedido.datosEnvio?.telefono
+                },
+                address: {
+                    zip_code: '',
+                    street_name: pedido.datosEnvio?.calleNumero || '',
+                    street_number: ''
+                }
+            },
             notification_url: `${process.env.BACKEND_URL || 'https://looserfit-api.onrender.com'}/api/payments/webhook`
         };
 

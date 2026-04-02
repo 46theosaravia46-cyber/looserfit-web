@@ -82,8 +82,8 @@ export default function Footer() {
           <p>© 2026 Looserfit — Todos los derechos reservados</p>
           <p className="credit">
             Creado por{' '}
-            <a href="https://instagram.com/saravia.devv" target="_blank" rel="noreferrer">
-              Theo Saravia
+            <a href="https://instagram.com/saravia.devv" target="_blank" rel="noreferrer" className="credit__link">
+              Theo Saravia <span className="credit__icon">↗</span>
             </a>
           </p>
           <Link to="/admin" className="footer__admin-link" style={{ display: 'inline-block', marginTop: '10px' }}>Panel Admin</Link>

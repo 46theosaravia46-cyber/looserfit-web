@@ -49,9 +49,8 @@ const createOrder = async (orderData) => {
 
     await nuevoPedido.save();
 
-    // Enviar emails (asincrónico)
+    // Enviar email al cliente (asincrónico)
     enviarEmailPedido(datosEnvio, nuevoPedido).catch(console.error);
-    enviarEmailNotificacionAdmin(nuevoPedido).catch(console.error);
 
     return nuevoPedido;
 };

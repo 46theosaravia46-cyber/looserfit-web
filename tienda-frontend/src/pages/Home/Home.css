@@ -244,6 +244,8 @@
   gap: 8rem; /* Even more separation */
   width: max-content;
   animation: familySlide 35s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0); /* Hardware acceleration for Safari */
 }
 
 .family-carousel:hover {
@@ -256,13 +258,13 @@
     animation-play-state: running;
   }
   .family-carousel:active {
-    animation-play-state: paused;
+    animation-play-state: paused !important;
   }
 }
 
 @keyframes familySlide {
   from { transform: translateX(0); }
-  to { transform: translateX(-10%); } /* Exactly translating 1/10th of the 10 copies */
+  to { transform: translateX(-33.33%); } /* Translating exactly 1 of the 3 copies */
 }
 
 .family-item {
@@ -277,6 +279,10 @@
   border-radius: 8px; /* Trazado negro */
   box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 25px rgba(0,0,0,0.4); /* Mas intenso */
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -webkit-tap-highlight-color: transparent; /* Remove blue highlight on mobile */
+  user-select: none; /* Prevent text selection */
+  -webkit-user-select: none;
+  -webkit-touch-callout: none; /* Prevent context menu on hold */
 }
 
 .family-item img {

@@ -90,8 +90,8 @@ export default function Home() {
     return () => observer.disconnect()
   }, [familyImages])
 
-  // Repetir el array para scroll infinito largo (10 copias)
-  const carouselArray = Array(10).fill(familyImages).flat()
+  // Repetir el array para scroll infinito (3 copias son suficientes para cubrir el ancho)
+  const carouselArray = Array(3).fill(familyImages).flat()
 
   return (
     <div className="home">

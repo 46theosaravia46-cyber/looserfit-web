@@ -156,6 +156,31 @@
   width: 100%;
 }
 
+.credit__link {
+  font-weight: 600;
+  color: var(--white) !important;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.credit__link:hover {
+  text-shadow: 0 0 8px rgba(255,255,255,0.5);
+  transform: translateY(-1px);
+}
+
+.credit__icon {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.credit__link:hover .credit__icon {
+  transform: translate(2px, -2px);
+  opacity: 1;
+}
+
 .footer-modal-overlay {
   position: fixed;
   inset: 0;
