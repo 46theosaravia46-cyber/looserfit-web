@@ -5,12 +5,13 @@ const getAllProducts = async (filtros = {}) => {
     if (filtros.categoria) query.categoria = filtros.categoria;
     if (filtros.publicado !== undefined) query.publicado = filtros.publicado;
     if (filtros.corte) query.tipo = filtros.corte;
+    if (filtros.esNuevoDrop !== undefined) query.esNuevoDrop = filtros.esNuevoDrop;
 
     return await Product.find(query).populate('categoria').sort({ createdAt: -1 });
 };
 
 const searchProducts = async (q, categoriaId) => {
-    let filter = { stock: { $gt: 0 }, publicado: true };
+    let filter = { publicado: true };
     if (categoriaId) filter.categoria = categoriaId;
     if (q) {
         filter.nombre = { $regex: q, $options: 'i' };

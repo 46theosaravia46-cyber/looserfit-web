@@ -21,6 +21,7 @@ export async function getProductos(filtros = {}) {
   if (filtros.corte)          params.append('corte', filtros.corte)
   if (filtros.q)              params.append('q', filtros.q)
   if (filtros.soloPublicados) params.append('soloPublicados', 'true')
+  if (filtros.esNuevoDrop)    params.append('esNuevoDrop', 'true')
 
   const query = params.toString()
   const url   = query

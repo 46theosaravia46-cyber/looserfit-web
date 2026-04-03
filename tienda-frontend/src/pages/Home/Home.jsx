@@ -50,8 +50,8 @@ export default function Home() {
   }
 
   useEffect(() => {
-    // Cargar productos
-    getProductos({ soloPublicados: true })
+    // Cargar productos (solo nuevos drops)
+    getProductos({ soloPublicados: true, esNuevoDrop: true })
       .then(data => {
         setProductos(data.slice(0, 4))
         setLoading(false)

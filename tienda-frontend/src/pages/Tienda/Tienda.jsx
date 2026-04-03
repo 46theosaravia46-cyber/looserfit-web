@@ -94,9 +94,8 @@ export default function Tienda() {
       })
   }, [catActiva, q])
 
-  // Filtrar por talle y stock en el frontend (búsqueda ya viene del backend)
+  // Filtrar por talle (búsqueda ya viene del backend)
   const filtrados = productos.filter(p => {
-    if ((p.stock || 0) <= 0) return false
     if (!talleActivo) return true
     return p.talles?.includes(talleActivo)
   })

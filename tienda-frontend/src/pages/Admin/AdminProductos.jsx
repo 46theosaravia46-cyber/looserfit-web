@@ -296,6 +296,73 @@ export default function AdminProductos() {
           <p className="admin-empty">No se encontraron productos.</p>
         )}
       </div>
+      
+      {/* Sección Sin Stock */}
+      <div className="admin-page-header" style={{ marginTop: '4rem', borderTop: '1px solid #eee', paddingTop: '2rem' }}>
+        <div>
+          <h2 className="admin-page-title" id="sin-stock">Productos sin stock</h2>
+          <p className="admin-page-sub">
+            Estos productos no tienen inventario disponible. Podés elegir si ocultarlos o mantenerlos visibles con el cartel "Sin Stock".
+          </p>
+        </div>
+      </div>
+
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading
+              ? Array.from({length: 2}).map((_, i) => (
+                  <tr key={i}><td colSpan={3}><div className="skeleton" style={{height: 24}} /></td></tr>
+                ))
+              : productos.filter(p => p.stock === 0).length === 0
+                ? <tr><td colSpan={3} className="admin-empty">No hay productos sin stock. ¡Buen trabajo!</td></tr>
+                : productos.filter(p => p.stock === 0).map(p => (
+                    <tr key={p._id}>
+                      <td className="table-product">
+                        {p.imagenes?.[0] && (
+                          <img src={p.imagenes[0]} alt={p.nombre} className="table-thumb" />
+                        )}
+                        <div>
+                          <span className="table-nombre">{p.nombre}</span>
+                          <span className="table-id">{p._id}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`status-badge ${p.publicado ? 'status-badge--ok' : 'status-badge--off'}`}>
+                          {p.publicado ? 'Visible (Sin Stock)' : 'Oculto'}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            className="admin-btn-secondary"
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                            onClick={() => handleToggle(p._id)}
+                          >
+                            {p.publicado ? 'Ocultar' : 'Mostrar'}
+                          </button>
+                          <Link
+                            to={`/admin/productos/editar/${p._id}`}
+                            className="admin-btn-secondary"
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', textDecoration: 'none' }}
+                          >
+                            Editar
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
