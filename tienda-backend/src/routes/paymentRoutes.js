@@ -123,9 +123,16 @@ router.post('/webhook', async (req, res) => {
                 if (pedido && pedido.estado !== 'Pagado') {
                     // --- DESCONTAR STOCK AL CONFIRMAR PAGO ---
                     for (const item of pedido.productos) {
-                        await Product.findByIdAndUpdate(item.productoId, { 
-                            $inc: { stock: -item.cantidad } 
-                        });
+                        const updated = await Product.findOneAndUpdate(
+                            { _id: item.productoId, stock: { $gte: item.cantidad } },
+                            { $inc: { stock: -item.cantidad } },
+                            { new: true }
+                        );
+                        
+                        if (!updated) {
+                           console.error(`❌ [Webhook MP] Error critico: No hay stock suficiente para ${item.nombre} al confirmar pago de orden ${orderId}`);
+                           // Aquí idealmente notificaríamos al admin para devolución manual
+                        }
                     }
 
                     const orderService = require('../services/orderService');

@@ -4,8 +4,11 @@ const upload = require('../config/cloudinary');
 const orderController = require('../controllers/orderController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
-// --- CREAR UN NUEVO PEDIDO ---
-router.post('/create', orderController.createOrder);
+// --- CREAR UN NUEVO PEDIDO (Solo Usuarios Registrados) ---
+router.post('/create', protect, orderController.createOrder);
+
+// --- VER MIS PEDIDOS ---
+router.get('/mine', protect, orderController.getOrdersMine);
 
 // --- VER TODOS LOS PEDIDOS (Solo Admin) ---
 router.get('/all', protect, adminOnly, orderController.getAllOrders);

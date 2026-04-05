@@ -145,8 +145,14 @@ export default function PedidoExito() {
           </div>
 
           <div className="pedido-exito-actions">
-            <a href={gmailUrl} className="btn btn-filled" style={{ background: '#ea4335', borderColor: '#ea4335' }}>Mandar por Gmail</a>
-            <Link to="/tienda" className="btn">Volver a tienda</Link>
+            {!comprobanteUrl ? (
+              <p className="mandatory-msg">⚠️ Debes subir el comprobante de pago para finalizar el proceso y que podamos preparar tu pedido.</p>
+            ) : (
+              <>
+                <a href={gmailUrl} className="btn btn-filled" style={{ background: '#ea4335', borderColor: '#ea4335' }}>Mandar por Gmail</a>
+                <Link to="/tienda" className="btn">Volver a tienda</Link>
+              </>
+            )}
           </div>
         </div>
       </div>

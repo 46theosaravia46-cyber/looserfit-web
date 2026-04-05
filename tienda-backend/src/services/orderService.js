@@ -59,6 +59,10 @@ const getAllOrders = async () => {
     return await Order.find().sort({ createdAt: -1 });
 };
 
+const getOrdersByUser = async (usuarioId) => {
+    return await Order.find({ usuario: usuarioId }).sort({ createdAt: -1 });
+};
+
 const getOrderById = async (id) => {
     return await Order.findById(id);
 };
@@ -97,6 +101,7 @@ const uploadComprobante = async (id, comprobantePath) => {
 module.exports = {
     createOrder,
     getAllOrders,
+    getOrdersByUser,
     getOrderById,
     updateOrderStatus,
     updateTracking,

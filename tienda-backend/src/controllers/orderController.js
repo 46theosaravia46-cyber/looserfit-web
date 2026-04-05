@@ -2,7 +2,9 @@ const orderService = require('../services/orderService');
 
 const createOrder = async (req, res) => {
     try {
-        const order = await orderService.createOrder(req.body);
+        // En teoría protect ya validó req.user
+        const orderData = { ...req.body, usuario: req.user._id };
+        const order = await orderService.createOrder(orderData);
         res.status(201).json({ mensaje: 'Ticket generado con éxito', pedido: order });
     } catch (error) {
         res.status(400).json({ mensaje: 'Error al generar el ticket', error: error.message });
@@ -15,6 +17,15 @@ const getAllOrders = async (req, res) => {
         res.json(orders);
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al obtener pedidos' });
+    }
+};
+
+const getOrdersMine = async (req, res) => {
+    try {
+        const orders = await orderService.getOrdersByUser(req.user._id);
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener tus pedidos', error: error.message });
     }
 };
 
@@ -71,6 +82,7 @@ const uploadComprobante = async (req, res) => {
 module.exports = {
     createOrder,
     getAllOrders,
+    getOrdersMine,
     getOrderById,
     updateStatus,
     updateTracking,

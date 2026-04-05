@@ -18,6 +18,7 @@ import AuthModal from './components/AuthModal/AuthModal'
 import { getHomeContent } from './services/api'
 import Checkout from './pages/Checkout/Checkout'
 import PedidoExito from './pages/PedidoExito/PedidoExito'
+import MisPedidos from './pages/MisPedidos/MisPedidos'
 import NotFound from './pages/NotFound/NotFound'
 
 function ComingSoonScreen({ launchDate, message, subtitle, onAuthClick }) {
@@ -137,6 +138,12 @@ function App() {
   }
 
   useEffect(() => {
+    if (location.state?.openAuth) {
+      setAuthOpen(true)
+      // Limpiar el estado para que no se abra de nuevo al navegar a otro lado
+      window.history.replaceState({}, document.title)
+    }
+    
     const isAdminRoute = location.pathname.startsWith('/admin')
 
     if (isLaunchActive && !isAdminRoute) {
@@ -198,6 +205,13 @@ function App() {
           <PublicGate {...publicGateProps}>
             <Navbar />
             <main><PedidoExito /></main>
+            <Footer />
+          </PublicGate>
+        }/>
+        <Route path="/mis-pedidos" element={
+          <PublicGate {...publicGateProps}>
+            <Navbar />
+            <main><MisPedidos /></main>
             <Footer />
           </PublicGate>
         }/>

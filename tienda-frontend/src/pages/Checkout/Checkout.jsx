@@ -44,6 +44,12 @@ export default function Checkout() {
     talle: i.talle || '',
     imagen: i.imagen || '',
   })), [items])
+  
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/', { state: { openAuth: true } }) // Redirigir a Home y abrir Auth modal
+    }
+  }, [user, loading, navigate])
 
   useEffect(() => {
     const shipping = tipoEnvio === 'domicilio' ? 9500 : 6500

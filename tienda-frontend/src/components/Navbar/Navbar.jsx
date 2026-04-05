@@ -27,8 +27,8 @@ export default function Navbar() {
 
   // Cargar pedidos si está logueado y abre notificaciones
   useEffect(() => {
-    if (user?.email && notificationsOpen) {
-      getMisPedidos(user.email)
+    if (user && notificationsOpen) {
+      getMisPedidos()
         .then(setMisPedidos)
         .catch(console.error)
     }

@@ -44,7 +44,10 @@ export async function getProductoById(id) {
 export async function crearPedido(datosPedido) {
   const res = await fetch(`${BASE_URL}/orders/create`, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
     body:    JSON.stringify(datosPedido)
   })
   if (!res.ok) {
@@ -118,8 +121,10 @@ export async function subirComprobante(orderId, formData) {
   return res.json()
 }
 
-export async function getMisPedidos(email) {
-  const res = await fetch(`${BASE_URL}/orders/user/${email}`)
+export async function getMisPedidos() {
+  const res = await fetch(`${BASE_URL}/orders/mine`, {
+    headers: { ...getAuthHeaders() }
+  })
   if (!res.ok) throw new Error('Error al obtener tus pedidos')
   return res.json()
 }

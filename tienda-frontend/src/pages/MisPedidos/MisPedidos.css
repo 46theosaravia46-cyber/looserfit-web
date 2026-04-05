@@ -1,0 +1,110 @@
+.mis-pedidos-page {
+  padding: 8rem 0 4rem;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+}
+
+.mis-pedidos-header {
+  margin-bottom: 2rem;
+}
+
+.mis-pedidos-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.no-pedidos {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.pedidos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pedido-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border: 1px solid #eee;
+}
+
+.pedido-card__header {
+  padding: 1.25rem;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-number {
+  display: block;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.order-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.pedido-card__body {
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.pedido-prod-item {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pedido-prod-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.pedido-info-pago p {
+  margin-bottom: 0.5rem;
+}
+
+.tracking-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f0f7ff;
+  border-radius: 8px;
+  border: 1px solid #cce3ff;
+}
+
+.btn-link {
+  color: #007bff;
+  text-decoration: underline;
+  font-size: 0.9rem;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.pedido-card__footer {
+  padding: 1.25rem;
+  border-top: 1px solid #eee;
+  background: #fff;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .pedido-card__body {
+    grid-template-columns: 1fr;
+  }
+}
