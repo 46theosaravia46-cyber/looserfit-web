@@ -479,71 +479,8 @@ export default function AdminHome() {
         </div>
       </form>
 
-      {/* ── Looserfit Family ── */}
-      <form className="admin-form" onSubmit={handleFamilySubmit} style={{ marginTop: '3rem' }}>
-        <div className="admin-card">
-          <h3 className="admin-card__title">Looserfit Family (carousel)</h3>
-          <p className="admin-page-sub" style={{ marginBottom: '1.2rem' }}>
-            Agregá el nombre del producto, el IG y arrastrá ☰ para ordenarlos cronológicamente en el carrusel.
-          </p>
-
-          <div style={{display:'flex', flexDirection:'column', gap:'0.75rem', marginBottom:'1.5rem'}}>
-            {familyItems.map((item, i) => (
-              <div
-                key={item.id}
-                draggable
-                onDragStart={() => onDragStart(i)}
-                onDragEnter={(e) => onDragEnterFamily(e, i)}
-                onDragEnd={onDragEnd}
-                onDragOver={e => e.preventDefault()}
-                style={{
-                  display: 'flex', gap: '1rem', alignItems: 'center', background: '#fdfdfc',
-                  border: '1px solid var(--gray-4)', padding: '0.75rem', borderRadius: '8px',
-                  cursor: 'grab'
-                }}
-              >
-                <div style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', color:'var(--gray-3)', width: '2rem'}}>
-                  <span style={{fontSize:'1.2rem', lineHeight: '1'}}>☰</span>
-                  <span style={{fontSize:'0.55rem', userSelect: 'none'}}>mover</span>
-                </div>
-                <img src={item.src} style={{width:'60px', height:'60px', objectFit:'cover', borderRadius:'4px', pointerEvents:'none'}} alt={`Family ${i}`}/>
-                <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-                  <input type="text" placeholder="Título (ej: Cárdigan oversize)" value={item.titulo} onChange={e => updateFamilyMeta(item.id, 'titulo', e.target.value)} style={{padding:'0.5rem', border:'1px solid var(--gray-4)', borderRadius:'4px', outline: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.85rem'}} />
-                  <input type="text" placeholder="Descripción (ej: @usuario)" value={item.descripcion} onChange={e => updateFamilyMeta(item.id, 'descripcion', e.target.value)} style={{padding:'0.5rem', border:'1px solid var(--gray-4)', borderRadius:'4px', outline: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.85rem'}} />
-                </div>
-                <button type="button" onClick={() => removeFamilyItem(item.id)} style={{background:'#c0392b', color:'white', border:'none', padding:'0.6rem 0.8rem', borderRadius:'4px', cursor:'pointer', fontSize: '0.8rem', alignSelf: 'stretch', display: 'flex', alignItems: 'center'}}>Eliminar</button>
-              </div>
-            ))}
-            {familyItems.length === 0 && (
-              <p style={{color: 'var(--gray-3)', fontStyle: 'italic', padding: '2rem'}}>No hay imágenes en la familia. Puedes agregar nuevas.</p>
-            )}
-          </div>
-
-          <label className="img-upload">
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFamilyFiles}
-              style={{ display: 'none' }}
-            />
-            <div className="img-upload__inner">
-              <span>+ Agregar fotos para Looserfit Family</span>
-            </div>
-          </label>
-        </div>
-        
-        {familyMsg && <p className="admin-form__exito">{familyMsg}</p>}
-        
-        <div className="admin-form__actions">
-          <button type="submit" className="admin-btn-primary" disabled={familyLoading}>
-            {familyLoading ? 'Guardando...' : 'Guardar fotos Family'}
-          </button>
-        </div>
-      </form>
-
       {/* ── Productos Destacados ── */}
-      <form className="admin-form" onSubmit={handleFeaturedSubmit} style={{ marginTop: '3rem', marginBottom: '4rem' }}>
+      <form className="admin-form" onSubmit={handleFeaturedSubmit} style={{ marginTop: '3rem' }}>
         <div className="admin-card">
           <h3 className="admin-card__title">Productos Destacados (Stock Completo)</h3>
           <p className="admin-page-sub" style={{ marginBottom: '1.2rem' }}>
@@ -651,7 +588,70 @@ export default function AdminHome() {
 
         <div className="admin-form__actions">
           <button type="submit" className="admin-btn-primary" disabled={featuredLoading || featuredIds.length !== 4}>
-            {featuredLoading ? 'Guardando...' : 'Guardar productos destacados'}
+            {featuredLoading ? 'Guardando...' : 'Guardar productos destacados (v3)'}
+          </button>
+        </div>
+      </form>
+
+      {/* ── Looserfit Family ── */}
+      <form className="admin-form" onSubmit={handleFamilySubmit} style={{ marginTop: '3rem', marginBottom: '4rem' }}>
+        <div className="admin-card">
+          <h3 className="admin-card__title">Looserfit Family (carousel)</h3>
+          <p className="admin-page-sub" style={{ marginBottom: '1.2rem' }}>
+            Agregá el nombre del producto, el IG y arrastrá ☰ para ordenarlos cronológicamente en el carrusel.
+          </p>
+
+          <div style={{display:'flex', flexDirection:'column', gap:'0.75rem', marginBottom:'1.5rem'}}>
+            {familyItems.map((item, i) => (
+              <div
+                key={item.id}
+                draggable
+                onDragStart={() => onDragStart(i)}
+                onDragEnter={(e) => onDragEnterFamily(e, i)}
+                onDragEnd={onDragEnd}
+                onDragOver={e => e.preventDefault()}
+                style={{
+                  display: 'flex', gap: '1rem', alignItems: 'center', background: '#fdfdfc',
+                  border: '1px solid var(--gray-4)', padding: '0.75rem', borderRadius: '8px',
+                  cursor: 'grab'
+                }}
+              >
+                <div style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', color:'var(--gray-3)', width: '2rem'}}>
+                  <span style={{fontSize:'1.2rem', lineHeight: '1'}}>☰</span>
+                  <span style={{fontSize:'0.55rem', userSelect: 'none'}}>mover</span>
+                </div>
+                <img src={item.src} style={{width:'60px', height:'60px', objectFit:'cover', borderRadius:'4px', pointerEvents:'none'}} alt={`Family ${i}`}/>
+                <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                  <input type="text" placeholder="Título (ej: Cárdigan oversize)" value={item.titulo} onChange={e => updateFamilyMeta(item.id, 'titulo', e.target.value)} style={{padding:'0.5rem', border:'1px solid var(--gray-4)', borderRadius:'4px', outline: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.85rem'}} />
+                  <input type="text" placeholder="Descripción (ej: @usuario)" value={item.descripcion} onChange={e => updateFamilyMeta(item.id, 'descripcion', e.target.value)} style={{padding:'0.5rem', border:'1px solid var(--gray-4)', borderRadius:'4px', outline: 'none', fontFamily: 'var(--font-mono)', fontSize: '0.85rem'}} />
+                </div>
+                <button type="button" onClick={() => removeFamilyItem(item.id)} style={{background:'#c0392b', color:'white', border:'none', padding:'0.6rem 0.8rem', borderRadius:'4px', cursor:'pointer', fontSize: '0.8rem', alignSelf: 'stretch', display: 'flex', alignItems: 'center'}}>Eliminar</button>
+              </div>
+            ))}
+            {familyItems.length === 0 && (
+              <p style={{color: 'var(--gray-3)', fontStyle: 'italic', padding: '2rem'}}>No hay imágenes en la familia. Puedes agregar nuevas.</p>
+            )}
+          </div>
+
+          <label className="img-upload">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFamilyFiles}
+              style={{ display: 'none' }}
+            />
+            <div className="img-upload__inner">
+              <span>+ Agregar fotos para Looserfit Family</span>
+            </div>
+          </label>
+        </div>
+        
+        {familyMsg && <p className="admin-form__exito">{familyMsg}</p>}
+        
+        <div className="admin-form__actions">
+          <button type="submit" className="admin-btn-primary" disabled={familyLoading}>
+            {familyLoading ? 'Guardando...' : 'Guardar fotos Family'}
           </button>
         </div>
       </form>
