@@ -58,23 +58,22 @@ export default function Tienda() {
 
   // Efecto para cargar productos cuando cambian los filtros
   useEffect(() => {
-    // Si tenemos un catActiva en la URL pero aún no cargamos las categorías del backend,
-    // esperamos a que `categorias` esté poblado para encontrar el objeto correcto.
-    // Excepto si catActiva ya parece ser un ID (Mongo ObjectId tiene 24 chars hex)
-    const isId = /^[0-9a-fA-F]{24}$/.test(catActiva)
-    
-    if (catActiva && !isId && categorias.length === 0) {
-      return // Esperamos a que carguen las categorías para resolver el nombre
-    }
-
     setLoading(true)
     const filtros = { soloPublicados: true }
     if (orden === 'nuevodrop') filtros.esNuevoDrop = true
     
-    // Priorizamos el ID del objeto encontrado, si no el catActiva tal cual
+    // Identificar si catActiva ya es un ID
+    const isId = /^[0-9a-fA-F]{24}$/.test(catActiva)
+    
+    // Priorizamos el ID del objeto encontrado, si no el catActiva si parece un ID
     const categoriaId = activeCategoryObj?._id || (isId ? catActiva : null)
+    
     if (categoriaId) {
       filtros.categoria = categoriaId
+    } else if (catActiva && !activeCategoryObj && categorias.length > 0) {
+      // Si hay un filtro por nombre pero no se encontró nada tras cargar categorías,
+      // no mandamos filtro de categoría para no traer [] (o mandamos uno que no exista)
+      // Pero para ser simples, si hay catActiva pero no ID, no filtramos por categoría aún.
     }
 
     if (q) filtros.q = q
@@ -89,7 +88,7 @@ export default function Tienda() {
         setError(true)
         setLoading(false)
       })
-  }, [catActiva, q, orden, activeCategoryObj, categorias.length])
+  }, [catActiva, q, orden, activeCategoryObj])
 
   // Filtrar por talle (búsqueda ya viene del backend)
   const filtrados = productos.filter(p => {
