@@ -1,7 +1,7 @@
 const SIZES_BY_CATEGORY = {
   'Abrigos': ['Talle Único', 'S', 'M', 'L', 'XL', 'XXL', '3XL'],
   'Remeras': ['Talle Único', 'S', 'M', 'L', 'XL', 'XXL', '3XL'],
-  'Pantalones': ['Talle Único', '40ARG', '42ARG', '44ARG', '46ARG', '48ARG', '50ARG', '52ARG', '+54ARG'],
+  'Pantalones': ['Talle Único', '38ARG', '40ARG', '42ARG', '44ARG', '46ARG', '48ARG', '50ARG', '52ARG', '+54ARG'],
   'Calzado': [
     'Talle Único',
     '36/36.5', 

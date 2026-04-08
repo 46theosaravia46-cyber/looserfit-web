@@ -365,25 +365,36 @@ export default function AdminNuevoProducto() {
         {/* ── Talles ── */}
         <div className="admin-card">
           <h3 className="admin-card__title">Talles disponibles</h3>
-          <div className="talles-global-selector">
-            {Object.entries(SIZES_BY_CATEGORY).map(([catName, sizes]) => (
-              <div key={catName} className="talle-group">
-                <p className="talle-group__name">{catName}</p>
-                <div className="talles-selector">
-                  {sizes.map(t => (
-                    <button
-                      key={t}
-                      type="button"
-                      className={`talle-chip ${form.talles.includes(t) ? 'talle-chip--active' : ''}`}
-                      onClick={() => handleTalle(t)}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          {!form.categoria ? (
+            <p style={{color: '#666', fontSize: '0.9rem'}}>Seleccioná una categoría para ver los talles disponibles.</p>
+          ) : (
+            <div className="talles-global-selector">
+              {Object.entries(SIZES_BY_CATEGORY)
+                .filter(([catName]) => {
+                  // Filtramos para mostrar solo la categoría que coincida con el nombre de la categoría seleccionada
+                  if (!activeCatObj) return true; // Si no hay objeto de categoría, mostramos todo por seguridad
+                  const dbName = activeCatObj.name.toLowerCase();
+                  return dbName.includes(catName.toLowerCase());
+                })
+                .map(([catName, sizes]) => (
+                  <div key={catName} className="talle-group">
+                    <p className="talle-group__name">{catName}</p>
+                    <div className="talles-selector">
+                      {sizes.map(t => (
+                        <button
+                          key={t}
+                          type="button"
+                          className={`talle-chip ${form.talles.includes(t) ? 'talle-chip--active' : ''}`}
+                          onClick={() => handleTalle(t)}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
 
         {/* ── Imágenes ── */}
