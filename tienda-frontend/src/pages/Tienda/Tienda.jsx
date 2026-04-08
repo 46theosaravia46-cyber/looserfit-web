@@ -2,16 +2,9 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ProductCard from '../../components/ProductCard/ProductCard'
 import { getProductos, getCategories } from '../../services/api'
+import { SIZES_BY_CATEGORY } from '../../constants/productConstants'
 import './Tienda.css'
 
-const TALLES     = ['S', 'M', 'L', 'XL', 'XXL']
-const TALLAS_POR_CATEGORIA = {
-  Abrigos: ['S', 'M', 'L', 'XL', 'XXL'],
-  Remeras: ['S', 'M', 'L', 'XL', 'XXL'],
-  Pantalones: ['S', 'M', 'L', 'XL', 'XXL'],
-  Calzado: ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'],
-  Accesorios: []
-}
 const ORDEN_OPS  = [
   { label: 'Más nuevos',    value: 'nuevo' },
   { label: 'Menor precio',  value: 'asc'   },
@@ -29,6 +22,7 @@ export default function Tienda() {
   const [talleActivo,setTalleActivo]= useState('')
   const [orden,      setOrden]      = useState('nuevo')
   const q = searchParams.get('q') || ''
+  const esNuevoDrop = searchParams.get('esNuevoDrop') === 'true'
 
   // Cargar categorías desde el backend
   useEffect(() => {
@@ -37,31 +31,19 @@ export default function Tienda() {
       .catch(err => console.error('Error cargando categorías:', err))
   }, [])
 
-  const getStoredTallesMap = () => {
-    try {
-      return JSON.parse(localStorage.getItem('lf_talles_map')) || {}
-    } catch {
-      return {}
-    }
+  // Mapear nombre de categoría a clave de SIZES_BY_CATEGORY
+  const getCatKey = (fullName) => {
+    if (!fullName) return ''
+    const n = fullName.toLowerCase()
+    if (n.includes('pantalones') || n.includes('bottoms')) return 'Pantalones'
+    if (n.includes('remeras') || n.includes('tops')) return 'Remeras'
+    if (n.includes('abrigos') || n.includes('outerwear')) return 'Abrigos'
+    if (n.includes('calzado') || n.includes('footwear')) return 'Calzado'
+    if (n.includes('accesorios') || n.includes('accessories')) return 'Accesorios'
+    return ''
   }
 
-  const getTallesForCategoria = (categoriaName) => {
-    if (!categoriaName) return []
-    const lowerCat = categoriaName.toLowerCase()
-    const stored = getStoredTallesMap()
-    const storedKey = Object.keys(stored).find(key => 
-      key.toLowerCase() === lowerCat || 
-      key.toLowerCase().includes(lowerCat) || 
-      lowerCat.includes(key.toLowerCase())
-    )
-    if (storedKey) {
-      return stored[storedKey] || []
-    }
-    const defaultKey = Object.keys(TALLAS_POR_CATEGORIA).find(key => key.toLowerCase() === lowerCat)
-    return defaultKey ? TALLAS_POR_CATEGORIA[defaultKey] : []
-  }
-
-  // Encontrar el nombre de la categoría activa para los talles (soporta nombres cortos de URL)
+  // Encontrar el nombre de la categoría activa para los talles
   const activeCategoryObj = (categorias || []).find(c => {
     if (!catActiva) return false
     return (
@@ -70,11 +52,15 @@ export default function Tienda() {
       c.name.toLowerCase().includes(catActiva.toLowerCase())
     )
   })
-  const tallesPorCategoria = getTallesForCategoria(activeCategoryObj?.name)
+  const currentSizesKey = getCatKey(activeCategoryObj?.name)
+  const tallesPorCategoria = SIZES_BY_CATEGORY[currentSizesKey] || []
 
   useEffect(() => {
     setLoading(true)
-    const filtros = { soloPublicados: true }
+    const filtros = { 
+      soloPublicados: true,
+      esNuevoDrop: esNuevoDrop ? true : undefined
+    }
     if (activeCategoryObj) {
       filtros.categoria = activeCategoryObj._id
     } else if (catActiva) {
@@ -92,7 +78,7 @@ export default function Tienda() {
         setError(true)
         setLoading(false)
       })
-  }, [catActiva, q])
+  }, [catActiva, q, esNuevoDrop, activeCategoryObj])
 
   // Filtrar por talle (búsqueda ya viene del backend)
   const filtrados = productos.filter(p => {
@@ -111,16 +97,26 @@ export default function Tienda() {
     const nueva = catId === catActiva ? '' : catId
     setCatActiva(nueva)
     setTalleActivo('')
+    
+    const params = new URLSearchParams(searchParams)
     if (nueva) {
-      const newParams = { categoria: catName.toLowerCase() }
-      if (q) newParams.q = q
-      setSearchParams(newParams)
+      params.set('categoria', catName)
     } else {
-      const newParams = {}
-      if (q) newParams.q = q
-      setSearchParams(newParams)
+      params.delete('categoria')
     }
+    setSearchParams(params)
   }
+
+  const handleDropToggle = () => {
+    const params = new URLSearchParams(searchParams)
+    if (esNuevoDrop) {
+      params.delete('esNuevoDrop')
+    } else {
+      params.set('esNuevoDrop', 'true')
+    }
+    setSearchParams(params)
+  }
+
 
   return (
     <div className="tienda-page">
@@ -138,6 +134,17 @@ export default function Tienda() {
 
           {/* Sidebar filtros */}
           <aside className="tienda-sidebar">
+            <div className="filter-group">
+              <h4 className="filter-group__title">Lanzamientos</h4>
+              <button 
+                className={`filter-btn ${esNuevoDrop ? 'filter-btn--active' : ''}`}
+                onClick={handleDropToggle}
+                style={{ width: '100%', textAlign: 'left', marginBottom: '1.5rem' }}
+              >
+                🔥 NUEVO DROP
+              </button>
+            </div>
+
             <div className="filter-group">
               <h4 className="filter-group__title">Categorías</h4>
               <ul className="filter-list">

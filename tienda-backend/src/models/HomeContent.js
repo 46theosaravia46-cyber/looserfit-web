@@ -7,7 +7,7 @@ const familyImageSchema = new mongoose.Schema({
 }, { _id: false });
 
 const homeContentSchema = new mongoose.Schema({
-    heroImages: { type: [String], default: [] },
+    heroImages: [{ type: String }],
     familyImages: { type: [familyImageSchema], default: [] },
     comingSoon: {
         enabled: { type: Boolean, default: false },

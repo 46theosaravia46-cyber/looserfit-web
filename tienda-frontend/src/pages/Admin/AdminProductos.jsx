@@ -224,7 +224,24 @@ export default function AdminProductos() {
                         <img src={p.imagenes[0]} alt={p.nombre} className="table-thumb" />
                       )}
                       <div>
-                        <span className="table-nombre">{p.nombre}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span className="table-nombre">{p.nombre}</span>
+                          {p.esNuevoDrop && (
+                            <span 
+                              style={{ 
+                                background: 'var(--yellow)', 
+                                color: 'var(--black)', 
+                                fontSize: '0.6rem', 
+                                fontWeight: 'bold', 
+                                padding: '1px 4px', 
+                                borderRadius: '2px',
+                                textTransform: 'uppercase'
+                              }}
+                            >
+                              Drop
+                            </span>
+                          )}
+                        </div>
                         <span className="table-id">{p._id}</span>
                       </div>
                     </td>

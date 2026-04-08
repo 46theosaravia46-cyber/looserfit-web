@@ -136,8 +136,12 @@ export default function AdminHome() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(''); setMsg('')
-    if (heroItems.length !== 3) {
-      setError('El Hero debe tener exactamente 3 imágenes (izquierda, centro, derecha).')
+    if (heroItems.length === 0) {
+      setError('Debes subir al menos 1 imagen para el Hero.')
+      return;
+    }
+    if (heroItems.length > 3) {
+      setError('El Hero admite un máximo de 3 imágenes.')
       return;
     }
     setLoading(true)

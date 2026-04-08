@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { BASE_URL, getAuthHeaders, getCategories } from '../../services/api'
+import { SIZES_BY_CATEGORY } from '../../constants/productConstants'
 import './Admin.css'
-
-const INITIAL_CATEGORIAS = ['Outerwear / Abrigos','Tops / Remeras','Bottoms / Pantalones','Footwear / Calzado','Accessories / Accesorios']
-const INITIAL_TIPOS = ['baggy','oversize','slim','regular','chaqueta','no aplica']
-const INITIAL_TALLES = ['S', 'M', 'L', 'XL', 'XXL']
 
 export default function AdminNuevoProducto() {
   const { id }   = useParams()
@@ -26,29 +23,16 @@ export default function AdminNuevoProducto() {
     guiaTalles:  '',
   })
 
-  // Listas personalizables
-  const [customCategorias, setCustomCategorias] = useState(() => JSON.parse(localStorage.getItem('lf_categorias')) || INITIAL_CATEGORIAS)
-  const [tiposMap, setTiposMap] = useState(() => {
-    const map = JSON.parse(localStorage.getItem('lf_tipos_map')) || {};
-    if (Object.keys(map).length === 0) {
-      const def = JSON.parse(localStorage.getItem('lf_tipos')) || INITIAL_TIPOS;
-      INITIAL_CATEGORIAS.forEach(c => map[c] = def);
-    }
-    return map;
-  })
-  const [tallesMap, setTallesMap] = useState(() => {
-    const map = JSON.parse(localStorage.getItem('lf_talles_map')) || {};
-    if (Object.keys(map).length === 0) {
-      const def = JSON.parse(localStorage.getItem('lf_talles')) || INITIAL_TALLES;
-      INITIAL_CATEGORIAS.forEach(c => map[c] = def);
-    }
-    return map;
-  })
-  
   const [realCategories, setRealCategories] = useState([])
-  const [nuevaCat, setNuevaCat] = useState('')
-  const [nuevoTipo, setNuevoTipo] = useState('')
-  const [nuevoTalle, setNuevoTalle] = useState('')
+  const [imagenes,    setImagenes]    = useState([])   // archivos nuevos
+  const [previews,    setPreviews]    = useState([])   // URLs preview
+  const [imgExistentes, setImgExistentes] = useState([]) // URLs ya en DB
+  const [guiaTallesImg, setGuiaTallesImg] = useState(null) // Nuevo archivo guía
+  const [guiaTallesPreview, setGuiaTallesPreview] = useState('') // Preview guía
+  const [loading,     setLoading]     = useState(false)
+  const [loadingData, setLoadingData] = useState(esEdicion)
+  const [error,       setError]       = useState('')
+  const [exito,       setExito]       = useState(false)
 
   // Cargar categorías reales del backend
   useEffect(() => {
@@ -62,23 +46,20 @@ export default function AdminNuevoProducto() {
       .catch(err => console.error('Error al cargar categorías:', err))
   }, [esEdicion, form.categoria])
 
-  const currentTipos = tiposMap[form.categoria] || []
-  const currentTalles = tallesMap[form.categoria] || []
-
-  useEffect(() => {
-    if (!form.categoria && customCategorias.length > 0) {
-      setForm(p => ({ ...p, categoria: customCategorias[0] }))
-    }
-  }, [customCategorias, form.categoria])
-  const [imagenes,    setImagenes]    = useState([])   // archivos nuevos
-  const [previews,    setPreviews]    = useState([])   // URLs preview
-  const [imgExistentes, setImgExistentes] = useState([]) // URLs ya en DB
-  const [guiaTallesImg, setGuiaTallesImg] = useState(null) // Nuevo archivo guía
-  const [guiaTallesPreview, setGuiaTallesPreview] = useState('') // Preview guía
-  const [loading,     setLoading]     = useState(false)
-  const [loadingData, setLoadingData] = useState(esEdicion)
-  const [error,       setError]       = useState('')
-  const [exito,       setExito]       = useState(false)
+  // Obtener nombre de la categoría activa para los talles
+  const activeCatObj = realCategories.find(c => c._id === form.categoria)
+  const getCatKey = (fullName) => {
+    if (!fullName) return ''
+    const n = fullName.toLowerCase()
+    if (n.includes('pantalones') || n.includes('bottoms')) return 'Pantalones'
+    if (n.includes('remeras') || n.includes('tops')) return 'Remeras'
+    if (n.includes('abrigos') || n.includes('outerwear')) return 'Abrigos'
+    if (n.includes('calzado') || n.includes('footwear')) return 'Calzado'
+    if (n.includes('accesorios') || n.includes('accessories')) return 'Accesorios'
+    return ''
+  }
+  const currentSizesKey = getCatKey(activeCatObj?.name)
+  const availableSizes = SIZES_BY_CATEGORY[currentSizesKey] || []
 
   // Si es edición, cargar datos existentes
   useEffect(() => {
@@ -107,20 +88,10 @@ export default function AdminNuevoProducto() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setForm(prev => {
-      const next = {
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      }
-      // Si cambia categoría, ver si el tipo actual es válido en la nueva
-      if (name === 'categoria') {
-        const availableTipos = tiposMap[value] || []
-        if (!availableTipos.includes(next.tipo)) {
-          next.tipo = availableTipos[0] || ''
-        }
-      }
-      return next
-    })
+    setForm(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
   }
 
   const handleTalle = (t) => {
@@ -130,48 +101,6 @@ export default function AdminNuevoProducto() {
         ? prev.talles.filter(x => x !== t)
         : [...prev.talles, t]
     }))
-  }
-
-  const handleAddCustom = (setter, key, value, setVal) => {
-    if(!value.trim()) return
-    setter(prev => {
-      const next = prev.includes(value) ? prev : [...prev, value]
-      localStorage.setItem(key, JSON.stringify(next))
-      return next
-    })
-    setVal('')
-  }
-
-  const handleRemoveCustom = (setter, key, value) => {
-    const ok = window.confirm(`¿Seguro que querés borrar "${value}" de las opciones?`)
-    if(!ok) return
-    setter(prev => {
-      const next = prev.filter(v => v !== value)
-      localStorage.setItem(key, JSON.stringify(next))
-      return next
-    })
-  }
-
-  const handleAddMapItem = (setter, key, category, value, setVal) => {
-    if(!value.trim() || !category) return
-    setter(prev => {
-      const list = prev[category] || []
-      const nextList = list.includes(value) ? list : [...list, value]
-      const nextMap = { ...prev, [category]: nextList }
-      localStorage.setItem(key, JSON.stringify(nextMap))
-      return nextMap
-    })
-    setVal('')
-  }
-  const handleRemoveMapItem = (setter, key, category, value) => {
-    const ok = window.confirm(`¿Seguro que querés borrar "${value}" de "${category}"?`)
-    if(!ok) return
-    setter(prev => {
-      const list = prev[category] || []
-      const nextMap = { ...prev, [category]: list.filter(v => v !== value) }
-      localStorage.setItem(key, JSON.stringify(nextMap))
-      return nextMap
-    })
   }
 
   const compressImage = (file, maxWidth = 1000, quality = 0.7) => {
@@ -185,18 +114,14 @@ export default function AdminNuevoProducto() {
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-
-          // Redimensionar si es más ancho que maxWidth
           if (width > maxWidth) {
             height = (maxWidth / width) * height;
             width = maxWidth;
           }
-
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-
           canvas.toBlob((blob) => {
             const compressedFile = new File([blob], file.name, {
               type: 'image/jpeg',
@@ -211,7 +136,7 @@ export default function AdminNuevoProducto() {
 
   const handleImagenes = async (e) => {
     const files = Array.from(e.target.files)
-    setLoading(true) // Show loading during compression
+    setLoading(true)
     const compressedFiles = await Promise.all(files.map(f => compressImage(f)))
     setImagenes(prev => [...prev, ...compressedFiles])
     const urls = compressedFiles.map(f => URL.createObjectURL(f))
@@ -358,25 +283,23 @@ export default function AdminNuevoProducto() {
           <div className="admin-form-row" style={{marginTop: '1rem'}}>
             <div className="admin-field">
               <label>Categoría</label>
-              <div style={{display:'flex', gap:'0.5rem', marginBottom:'0.5rem'}}>
-                <select name="categoria" value={form.categoria} onChange={handleChange} style={{flex:1}}>
-                  {realCategories.map(c => (
-                    <option key={c._id} value={c._id}>{c.name}</option>
-                  ))}
-                  {/* Fallback por si hay categorías viejas en texto */}
-                  {form.categoria && !realCategories.find(c => c._id === form.categoria) && (
-                    <option value={form.categoria}>{form.categoria} (Antigua)</option>
-                  )}
-                </select>
-                <button type="button" className="admin-btn-secondary" style={{padding:'0 0.8rem'}} onClick={() => handleRemoveCustom(setCustomCategorias, 'lf_categorias', form.categoria)}>🗑</button>
-              </div>
-              <div style={{display:'flex', gap:'0.5rem'}}>
-                <input value={nuevaCat} onChange={e=>setNuevaCat(e.target.value)} placeholder="Nueva categoría" style={{flex:1}} />
-                <button type="button" className="admin-btn-secondary" style={{padding:'0 0.8rem'}} onClick={() => {
-                  handleAddCustom(setCustomCategorias, 'lf_categorias', nuevaCat, setNuevaCat)
-                  if(nuevaCat) setForm(p => ({...p, categoria: nuevaCat}))
-                }}>+</button>
-              </div>
+              <select name="categoria" value={form.categoria} onChange={handleChange} required>
+                <option value="">Seleccioná una categoría</option>
+                {realCategories.map(c => (
+                  <option key={c._id} value={c._id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="admin-field">
+              <label>Corte / Tipo</label>
+              <select name="tipo" value={form.tipo} onChange={handleChange}>
+                <option value="oversize">Oversize</option>
+                <option value="baggy">Baggy</option>
+                <option value="regular">Regular</option>
+                <option value="slim">Slim</option>
+                <option value="chaqueta">Chaqueta</option>
+                <option value="no aplica">No aplica</option>
+              </select>
             </div>
           </div>
           <div className="admin-field" style={{marginTop: '1rem'}}>
@@ -402,7 +325,6 @@ export default function AdminNuevoProducto() {
               />
               
               <div className="guia-img-upload">
-                {/* Preview de la guía actual (si es imagen) */}
                 {(guiaTallesPreview || (form.guiaTalles?.startsWith('http'))) && (
                   <div className="img-preview" style={{width: '200px', marginBottom: '0.5rem'}}>
                     <img src={guiaTallesPreview || form.guiaTalles} alt="Guía de talles" />
@@ -428,7 +350,7 @@ export default function AdminNuevoProducto() {
 
           <div className="admin-form-row" style={{marginTop: '1rem'}}>
             <div className="admin-field">
-              <label>Stock</label>
+              <label>Stock Total (Informativo)</label>
               <input
                 name="stock"
                 type="number"
@@ -436,24 +358,6 @@ export default function AdminNuevoProducto() {
                 onChange={handleChange}
                 min="0"
               />
-            </div>
-            <div className="admin-field">
-              <label>Tipo</label>
-              <div style={{display:'flex', gap:'0.5rem', marginBottom:'0.5rem'}}>
-                <select name="tipo" value={form.tipo} onChange={handleChange} style={{flex:1}}>
-                  {currentTipos.map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-                <button type="button" className="admin-btn-secondary" style={{padding:'0 0.8rem'}} onClick={() => handleRemoveMapItem(setTiposMap, 'lf_tipos_map', form.categoria, form.tipo)}>🗑</button>
-              </div>
-              <div style={{display:'flex', gap:'0.5rem'}}>
-                <input value={nuevoTipo} onChange={e=>setNuevoTipo(e.target.value)} placeholder="Nuevo tipo" style={{flex:1}} />
-                <button type="button" className="admin-btn-secondary" style={{padding:'0 0.8rem'}} onClick={() => {
-                  handleAddMapItem(setTiposMap, 'lf_tipos_map', form.categoria, nuevoTipo, setNuevoTipo)
-                  if(nuevoTipo) setForm(p => ({...p, tipo: nuevoTipo}))
-                }}>+</button>
-              </div>
             </div>
           </div>
           <div className="admin-checkboxes">
@@ -480,29 +384,25 @@ export default function AdminNuevoProducto() {
 
         {/* ── Talles ── */}
         <div className="admin-card">
-          <h3 className="admin-card__title">Talles disponibles ({form.categoria})</h3>
-          <div className="talles-selector" style={{marginBottom: '1rem'}}>
-            {currentTalles.map(t => (
-              <div key={t} style={{display:'inline-flex', flexDirection:'column', gap:'0.2rem'}}>
+          <h3 className="admin-card__title">Talles disponibles ({currentSizesKey || 'Seleccioná categoría'})</h3>
+          {availableSizes.length > 0 ? (
+            <div className="talles-selector">
+              {availableSizes.map(t => (
                 <button
+                  key={t}
                   type="button"
                   className={`talle-chip ${form.talles.includes(t) ? 'talle-chip--active' : ''}`}
                   onClick={() => handleTalle(t)}
                 >
                   {t}
                 </button>
-                <span 
-                  style={{fontSize:'0.6rem', color:'#c0392b', cursor:'pointer', textAlign:'center'}}
-                  onClick={() => handleRemoveMapItem(setTallesMap, 'lf_talles_map', form.categoria, t)}
-                  title="Eliminar talle de la lista"
-                >x</span>
-              </div>
-            ))}
-          </div>
-          <div style={{display:'flex', gap:'0.5rem', maxWidth: '250px'}}>
-            <input value={nuevoTalle} onChange={e=>setNuevoTalle(e.target.value)} placeholder="Nuevo talle" />
-            <button type="button" className="admin-btn-secondary" onClick={() => handleAddMapItem(setTallesMap, 'lf_talles_map', form.categoria, nuevoTalle.toUpperCase(), setNuevoTalle)}>+ Añadir</button>
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{color: '#666', fontSize: '0.9rem'}}>
+              {form.categoria ? 'Esta categoría no utiliza talles.' : 'Seleccioná una categoría para ver los talles.'}
+            </p>
+          )}
         </div>
 
         {/* ── Imágenes ── */}

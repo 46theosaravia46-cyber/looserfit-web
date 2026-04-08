@@ -7,7 +7,7 @@
 
 .hero__grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(var(--hero-cols, 3), 1fr);
   height: 100%;
 }
 
@@ -410,17 +410,22 @@
 
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
+  .hero {
+    height: auto;
+    min-height: 100dvh;
+  }
+
   .hero__grid {
     grid-template-columns: 1fr;
     height: auto;
   }
 
-  .hero__col:not(.hero__col--center) {
-    display: none;
+  .hero__col {
+    height: 70dvh;
   }
 
-  .hero__col--center {
-    height: 100dvh;
+  .hero__cta {
+    bottom: 2rem;
   }
 
   .product-grid {

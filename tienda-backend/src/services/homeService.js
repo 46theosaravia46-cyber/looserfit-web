@@ -56,11 +56,11 @@ const getHomeContent = async () => {
     return doc;
 };
 
-const updateHero = async (heroImages) => {
-    let doc = await HomeContent.findOne();
-    if (!doc) doc = await HomeContent.create({});
-    doc.heroImages = heroImages.slice(0, 3);
-    return await doc.save();
+const updateHero = async (images) => {
+    // Ya no obligamos a que sean 3
+    const home = await getHomeContent();
+    home.heroImages = images;
+    return await home.save();
 };
 
 const updateFamily = async (familyImages) => {

@@ -70,10 +70,11 @@ export default function Home() {
   useEffect(() => {
     getHomeContent()
       .then(data => {
-        if (Array.isArray(data.heroImages) && data.heroImages.length >= 3) {
-          setHeroImages(data.heroImages.slice(0, 3))
+        if (Array.isArray(data.heroImages)) {
+          setHeroImages(data.heroImages)
         }
         if (Array.isArray(data.familyImages) && data.familyImages.length > 0) {
+// ...
           // Soporte para formato antiguo (string[]) y nuevo ({src,titulo,descripcion}[])
           const normalized = data.familyImages.map(item =>
             typeof item === 'string'
@@ -116,55 +117,47 @@ export default function Home() {
 
       {/* ── HERO ── */}
       <section className="hero">
-        <div className="hero__grid">
-          <div className="hero__col">
-            {heroImages[0] && (
+        <div 
+          className="hero__grid" 
+          style={{ '--hero-cols': heroImages.length || 1 }}
+        >
+          {heroImages.map((img, i) => (
+            <div key={i} className="hero__col">
               <img 
-                src={heroImages[0]} 
-                alt="Look 1" 
-                className={`hero__img ${heroLoaded[0] ? 'is-loaded' : ''}`} 
-                onLoad={() => handleHeroLoad(0)}
+                src={img} 
+                alt={`Hero ${i}`} 
+                className={`hero__img ${heroLoaded[i] ? 'is-loaded' : ''}`}
+                onLoad={() => handleHeroLoad(i)}
               />
-            )}
-          </div>
-          <div className="hero__col hero__col--center">
-            {heroImages[1] && (
-              <img 
-                src={heroImages[1]} 
-                alt="Look 2" 
-                className={`hero__img hero__img--ver-todo ${heroLoaded[1] ? 'is-loaded' : ''}`} 
-                onLoad={() => handleHeroLoad(1)}
-              />
-            )}
-            <div className="hero__cta">
-              <p className="hero__label">Nueva temporada</p>
-              <h1 className="hero__title">Nueva<br />Colección</h1>
-              <Link to="/tienda" className="btn btn-filled" style={{ transition: 'all 0.3s' }}>
-                Ver Colección →
-              </Link>
+              <div className="hero__content">
+                <Link 
+                  to="/tienda?esNuevoDrop=true" 
+                  className="hero__btn"
+                >
+                  VER COLECCIÓN
+                </Link>
+              </div>
             </div>
-          </div>
-          <div className="hero__col">
-            {heroImages[2] && (
-              <img 
-                src={heroImages[2]} 
-                alt="Look 3" 
-                className={`hero__img ${heroLoaded[2] ? 'is-loaded' : ''}`} 
-                onLoad={() => handleHeroLoad(2)}
-              />
-            )}
-          </div>
+          ))}
+          {heroImages.length === 0 && (
+            <div className="hero__col">
+              <img src="https://via.placeholder.com/1920x1080?text=Looserfit+Vibe" alt="Placeholder" />
+              <div className="hero__content">
+                <Link to="/tienda" className="hero__btn">VER TIENDA</Link>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
       {/* ── TICKER ── */}
       <Ticker />
 
-      {/* ── NUEVOS INGRESOS ── */}
+      {/* ── STOCK COMPLETO ── */}
       <section className="section" id="nuevos">
         <div className="container">
           <div className="section-title">
-            <span>Nuevos Ingresos</span>
+            <span>STOCK COMPLETO</span>
             <Link to="/tienda">Ver todo</Link>
           </div>
 
