@@ -61,11 +61,9 @@ export default function AdminHome() {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
           canvas.toBlob((blob) => {
-            const compressedFile = new File([blob], file.name, {
-              type: 'image/jpeg',
-              lastModified: Date.now(),
-            });
-            resolve(compressedFile);
+            // Guardamos el blob y adjuntamos el nombre original para usarlo en FormData
+            blob.name = file.name;
+            resolve(blob);
           }, 'image/jpeg', quality);
         };
       };
@@ -102,6 +100,15 @@ export default function AdminHome() {
 
   const removeHeroItem = (id) => setHeroItems(p => p.filter(x => x.id !== id))
   const removeFamilyItem = (id) => setFamilyItems(p => p.filter(x => x.id !== id))
+
+  const moveHeroItem = (index, direction) => {
+    const newItems = [...heroItems]
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= newItems.length) return
+    const [moved] = newItems.splice(index, 1)
+    newItems.splice(targetIndex, 0, moved)
+    setHeroItems(newItems)
+  }
 
   const updateFamilyMeta = (id, field, value) => {
     setFamilyItems(p => p.map(x => x.id === id ? { ...x, [field]: value } : x))
@@ -359,9 +366,16 @@ export default function AdminHome() {
                 }}
               >
                 <img src={item.src} style={{width:'100%', aspectRatio:'3/4', objectFit:'cover', pointerEvents:'none'}} alt={`Hero ${i}`} />
-                <button type="button" onClick={() => removeHeroItem(item.id)} style={{position:'absolute', top:4, right:4, background:'#c0392b', color:'white', border:'none', borderRadius:'50%', width:'24px', height:'24px', cursor:'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>✕</button>
+                <button type="button" className="admin-img-action admin-img-action--remove" onClick={() => removeHeroItem(item.id)}>✕</button>
+                
+                {/* Botones de movimiento para Mobile */}
+                <div className="admin-img-moves">
+                  <button type="button" className="admin-img-move" onClick={() => moveHeroItem(i, -1)} disabled={i === 0}>←</button>
+                  <button type="button" className="admin-img-move" onClick={() => moveHeroItem(i, 1)} disabled={i === heroItems.length - 1}>→</button>
+                </div>
+
                 <div style={{position:'absolute', bottom:0, width:'100%', background:'rgba(0,0,0,0.6)', color:'white', textAlign:'center', fontSize:'0.7rem', padding:'4px 0'}}>
-                  {i === 0 ? '⇦ Izquierda' : i === 1 ? 'Centro' : 'Derecha ⇨'}
+                  {i === 0 ? 'Izq' : i === 1 ? 'Centro' : 'Der'}
                 </div>
               </div>
             ))}

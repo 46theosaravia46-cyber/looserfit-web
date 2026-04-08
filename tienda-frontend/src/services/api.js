@@ -194,7 +194,14 @@ export async function updateHeroImages(formData) {
     headers: { ...getAuthHeaders() },
     body: formData,
   })
-  if (!res.ok) throw new Error('No se pudo actualizar el hero')
+  if (!res.ok) {
+    let mensaje = 'No se pudo actualizar el hero'
+    try {
+      const data = await res.json()
+      mensaje = data.mensaje || data.error || mensaje
+    } catch { /* ignorar */ }
+    throw new Error(mensaje)
+  }
   return res.json()
 }
 
@@ -204,7 +211,14 @@ export async function updateFamilyImages(formData) {
     headers: { ...getAuthHeaders() },
     body: formData,
   })
-  if (!res.ok) throw new Error('No se pudo actualizar las fotos')
+  if (!res.ok) {
+    let mensaje = 'No se pudo actualizar las fotos family'
+    try {
+      const data = await res.json()
+      mensaje = data.mensaje || data.error || mensaje
+    } catch { /* ignorar */ }
+    throw new Error(mensaje)
+  }
   return res.json()
 }
 

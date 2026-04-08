@@ -711,6 +711,84 @@
     padding: 1rem;
     font-size: 0.75rem;
   }
+
+  /* Prevent auto-zoom on mobile inputs */
+  .admin-input, 
+  .admin-field input, 
+  .admin-field textarea, 
+  .admin-field select,
+  .admin-search {
+    font-size: 16px !important;
+  }
+}
+
+/* ── ESTILOS PARA ACCIONES DE IMAGEN (HERO/PRODUCTOS) ── */
+.admin-img-action {
+  position: absolute;
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.admin-img-action--remove {
+  top: 6px;
+  right: 6px;
+  background: #c0392b;
+  font-size: 0.8rem;
+}
+
+.admin-img-action:active {
+  transform: scale(0.9);
+}
+
+.admin-img-moves {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 6px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.admin-img-move {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--black);
+  border: 1px solid var(--gray-4);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+}
+
+.admin-img-move:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.admin-img-move:active {
+  background: var(--black);
+  color: var(--white);
 }
 
 @media (max-width: 480px) {

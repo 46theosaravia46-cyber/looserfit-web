@@ -123,11 +123,9 @@ export default function AdminNuevoProducto() {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
           canvas.toBlob((blob) => {
-            const compressedFile = new File([blob], file.name, {
-              type: 'image/jpeg',
-              lastModified: Date.now(),
-            });
-            resolve(compressedFile);
+            // Guardamos el blob y adjuntamos el nombre original para usarlo en FormData
+            blob.name = file.name;
+            resolve(blob);
           }, 'image/jpeg', quality);
         };
       };
@@ -328,7 +326,7 @@ export default function AdminNuevoProducto() {
                     <img src={guiaTallesPreview || form.guiaTalles} alt="Guía de talles" />
                     <button 
                       type="button" 
-                      className="img-preview__remove" 
+                      className="admin-img-action admin-img-action--remove" 
                       onClick={() => {
                         setGuiaTallesImg(null)
                         setGuiaTallesPreview('')
@@ -428,7 +426,7 @@ export default function AdminNuevoProducto() {
                   <span className="img-preview__tag">Guardada</span>
                   <button 
                     type="button" 
-                    className="img-preview__remove" 
+                    className="admin-img-action admin-img-action--remove" 
                     onClick={() => setImgExistentes(prev => prev.filter(x => x !== url))}
                     title="Eliminar de la galería"
                   >✕</button>
