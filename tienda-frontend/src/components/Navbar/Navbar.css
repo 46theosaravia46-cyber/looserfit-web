@@ -9,7 +9,17 @@
   height: 64px;
   display: flex;
   align-items: center;
-  transition: background 0.3s ease, border-bottom 0.3s ease, backdrop-filter 0.3s ease;
+  transition: background 0.3s ease, border-bottom 0.3s ease, backdrop-filter 0.3s ease, top 0.3s ease;
+}
+
+body.has-pending-alert .navbar {
+  top: 42px; /* Altura estimada de la barra amarilla */
+}
+
+@media (max-width: 600px) {
+  body.has-pending-alert .navbar {
+    top: 64px; /* Un poco mas en mobile si el texto wrappea */
+  }
 }
 
 /* Transparente sobre el hero */

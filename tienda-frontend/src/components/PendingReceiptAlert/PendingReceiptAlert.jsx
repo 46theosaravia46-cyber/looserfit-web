@@ -1,23 +1,30 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { getMisPedidos } from '../../services/api'
+import { getMisPedidos, getPedidos } from '../../services/api'
 import './PendingReceiptAlert.css'
 
 export default function PendingReceiptAlert() {
   const { user } = useAuth()
-  const [pendingOrders, setPendingOrders] = useState([])
+  const [pendingCount, setPendingCount] = useState(0)
   const location = useLocation()
+  const isAdmin = user?.role === 'admin'
 
   useEffect(() => {
     if (!user) return
 
     const checkPending = async () => {
       try {
-        const orders = await getMisPedidos()
+        let orders = []
+        if (isAdmin) {
+          orders = await getPedidos()
+        } else {
+          orders = await getMisPedidos()
+        }
+        
         // Filtrar pedidos que están "Pendiente" y NO tienen comprobante
         const missing = orders.filter(o => o.estado === 'Pendiente' && !o.comprobante)
-        setPendingOrders(missing)
+        setPendingCount(missing.length)
       } catch (err) {
         console.error('Error checking pending orders:', err)
       }
@@ -25,25 +32,30 @@ export default function PendingReceiptAlert() {
 
     checkPending()
     
-    // Volver a chequear si cambia la ruta (por si acaba de subir uno)
-    // o cada 30 segundos
     const interval = setInterval(checkPending, 30000)
     return () => clearInterval(interval)
-  }, [user, location.pathname])
+  }, [user, location.pathname, isAdmin])
 
-  if (!user || pendingOrders.length === 0) return null
+  useEffect(() => {
+    if (user && pendingCount > 0) {
+      document.body.classList.add('has-pending-alert')
+    } else {
+      document.body.classList.remove('has-pending-alert')
+    }
+  }, [user, pendingCount])
 
-  // Si ya estamos en una página de "mis pedidos" o subiendo uno, tal vez no queremos molestar tanto
-  // Pero el usuario pidió "Alerta obligatoria"
-  
+  if (!user || pendingCount === 0) return null
+
   return (
     <div className="pending-alert">
       <div className="container pending-alert__content">
         <p>
-          ⚠️ Tenés <strong>{pendingOrders.length}</strong> {pendingOrders.length === 1 ? 'pedido pendiente' : 'pedidos pendientes'} de comprobante.
+          ⚠️ {isAdmin 
+            ? `Hay ${pendingCount} ${pendingCount === 1 ? 'pedido' : 'pedidos'} sin comprobante.` 
+            : `Tenés ${pendingCount} ${pendingCount === 1 ? 'pedido pendiente' : 'pedidos pendientes'} de comprobante.`}
         </p>
-        <Link to="/mis-pedidos" className="pending-alert__link">
-          Subir comprobante ahora →
+        <Link to={isAdmin ? "/admin/pedidos" : "/mis-pedidos"} className="pending-alert__link">
+          {isAdmin ? "Ver pedidos →" : "Subir comprobante ahora →"}
         </Link>
       </div>
     </div>

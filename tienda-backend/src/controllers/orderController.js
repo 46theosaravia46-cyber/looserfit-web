@@ -2,24 +2,15 @@ const orderService = require('../services/orderService');
 
 const createOrder = async (req, res) => {
     try {
-        // Validar que venga el comprobante
-        if (!req.file) {
-            return res.status(400).json({ mensaje: 'El comprobante de pago es obligatorio' });
-        }
-
-        // En multipart/form-data, los objetos complejos a veces vienen como strings
-        let { productos, datosEnvio, total, tipoEnvio } = req.body;
+        const { productos, datosEnvio, total, tipoEnvio } = req.body;
         
-        if (typeof productos === 'string') productos = JSON.parse(productos);
-        if (typeof datosEnvio === 'string') datosEnvio = JSON.parse(datosEnvio);
-
         const orderData = { 
             productos, 
             datosEnvio, 
             total, 
             tipoEnvio, 
             usuario: req.user._id,
-            comprobante: req.file.path // Guardar URL de Cloudinary
+            comprobante: null // Ya no es obligatorio al crear
         };
 
         const order = await orderService.createOrder(orderData);
