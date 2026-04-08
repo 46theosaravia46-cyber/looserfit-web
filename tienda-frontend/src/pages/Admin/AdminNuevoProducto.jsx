@@ -48,19 +48,6 @@ export default function AdminNuevoProducto() {
 
   // Obtener nombre de la categoría activa para los talles
   const activeCatObj = realCategories.find(c => c._id === form.categoria)
-  const getCatKey = (fullName) => {
-    if (!fullName) return ''
-    const n = fullName.toLowerCase()
-    if (n.includes('pantalones') || n.includes('bottoms')) return 'Pantalones'
-    if (n.includes('remeras') || n.includes('tops')) return 'Remeras'
-    if (n.includes('abrigos') || n.includes('outerwear')) return 'Abrigos'
-    if (n.includes('calzado') || n.includes('footwear')) return 'Calzado'
-    if (n.includes('accesorios') || n.includes('accessories')) return 'Accesorios'
-    return ''
-  }
-  const currentSizesKey = getCatKey(activeCatObj?.name)
-  const availableSizes = SIZES_BY_CATEGORY[currentSizesKey] || []
-
   // Si es edición, cargar datos existentes
   useEffect(() => {
     if (!esEdicion) return
@@ -375,25 +362,26 @@ export default function AdminNuevoProducto() {
 
         {/* ── Talles ── */}
         <div className="admin-card">
-          <h3 className="admin-card__title">Talles disponibles ({currentSizesKey || 'Seleccioná categoría'})</h3>
-          {availableSizes.length > 0 ? (
-            <div className="talles-selector">
-              {availableSizes.map(t => (
-                <button
-                  key={t}
-                  type="button"
-                  className={`talle-chip ${form.talles.includes(t) ? 'talle-chip--active' : ''}`}
-                  onClick={() => handleTalle(t)}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p style={{color: '#666', fontSize: '0.9rem'}}>
-              {form.categoria ? 'Esta categoría no utiliza talles.' : 'Seleccioná una categoría para ver los talles.'}
-            </p>
-          )}
+          <h3 className="admin-card__title">Talles disponibles</h3>
+          <div className="talles-global-selector">
+            {Object.entries(SIZES_BY_CATEGORY).map(([catName, sizes]) => (
+              <div key={catName} className="talle-group">
+                <p className="talle-group__name">{catName}</p>
+                <div className="talles-selector">
+                  {sizes.map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      className={`talle-chip ${form.talles.includes(t) ? 'talle-chip--active' : ''}`}
+                      onClick={() => handleTalle(t)}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* ── Imágenes ── */}

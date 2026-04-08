@@ -3,27 +3,15 @@ const Category = require('../models/Category');
 const { SIZES_BY_CATEGORY } = require('../constants/products');
 
 const validateSizes = async (categoriaId, talles = []) => {
-    if (!categoriaId) return;
-    const cat = await Category.findById(categoriaId);
-    if (!cat) throw new Error('Categoría no encontrada');
-
-    // Mapear nombre de categoría a las claves de SIZES_BY_CATEGORY
-    // Los nombres pueden ser "Outerwear / Abrigos", etc.
-    const catName = cat.name.toLowerCase();
-    let key = '';
-    if (catName.includes('pantalones') || catName.includes('bottoms')) key = 'Pantalones';
-    else if (catName.includes('remeras') || catName.includes('tops')) key = 'Remeras';
-    else if (catName.includes('abrigos') || catName.includes('outerwear')) key = 'Abrigos';
-    else if (catName.includes('calzado') || catName.includes('footwear')) key = 'Calzado';
-    else if (catName.includes('accesorios') || catName.includes('accessories')) key = 'Accesorios';
-
-    const validSizes = SIZES_BY_CATEGORY[key] || [];
+    if (!categoriaId || talles.length === 0) return;
     
+    // Lista maestra de todos los talles permitidos en el sistema
+    const allValidSizes = [...new Set(Object.values(SIZES_BY_CATEGORY).flat())];
 
-    // Validar que cada talle enviado esté en la lista permitida
-    const invalid = talles.filter(t => !validSizes.includes(t));
+    // Validar que cada talle enviado esté en la lista maestra
+    const invalid = talles.filter(t => !allValidSizes.includes(t));
     if (invalid.length > 0) {
-        throw new Error(`Talles inválidos para la categoría ${key}: ${invalid.join(', ')}`);
+        throw new Error(`Talles no reconocidos por el sistema: ${invalid.join(', ')}. Por favor contactá a soporte si necesitás agregar uno nuevo.`);
     }
 };
 
