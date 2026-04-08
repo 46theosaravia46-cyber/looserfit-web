@@ -153,6 +153,26 @@ export default function AdminHome() {
   }
   const onDragEnd = () => setDraggedItemIndex(null)
 
+  const moveFeaturedItem = (index, direction) => {
+    const newIds = [...featuredIds]
+    const targetIdx = index + direction
+    if (targetIdx < 0 || targetIdx >= newIds.length) return
+    const [moved] = newIds.splice(index, 1)
+    newIds.splice(targetIdx, 0, moved)
+    setFeaturedIds(newIds)
+  }
+
+  const onDragEnterFeatured = (e, targetIndex) => {
+    e.preventDefault()
+    if (draggedItemIndex === null || draggedItemIndex === targetIndex) return
+    const newIds = [...featuredIds]
+    const draggedId = newIds[draggedItemIndex]
+    newIds.splice(draggedItemIndex, 1)
+    newIds.splice(targetIndex, 0, draggedId)
+    setDraggedItemIndex(targetIndex)
+    setFeaturedIds(newIds)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(''); setMsg('')
@@ -289,7 +309,10 @@ export default function AdminHome() {
   const toggleProduct = (id) => {
     setFeaturedIds(prev => {
       if (prev.includes(id)) return prev.filter(x => x !== id)
-      if (prev.length >= 4) return prev
+      if (prev.length >= 4) {
+        setError('Solo podés seleccionar un máximo de 4 productos destacados.')
+        return prev
+      }
       return [...prev, id]
     })
   }
@@ -526,6 +549,52 @@ export default function AdminHome() {
             Seleccioná los 4 productos que aparecerán en la sección "Stock Completo" del Home. ({featuredIds.length}/4 seleccionados)
           </p>
 
+          <div style={{ marginBottom: '2rem' }}>
+            <p style={{ fontSize: '0.9rem', marginBottom: '0.75rem', fontWeight: '600' }}>Orden actual (Stock Completo):</p>
+            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px' }}>
+              {featuredIds.map((id, i) => {
+                const p = allProducts.find(prod => prod._id === id)
+                if (!p) return null
+                return (
+                  <div 
+                    key={id}
+                    draggable
+                    onDragStart={() => onDragStart(i)}
+                    onDragEnter={(e) => onDragEnterFeatured(e, i)}
+                    onDragEnd={onDragEnd}
+                    onDragOver={e => e.preventDefault()}
+                    style={{ 
+                      width: '100px', flexShrink: 0, position: 'relative', 
+                      background: 'white', border: '1px solid var(--admin-primary)',
+                      borderRadius: '8px', overflow: 'hidden', cursor: 'grab'
+                    }}
+                  >
+                    <img src={p.imagenes[0]} style={{ width: '100%', height: '80px', objectFit: 'cover' }} alt="" />
+                    <div style={{ padding: '4px', fontSize: '0.7rem', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {p.nombre}
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => toggleProduct(id)}
+                      style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px', cursor: 'pointer' }}
+                    >✕</button>
+                    
+                    <div className="admin-img-moves" style={{ padding: '2px', background: '#eee' }}>
+                      <button type="button" className="admin-img-move" style={{ padding: '0 4px', fontSize: '10px' }} onClick={() => moveFeaturedItem(i, -1)} disabled={i === 0}>←</button>
+                      <button type="button" className="admin-img-move" style={{ padding: '0 4px', fontSize: '10px' }} onClick={() => moveFeaturedItem(i, 1)} disabled={i === featuredIds.length - 1}>→</button>
+                    </div>
+                  </div>
+                )
+              })}
+              {featuredIds.length === 0 && (
+                <div style={{ padding: '1.5rem', border: '2px dashed var(--gray-4)', borderRadius: '8px', color: 'var(--gray-3)', width: '100%', textAlign: 'center' }}>
+                  No hay productos seleccionados. Buscá abajo.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <p style={{ fontSize: '0.9rem', marginBottom: '0.75rem', fontWeight: '600' }}>Selector de productos:</p>
           <input 
             type="text" 
             placeholder="Buscar producto por nombre o categoría..." 
@@ -536,7 +605,7 @@ export default function AdminHome() {
           />
 
           <div style={{ 
-            maxHeight: '400px', 
+            maxHeight: '300px', 
             overflowY: 'auto', 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
@@ -553,23 +622,23 @@ export default function AdminHome() {
                   key={p._id} 
                   onClick={() => toggleProduct(p._id)}
                   style={{
-                    padding: '10px',
+                    padding: '8px',
                     border: isSelected ? '2px solid var(--admin-primary)' : '1px solid var(--gray-4)',
                     borderRadius: '6px',
                     cursor: 'pointer',
                     background: isSelected ? '#f0f7ff' : 'white',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
+                    gap: '8px',
                     opacity: !isSelected && featuredIds.length >= 4 ? 0.5 : 1
                   }}
                 >
-                  <img src={p.imagenes[0]} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} alt="" />
+                  <img src={p.imagenes[0]} style={{ width: '30px', height: '30px', objectFit: 'cover', borderRadius: '4px' }} alt="" />
                   <div style={{ flex: 1, overflow: 'hidden' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.nombre}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-3)' }}>{p.categoria?.nombre}</div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.nombre}</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--gray-3)' }}>{p.categoria?.nombre}</div>
                   </div>
-                  {isSelected && <span style={{ color: 'var(--admin-primary)', fontWeight: 'bold' }}>✓</span>}
+                  {isSelected && <span style={{ color: 'var(--admin-primary)', fontWeight: 'bold', fontSize: '0.8rem' }}>✓</span>}
                 </div>
               )
             })}

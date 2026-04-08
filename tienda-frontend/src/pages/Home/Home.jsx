@@ -50,11 +50,11 @@ export default function Home() {
   }
 
   useEffect(() => {
-    // Cargar productos (solo nuevos drops) como respaldo
-    getProductos({ soloPublicados: true, esNuevoDrop: true })
+    // Cargar productos de stock general como respaldo
+    getProductos({ soloPublicados: true })
       .then(data => {
-        setProductos(prev => prev.length === 0 ? data.slice(0, 4) : prev)
-        setLoading(prev => prev ? false : prev)
+        setProductos(prev => (prev.length === 0) ? data.slice(0, 4) : prev)
+        setLoading(prev => (prev ? false : prev))
       })
       .catch(err => {
         setError(err.message)
