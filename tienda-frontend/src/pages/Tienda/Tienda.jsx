@@ -7,6 +7,7 @@ import './Tienda.css'
 
 const ORDEN_OPS  = [
   { label: 'Más nuevos',    value: 'nuevo' },
+  { label: 'Nuevo Drop',    value: 'nuevodrop' },
   { label: 'Menor precio',  value: 'asc'   },
   { label: 'Mayor precio',  value: 'desc'  },
 ]
@@ -20,9 +21,11 @@ export default function Tienda() {
   const [error,      setError]      = useState(null)
   const [catActiva,  setCatActiva]  = useState(searchParams.get('categoria') || '')
   const [talleActivo,setTalleActivo]= useState('')
-  const [orden,      setOrden]      = useState('nuevo')
+  const [orden,      setOrden]      = useState(() => {
+    const o = searchParams.get('ordenar')
+    return o === 'nuevodrop' ? 'nuevodrop' : 'nuevo'
+  })
   const q = searchParams.get('q') || ''
-  const esNuevoDrop = searchParams.get('esNuevoDrop') === 'true'
 
   // Cargar categorías desde el backend
   useEffect(() => {
@@ -57,10 +60,8 @@ export default function Tienda() {
 
   useEffect(() => {
     setLoading(true)
-    const filtros = { 
-      soloPublicados: true,
-      esNuevoDrop: esNuevoDrop ? true : undefined
-    }
+    const filtros = { soloPublicados: true }
+    if (orden === 'nuevodrop') filtros.esNuevoDrop = true
     if (activeCategoryObj) {
       filtros.categoria = activeCategoryObj._id
     } else if (catActiva) {
@@ -78,7 +79,7 @@ export default function Tienda() {
         setError(true)
         setLoading(false)
       })
-  }, [catActiva, q, esNuevoDrop, activeCategoryObj])
+  }, [catActiva, q, orden, activeCategoryObj])
 
   // Filtrar por talle (búsqueda ya viene del backend)
   const filtrados = productos.filter(p => {
@@ -88,32 +89,20 @@ export default function Tienda() {
 
   // Ordenar
   const ordenados = [...filtrados].sort((a, b) => {
-    if (orden === 'asc')  return a.precio - b.precio
-    if (orden === 'desc') return b.precio - a.precio
+    if (orden === 'asc')       return a.precio - b.precio
+    if (orden === 'desc')      return b.precio - a.precio
+    if (orden === 'nuevodrop') return new Date(b.createdAt) - new Date(a.createdAt)
     return new Date(b.createdAt) - new Date(a.createdAt)
   })
 
-  const handleCategoria = (catId, catName) => {
+  const handleCategoria = (catId) => {
     const nueva = catId === catActiva ? '' : catId
     setCatActiva(nueva)
     setTalleActivo('')
     
-    const params = new URLSearchParams(searchParams)
-    if (nueva) {
-      params.set('categoria', catName)
-    } else {
-      params.delete('categoria')
-    }
-    setSearchParams(params)
-  }
-
-  const handleDropToggle = () => {
-    const params = new URLSearchParams(searchParams)
-    if (esNuevoDrop) {
-      params.delete('esNuevoDrop')
-    } else {
-      params.set('esNuevoDrop', 'true')
-    }
+    const params = new URLSearchParams()
+    if (nueva) params.set('categoria', nueva)
+    if (q)     params.set('q', q)
     setSearchParams(params)
   }
 
@@ -135,24 +124,13 @@ export default function Tienda() {
           {/* Sidebar filtros */}
           <aside className="tienda-sidebar">
             <div className="filter-group">
-              <h4 className="filter-group__title">Lanzamientos</h4>
-              <button 
-                className={`filter-btn ${esNuevoDrop ? 'filter-btn--active' : ''}`}
-                onClick={handleDropToggle}
-                style={{ width: '100%', textAlign: 'left', marginBottom: '1.5rem' }}
-              >
-                🔥 NUEVO DROP
-              </button>
-            </div>
-
-            <div className="filter-group">
               <h4 className="filter-group__title">Categorías</h4>
               <ul className="filter-list">
                 {categorias.map(cat => (
                   <li key={cat._id}>
                     <button
-                      className={`filter-btn ${catActiva === cat._id || catActiva.toLowerCase() === cat.name.toLowerCase() ? 'filter-btn--active' : ''}`}
-                      onClick={() => handleCategoria(cat._id, cat.name)}
+                      className={`filter-btn ${catActiva === cat._id ? 'filter-btn--active' : ''}`}
+                      onClick={() => handleCategoria(cat._id)}
                     >
                       {cat.name}
                     </button>
@@ -178,12 +156,13 @@ export default function Tienda() {
               </div>
             )}
 
-            {(catActiva || talleActivo || q) && (
+            {(catActiva || talleActivo || q || orden === 'nuevodrop') && (
               <button
                 className="filter-reset"
                 onClick={() => {
                   setCatActiva('')
                   setTalleActivo('')
+                  setOrden('nuevo')
                   setSearchParams({})
                 }}
               >

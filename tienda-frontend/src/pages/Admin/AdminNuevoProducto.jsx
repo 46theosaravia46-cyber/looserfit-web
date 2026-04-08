@@ -161,14 +161,6 @@ export default function AdminNuevoProducto() {
     setError('')
 
     try {
-      // --- DIAGNÓSTICO DE ÚLTIMA INSTANCIA ---
-      if (esEdicion) {
-        const confirmed = window.confirm(`MODO v1.0.7 - DIAGNÓSTICO:\n\n- Vamos a MANTENER (fotos viejas): ${imgExistentes.length}\n- Vamos a SUMAR (fotos nuevas): ${imagenes.length}\n\n¿Es correcto? Si dice 0 anteriores y hay fotos en pantalla, ¡CANCELÁ!`)
-        if (!confirmed) {
-          setLoading(false)
-          return
-        }
-      }
 
       if (!form.categoria) {
         throw new Error('La categoría es obligatoria.');
@@ -209,7 +201,6 @@ export default function AdminNuevoProducto() {
       if (!res.ok) {
         throw new Error(resData.mensaje || resData.error || 'Error al guardar producto')
       }
-      alert(`${resData.mensaje}\n\nDatos recibidos por el servidor: ${resData.bodyKeys?.join(', ')}`)
       setExito(true)
       setTimeout(() => navigate('/admin/productos'), 1500)
     } catch (err) {

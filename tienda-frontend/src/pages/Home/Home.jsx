@@ -121,29 +121,37 @@ export default function Home() {
           className="hero__grid" 
           style={{ '--hero-cols': heroImages.length || 1 }}
         >
-          {heroImages.map((img, i) => (
-            <div key={i} className="hero__col">
-              <img 
-                src={img} 
-                alt={`Hero ${i}`} 
-                className={`hero__img ${heroLoaded[i] ? 'is-loaded' : ''}`}
-                onLoad={() => handleHeroLoad(i)}
-              />
-              <div className="hero__content">
-                <Link 
-                  to="/tienda?esNuevoDrop=true" 
-                  className="hero__btn"
-                >
-                  VER COLECCIÓN
-                </Link>
+          {heroImages.map((img, i) => {
+            const centerIdx = Math.floor((heroImages.length - 1) / 2)
+            const isCenter = i === centerIdx
+            return (
+              <div key={i} className={`hero__col${isCenter ? ' hero__col--center' : ''}`}>
+                <img 
+                  src={img} 
+                  alt={`Hero ${i}`} 
+                  className={`hero__img${isCenter ? ' hero__img--ver-todo' : ''} ${heroLoaded[i] ? 'is-loaded' : ''}`}
+                  onLoad={() => handleHeroLoad(i)}
+                />
+                {isCenter && (
+                  <div className="hero__cta">
+                    <p className="hero__label">Nueva temporada</p>
+                    <h1 className="hero__title">Nueva<br />Colección</h1>
+                    <Link to="/tienda?ordenar=nuevodrop" className="btn btn-filled" style={{ transition: 'all 0.3s' }}>
+                      Ver Colección →
+                    </Link>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            )
+          })}
           {heroImages.length === 0 && (
-            <div className="hero__col">
-              <img src="https://via.placeholder.com/1920x1080?text=Looserfit+Vibe" alt="Placeholder" />
-              <div className="hero__content">
-                <Link to="/tienda" className="hero__btn">VER TIENDA</Link>
+            <div className="hero__col hero__col--center">
+              <div className="hero__cta">
+                <p className="hero__label">Nueva temporada</p>
+                <h1 className="hero__title">Nueva<br />Colección</h1>
+                <Link to="/tienda" className="btn btn-filled" style={{ transition: 'all 0.3s' }}>
+                  Ver Colección →
+                </Link>
               </div>
             </div>
           )}

@@ -61,11 +61,22 @@ const createProduct = async (productData) => {
 };
 
 const updateProduct = async (id, updateData) => {
-    if (updateData.categoria || updateData.talles) {
-        // Para update, necesitamos ambos o usar los existentes si faltan
+    // Procesar el array de talles que puede venir como string o array del FormData
+    if (updateData.talles !== undefined) {
+        if (typeof updateData.talles === 'string') {
+            try { updateData.talles = JSON.parse(updateData.talles); } 
+            catch { updateData.talles = [updateData.talles].filter(Boolean); }
+        }
+        if (!Array.isArray(updateData.talles)) {
+            updateData.talles = [updateData.talles].filter(Boolean);
+        }
+    }
+
+    // Solo validar talles si se está cambiando categoría o talles explícitamente
+    if (updateData.categoria !== undefined || updateData.talles !== undefined) {
         const existing = await Product.findById(id);
-        const catId = updateData.categoria || existing.categoria;
-        const talles = updateData.talles || existing.talles;
+        const catId  = updateData.categoria  || existing.categoria;
+        const talles = updateData.talles !== undefined ? updateData.talles : (existing.talles || []);
         await validateSizes(catId, talles);
     }
     return await Product.findByIdAndUpdate(id, updateData, { new: true }).populate('categoria');
