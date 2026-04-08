@@ -8,7 +8,6 @@ const validateSizes = async (categoriaId, talles = []) => {
     const cat = await Category.findById(categoriaId);
     if (!cat) throw new Error('Categoría no encontrada');
 
-    // Mapeo de nombre de DB a clave de constante
     const DB_CAT_TO_KEY = {
         'Outerwear / Abrigos': 'Abrigos',
         'Tops / Remeras': 'Remeras',
@@ -22,18 +21,17 @@ const validateSizes = async (categoriaId, talles = []) => {
 
     if (validSizesForCat.length > 0) {
         const lowerValid = validSizesForCat.map(s => s.toLowerCase().trim());
+        
+        // El usuario pide "Ignorar cualquier otro texto externo". 
+        // Si hay talles que no coinciden, los filtramos o avisamos.
+        // Pero para ser robustos (producción), si el admin los mandó, validamos.
         const invalid = talles.filter(t => !lowerValid.includes(String(t).toLowerCase().trim()));
         
         if (invalid.length > 0) {
-            throw new Error(`Los siguientes talles no son válidos para la categoría ${catKey}: ${invalid.join(', ')}.`);
-        }
-    } else {
-        // Fallback: Lista maestra de todos los talles si la categoría no tiene lista específica
-        const allValidSizes = [...new Set(Object.values(SIZES_BY_CATEGORY).flat())].map(s => s.toLowerCase().trim());
-        const invalid = talles.filter(t => !allValidSizes.includes(String(t).toLowerCase().trim()));
-        
-        if (invalid.length > 0) {
-            throw new Error(`Talles no reconocidos: ${invalid.join(', ')}.`);
+            // Si detectamos talles "sucios" (como 5US / 38ARG), y estamos en Calzado, 
+            // podríamos intentar extraer la parte útil, pero el usuario pidió separar campos.
+            // Por ahora, lanzamos error claro para que el admin lo limpie si es basura.
+            throw new Error(`Los siguientes valores no son talles válidos para ${catKey}: ${invalid.join(', ')}. Por favor eliminá el texto extra.`);
         }
     }
 };

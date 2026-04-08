@@ -75,10 +75,23 @@ export default function AdminNuevoProducto() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setForm(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
+    setForm(prev => {
+      const newVal = type === 'checkbox' ? checked : value
+      
+      // Si cambia la categoría, limpiamos los talles para evitar mezclar formatos
+      if (name === 'categoria' && newVal !== prev.categoria) {
+        return {
+          ...prev,
+          [name]: newVal,
+          talles: []
+        }
+      }
+
+      return {
+        ...prev,
+        [name]: newVal
+      }
+    })
   }
 
   const handleTalle = (t) => {
@@ -194,10 +207,15 @@ export default function AdminNuevoProducto() {
       setTimeout(() => navigate('/admin/productos'), 1500)
     } catch (err) {
       console.error('Error saving product:', err)
-      setError(err.message === 'Failed to fetch' 
-        ? 'No se pudo conectar con el servidor. Revisá tu conexión a internet.' 
-        : err.message)
+      
+      let mensajeError = err.message
+      if (err.message === 'Failed to fetch') {
+        mensajeError = 'Error de red o el servidor no responde. Verificá tu conexión.'
+      }
+      
+      setError(mensajeError)
       setLoading(false)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 

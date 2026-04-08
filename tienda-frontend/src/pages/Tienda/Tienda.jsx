@@ -46,27 +46,37 @@ export default function Tienda() {
     return ''
   }
 
-  // Encontrar el nombre de la categoría activa para los talles
-  const activeCategoryObj = (categorias || []).find(c => {
-    if (!catActiva) return false
-    return (
-      c._id === catActiva || 
-      c.name.toLowerCase() === catActiva.toLowerCase() ||
-      c.name.toLowerCase().includes(catActiva.toLowerCase())
-    )
-  })
+  // Encontrar el objeto de categoría basado en el ID o nombre de catActiva
+  const activeCategoryObj = categorias.find(c => 
+    c._id === catActiva || 
+    c.name.toLowerCase() === catActiva.toLowerCase() ||
+    c.name.toLowerCase().includes(catActiva.toLowerCase())
+  )
+
   const currentSizesKey = getCatKey(activeCategoryObj?.name)
   const tallesPorCategoria = SIZES_BY_CATEGORY[currentSizesKey] || []
 
+  // Efecto para cargar productos cuando cambian los filtros
   useEffect(() => {
+    // Si tenemos un catActiva en la URL pero aún no cargamos las categorías del backend,
+    // esperamos a que `categorias` esté poblado para encontrar el objeto correcto.
+    // Excepto si catActiva ya parece ser un ID (Mongo ObjectId tiene 24 chars hex)
+    const isId = /^[0-9a-fA-F]{24}$/.test(catActiva)
+    
+    if (catActiva && !isId && categorias.length === 0) {
+      return // Esperamos a que carguen las categorías para resolver el nombre
+    }
+
     setLoading(true)
     const filtros = { soloPublicados: true }
     if (orden === 'nuevodrop') filtros.esNuevoDrop = true
-    if (activeCategoryObj) {
-      filtros.categoria = activeCategoryObj._id
-    } else if (catActiva) {
-      filtros.categoria = catActiva
+    
+    // Priorizamos el ID del objeto encontrado, si no el catActiva tal cual
+    const categoriaId = activeCategoryObj?._id || (isId ? catActiva : null)
+    if (categoriaId) {
+      filtros.categoria = categoriaId
     }
+
     if (q) filtros.q = q
 
     getProductos(filtros)
@@ -79,7 +89,7 @@ export default function Tienda() {
         setError(true)
         setLoading(false)
       })
-  }, [catActiva, q, orden, activeCategoryObj])
+  }, [catActiva, q, orden, activeCategoryObj, categorias.length])
 
   // Filtrar por talle (búsqueda ya viene del backend)
   const filtrados = productos.filter(p => {
