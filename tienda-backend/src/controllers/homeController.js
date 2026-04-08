@@ -67,9 +67,23 @@ const updateSettings = async (req, res) => {
     }
 };
 
+const updateFeatured = async (req, res) => {
+    try {
+        const { productIds } = req.body;
+        if (!Array.isArray(productIds)) {
+            return res.status(400).json({ mensaje: 'productIds debe ser un array' });
+        }
+        const doc = await homeService.updateFeatured(productIds);
+        res.json({ mensaje: 'Productos destacados actualizados', home: doc });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar destacados', error: error.message });
+    }
+};
+
 module.exports = {
     getHome,
     updateHero,
     updateFamily,
-    updateSettings
+    updateSettings,
+    updateFeatured
 };

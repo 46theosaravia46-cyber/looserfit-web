@@ -252,6 +252,26 @@ export async function updateHomeSettings(settings) {
   return res.json()
 }
 
+export async function updateFeaturedProducts(productIds) {
+  const res = await fetch(`${BASE_URL}/home/featured`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify({ productIds })
+  })
+  if (!res.ok) {
+    let mensaje = 'No se pudo actualizar los productos destacados'
+    try {
+      const data = await res.json()
+      mensaje = data.mensaje || data.error || mensaje
+    } catch { /* ignorar */ }
+    throw new Error(mensaje)
+  }
+  return res.json()
+}
+
 // --- AUTH ---
 export async function login(email, password) {
   const res = await fetch(`${BASE_URL}/auth/login`, {

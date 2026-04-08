@@ -13,6 +13,9 @@ router.put('/hero', protect, adminOnly, upload.array('newHeroImages', 10), homeC
 // --- UPDATE FAMILY (Solo Admin) ---
 router.put('/family', protect, adminOnly, upload.array('newFamilyImages', 20), homeController.updateFamily);
 
+// --- UPDATE FEATURED (Solo Admin) ---
+router.put('/featured', protect, adminOnly, homeController.updateFeatured);
+
 // --- UPDATE SETTINGS (Solo Admin) ---
 router.put('/settings', protect, adminOnly, homeController.updateSettings);
 

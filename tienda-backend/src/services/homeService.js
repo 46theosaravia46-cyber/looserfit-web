@@ -41,7 +41,7 @@ const sendLaunchNotification = async (message, subtitle, emailMessage) => {
 }
 
 const getHomeContent = async () => {
-    let doc = await HomeContent.findOne();
+    let doc = await HomeContent.findOne().populate('featuredProducts');
     if (!doc) {
         doc = await HomeContent.create({
             heroImages: ['/hero-1.jpg', '/hero-ver-todo.jpg', '/hero-3.jpg']
@@ -93,9 +93,18 @@ const updateSettings = async (comingSoon) => {
     return await doc.save();
 };
 
+const updateFeatured = async (productIds) => {
+    let doc = await HomeContent.findOne();
+    if (!doc) doc = await HomeContent.create({});
+    doc.featuredProducts = productIds;
+    await doc.save();
+    return await doc.populate('featuredProducts');
+};
+
 module.exports = {
     getHomeContent,
     updateHero,
     updateFamily,
-    updateSettings
+    updateSettings,
+    updateFeatured
 };

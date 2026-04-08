@@ -50,11 +50,11 @@ export default function Home() {
   }
 
   useEffect(() => {
-    // Cargar productos (solo nuevos drops)
+    // Cargar productos (solo nuevos drops) como respaldo
     getProductos({ soloPublicados: true, esNuevoDrop: true })
       .then(data => {
-        setProductos(data.slice(0, 4))
-        setLoading(false)
+        setProductos(prev => prev.length === 0 ? data.slice(0, 4) : prev)
+        setLoading(prev => prev ? false : prev)
       })
       .catch(err => {
         setError(err.message)
@@ -72,6 +72,10 @@ export default function Home() {
       .then(data => {
         if (Array.isArray(data.heroImages)) {
           setHeroImages(data.heroImages)
+        }
+        if (Array.isArray(data.featuredProducts) && data.featuredProducts.length > 0) {
+          setProductos(data.featuredProducts.slice(0, 4))
+          setLoading(false)
         }
         if (Array.isArray(data.familyImages) && data.familyImages.length > 0) {
 // ...

@@ -15,7 +15,8 @@ const homeContentSchema = new mongoose.Schema({
         message: { type: String, default: 'Web prendida próximamente en:' },
         subtitle: { type: String, default: '' },
         emailMessage: { type: String, default: '' }
-    }
+    },
+    featuredProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('HomeContent', homeContentSchema);

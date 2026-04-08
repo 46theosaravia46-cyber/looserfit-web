@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getHomeContent, updateHeroImages, updateFamilyImages, updateHomeSettings } from '../../services/api'
+import { getHomeContent, updateHeroImages, updateFamilyImages, updateHomeSettings, getProductos, updateFeaturedProducts } from '../../services/api'
 import './Admin.css'
 
 export default function AdminHome() {
@@ -17,6 +17,12 @@ export default function AdminHome() {
   const [comingSoonMessage, setComingSoonMessage] = useState('Web prendida próximamente en:')
   const [comingSoonSubtitle, setComingSoonSubtitle] = useState('')
   const [comingSoonEmailMessage, setComingSoonEmailMessage] = useState('')
+  
+  const [allProducts, setAllProducts] = useState([])
+  const [featuredIds, setFeaturedIds] = useState([])
+  const [featuredLoading, setFeaturedLoading] = useState(false)
+  const [featuredMsg, setFeaturedMsg] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     getHomeContent()
@@ -37,8 +43,15 @@ export default function AdminHome() {
           const remainingMinutes = Math.max(Math.ceil((new Date(comingSoon.launchDate).getTime() - Date.now()) / 60000), 0)
           setComingSoonDurationMinutes(remainingMinutes.toString())
         }
+        if (data.featuredProducts) {
+          setFeaturedIds(data.featuredProducts.map(p => p._id))
+        }
       })
       .catch(() => setError('No se pudo cargar el home actual'))
+
+    getProductos()
+      .then(setAllProducts)
+      .catch(() => console.error('No se pudieron cargar productos para selección'))
   }, [])
 
   const compressImage = (file, maxWidth = 800, quality = 0.6) => {
@@ -255,6 +268,37 @@ export default function AdminHome() {
     }
   }
 
+  const handleFeaturedSubmit = async (e) => {
+    e.preventDefault()
+    setError(''); setFeaturedMsg('')
+    if (featuredIds.length !== 4) {
+      setError('Debes seleccionar exactamente 4 productos destacados.')
+      return;
+    }
+    setFeaturedLoading(true)
+    try {
+      await updateFeaturedProducts(featuredIds)
+      setFeaturedMsg('Productos destacados guardados correctamente')
+    } catch (err) {
+      setError(err.message || 'Error al guardar destacados')
+    } finally {
+      setFeaturedLoading(false)
+    }
+  }
+
+  const toggleProduct = (id) => {
+    setFeaturedIds(prev => {
+      if (prev.includes(id)) return prev.filter(x => x !== id)
+      if (prev.length >= 4) return prev
+      return [...prev, id]
+    })
+  }
+
+  const filteredProducts = allProducts.filter(p => 
+    p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    p.categoria?.nombre?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   return (
     <div>
       <div className="admin-page-header">
@@ -470,6 +514,74 @@ export default function AdminHome() {
         <div className="admin-form__actions">
           <button type="submit" className="admin-btn-primary" disabled={familyLoading}>
             {familyLoading ? 'Guardando...' : 'Guardar fotos Family'}
+          </button>
+        </div>
+      </form>
+
+      {/* ── Productos Destacados ── */}
+      <form className="admin-form" onSubmit={handleFeaturedSubmit} style={{ marginTop: '3rem', marginBottom: '4rem' }}>
+        <div className="admin-card">
+          <h3 className="admin-card__title">Productos Destacados (Stock Completo)</h3>
+          <p className="admin-page-sub" style={{ marginBottom: '1.2rem' }}>
+            Seleccioná los 4 productos que aparecerán en la sección "Stock Completo" del Home. ({featuredIds.length}/4 seleccionados)
+          </p>
+
+          <input 
+            type="text" 
+            placeholder="Buscar producto por nombre o categoría..." 
+            className="admin-input" 
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{ marginBottom: '1rem' }}
+          />
+
+          <div style={{ 
+            maxHeight: '400px', 
+            overflowY: 'auto', 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
+            gap: '10px',
+            border: '1px solid var(--gray-4)',
+            padding: '10px',
+            borderRadius: '8px',
+            background: '#fafafa'
+          }}>
+            {filteredProducts.map(p => {
+              const isSelected = featuredIds.includes(p._id)
+              return (
+                <div 
+                  key={p._id} 
+                  onClick={() => toggleProduct(p._id)}
+                  style={{
+                    padding: '10px',
+                    border: isSelected ? '2px solid var(--admin-primary)' : '1px solid var(--gray-4)',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    background: isSelected ? '#f0f7ff' : 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    opacity: !isSelected && featuredIds.length >= 4 ? 0.5 : 1
+                  }}
+                >
+                  <img src={p.imagenes[0]} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} alt="" />
+                  <div style={{ flex: 1, overflow: 'hidden' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.nombre}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-3)' }}>{p.categoria?.nombre}</div>
+                  </div>
+                  {isSelected && <span style={{ color: 'var(--admin-primary)', fontWeight: 'bold' }}>✓</span>}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {featuredMsg && <p className="admin-form__exito">{featuredMsg}</p>}
+        {error && <p className="admin-form__error">{error}</p>}
+
+        <div className="admin-form__actions">
+          <button type="submit" className="admin-btn-primary" disabled={featuredLoading || featuredIds.length !== 4}>
+            {featuredLoading ? 'Guardando...' : 'Guardar productos destacados'}
           </button>
         </div>
       </form>
