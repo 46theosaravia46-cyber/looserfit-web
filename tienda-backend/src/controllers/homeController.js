@@ -29,6 +29,7 @@ const updateHero = async (req, res) => {
         const doc = await homeService.updateHero(finalImages);
         res.json({ mensaje: 'Hero actualizado', home: doc });
     } catch (error) {
+        console.error('CRITICAL HERO ERROR:', error);
         res.status(500).json({ mensaje: 'Error al actualizar hero', error: error.message });
     }
 };

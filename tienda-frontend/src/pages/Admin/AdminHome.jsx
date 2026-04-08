@@ -41,7 +41,7 @@ export default function AdminHome() {
       .catch(() => setError('No se pudo cargar el home actual'))
   }, [])
 
-  const compressImage = (file, maxWidth = 1000, quality = 0.7) => {
+  const compressImage = (file, maxWidth = 800, quality = 0.6) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -406,7 +406,7 @@ export default function AdminHome() {
 
         <div className="admin-form__actions">
           <button type="submit" className="admin-btn-primary" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar hero'}
+            {loading ? 'Guardando...' : 'Guardar hero (v2)'}
           </button>
         </div>
       </form>
