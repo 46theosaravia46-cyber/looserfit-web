@@ -98,6 +98,29 @@ const uploadComprobante = async (req, res) => {
     }
 };
 
+const deleteOrder = async (req, res) => {
+    try {
+        const order = await orderService.deleteOrder(req.params.id);
+        if (!order) return res.status(404).json({ mensaje: 'Pedido no encontrado' });
+        res.json({ mensaje: 'Pedido eliminado con éxito' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al eliminar pedido', error: error.message });
+    }
+};
+
+const bulkDeleteOrders = async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ mensaje: 'No se enviaron IDs válidos' });
+        }
+        await orderService.bulkDeleteOrders(ids);
+        res.json({ mensaje: 'Pedidos eliminados con éxito' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al eliminar pedidos en masa', error: error.message });
+    }
+};
+
 module.exports = {
     createOrder,
     getAllOrders,
@@ -105,5 +128,7 @@ module.exports = {
     getOrderById,
     updateStatus,
     updateTracking,
-    uploadComprobante
+    uploadComprobante,
+    deleteOrder,
+    bulkDeleteOrders
 };

@@ -99,6 +99,14 @@ const uploadComprobante = async (id, comprobantePath) => {
     return await Order.findByIdAndUpdate(id, { comprobante: comprobantePath }, { new: true });
 };
 
+const deleteOrder = async (id) => {
+    return await Order.findByIdAndDelete(id);
+};
+
+const bulkDeleteOrders = async (ids) => {
+    return await Order.deleteMany({ _id: { $in: ids } });
+};
+
 module.exports = {
     createOrder,
     getAllOrders,
@@ -106,5 +114,7 @@ module.exports = {
     getOrderById,
     updateOrderStatus,
     updateTracking,
-    uploadComprobante
+    uploadComprobante,
+    deleteOrder,
+    bulkDeleteOrders
 };

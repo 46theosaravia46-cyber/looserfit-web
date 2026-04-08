@@ -25,4 +25,10 @@ router.patch('/:id/tracking', protect, adminOnly, orderController.updateTracking
 // --- SUBIR COMPROBANTE DE PAGO ---
 router.post('/upload-comprobante/:id', upload.single('comprobante'), orderController.uploadComprobante);
 
+// --- ELIMINAR UN PEDIDO (Solo Admin) ---
+router.delete('/:id', protect, adminOnly, orderController.deleteOrder);
+
+// --- ELIMINAR PEDIDOS EN MASA (Solo Admin) ---
+router.post('/delete-bulk', protect, adminOnly, orderController.bulkDeleteOrders);
+
 module.exports = router;

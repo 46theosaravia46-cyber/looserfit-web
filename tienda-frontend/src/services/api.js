@@ -159,6 +159,28 @@ export async function togglePublicadoProducto(id) {
   return res.json()
 }
 
+export async function eliminarPedido(id) {
+  const res = await fetch(`${BASE_URL}/orders/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() }
+  })
+  if (!res.ok) throw new Error('No se pudo eliminar el pedido')
+  return res.json()
+}
+
+export async function eliminarPedidosBulk(ids) {
+  const res = await fetch(`${BASE_URL}/orders/delete-bulk`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify({ ids })
+  })
+  if (!res.ok) throw new Error('No se pudieron eliminar los pedidos')
+  return res.json()
+}
+
 export async function getHomeContent() {
   const res = await fetch(`${BASE_URL}/home?_t=${Date.now()}`)
   if (!res.ok) throw new Error('No se pudo cargar contenido home')

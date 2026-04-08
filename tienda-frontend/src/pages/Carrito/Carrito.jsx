@@ -1,11 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useCart } from '../../context/CartContext'
+import { useAuth } from '../../context/AuthContext'
 import { getProductoById } from '../../services/api'
 import './Carrito.css'
 
 export default function Carrito() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { items, subtotal, updateCantidad, removeItem } = useCart()
   const [stocks, setStocks] = useState({})
 
