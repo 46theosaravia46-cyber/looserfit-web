@@ -539,7 +539,7 @@ export default function AdminHome() {
             maxHeight: '400px', 
             overflowY: 'auto', 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
             gap: '10px',
             border: '1px solid var(--gray-4)',
             padding: '10px',
