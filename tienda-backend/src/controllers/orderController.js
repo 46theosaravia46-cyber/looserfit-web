@@ -2,11 +2,30 @@ const orderService = require('../services/orderService');
 
 const createOrder = async (req, res) => {
     try {
-        // En teoría protect ya validó req.user
-        const orderData = { ...req.body, usuario: req.user._id };
+        // Validar que venga el comprobante
+        if (!req.file) {
+            return res.status(400).json({ mensaje: 'El comprobante de pago es obligatorio' });
+        }
+
+        // En multipart/form-data, los objetos complejos a veces vienen como strings
+        let { productos, datosEnvio, total, tipoEnvio } = req.body;
+        
+        if (typeof productos === 'string') productos = JSON.parse(productos);
+        if (typeof datosEnvio === 'string') datosEnvio = JSON.parse(datosEnvio);
+
+        const orderData = { 
+            productos, 
+            datosEnvio, 
+            total, 
+            tipoEnvio, 
+            usuario: req.user._id,
+            comprobante: req.file.path // Guardar URL de Cloudinary
+        };
+
         const order = await orderService.createOrder(orderData);
         res.status(201).json({ mensaje: 'Ticket generado con éxito', pedido: order });
     } catch (error) {
+        console.error('Error createOrder:', error);
         res.status(400).json({ mensaje: 'Error al generar el ticket', error: error.message });
     }
 };

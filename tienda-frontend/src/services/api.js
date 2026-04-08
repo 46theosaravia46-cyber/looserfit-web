@@ -41,14 +41,13 @@ export async function getProductoById(id) {
 }
 
 // --- Crear pedido ---
-export async function crearPedido(datosPedido) {
+export async function crearPedido(formData) {
   const res = await fetch(`${BASE_URL}/orders/create`, {
     method:  'POST',
     headers: { 
-      'Content-Type': 'application/json',
       ...getAuthHeaders()
     },
-    body:    JSON.stringify(datosPedido)
+    body:    formData
   })
   if (!res.ok) {
     let mensaje = 'Error al crear el pedido'

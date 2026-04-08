@@ -69,10 +69,13 @@ export default function Checkout() {
     })
   }
 
+  const [comprobante, setComprobante] = useState(null)
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     if (!items.length) return setError('No hay productos en el carrito.')
+    if (!comprobante) return setError('El comprobante de pago es obligatorio.')
 
     const localidad = form.localidad.trim()
     const direccionSucursal = form.direccionSucursal.trim()
@@ -93,17 +96,18 @@ export default function Checkout() {
       return setError('Calle y número son obligatorios para envío a domicilio.')
     }
 
-    const payload = {
-      productos: productosPedido,
-      total: totalWithShipping,
-      tipoEnvio,
-      datosEnvio: form,
-      usuario: user?._id, // Vincular pedido al usuario logueado
-    }
+    // Crear FormData para enviar el archivo y los datos
+    const formData = new FormData()
+    formData.append('comprobante', comprobante)
+    formData.append('productos', JSON.stringify(productosPedido))
+    formData.append('total', totalWithShipping)
+    formData.append('tipoEnvio', tipoEnvio)
+    formData.append('datosEnvio', JSON.stringify(form))
+    formData.append('usuario', user?._id)
 
     try {
       setLoading(true)
-      const resp = await crearPedido(payload)
+      const resp = await crearPedido(formData)
       
       // Creamos la preferencia de Mercado Pago
       const preference = await crearPreferenciaPago(resp.pedido._id)
@@ -113,19 +117,8 @@ export default function Checkout() {
 
       // Redirigimos al init_point de Mercado Pago
       window.location.href = preference.init_point
-
-      /* 
-      // Comentado: el flujo anterior de WhatsApp
-      navigate('/pedido-exito', {
-        state: {
-          pedido: resp.pedido,
-          whatsappText: buildWhatsappText(payload),
-        },
-      })
-      */
     } catch (err) {
       console.error('Error en checkout:', err);
-      // El backend ahora devuelve mensajes de stock específicos en err.response.data
       const msg = err.response?.data?.mensaje || err.message || 'No se pudo generar el pedido. Revisa los datos.';
       setError(msg)
       setLoading(false)
@@ -215,6 +208,21 @@ export default function Checkout() {
                   <input name="codigoPostal" placeholder="Código postal" value={form.codigoPostal} onChange={handleChange} required />
                 </div>
               )}
+
+              <div className="checkout-comprobante" style={{ marginTop: '2rem', borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Comprobante de Pago (Obligatorio)</h3>
+                <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem' }}>
+                  Por favor, subí una captura o PDF de tu transferencia para confirmar la compra.
+                </p>
+                <input 
+                  type="file" 
+                  accept="image/*,application/pdf" 
+                  onChange={(e) => setComprobante(e.target.files[0])}
+                  required
+                  className="checkout-file-input"
+                />
+                {comprobante && <p style={{ fontSize: '0.8rem', color: 'green', marginTop: '0.5rem' }}>✓ Archivo seleccionado: {comprobante.name}</p>}
+              </div>
             </section>
 
             <aside className="checkout-card">

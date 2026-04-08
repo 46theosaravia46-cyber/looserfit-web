@@ -5,7 +5,7 @@ const orderController = require('../controllers/orderController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // --- CREAR UN NUEVO PEDIDO (Solo Usuarios Registrados) ---
-router.post('/create', protect, orderController.createOrder);
+router.post('/create', protect, upload.single('comprobante'), orderController.createOrder);
 
 // --- VER MIS PEDIDOS ---
 router.get('/mine', protect, orderController.getOrdersMine);

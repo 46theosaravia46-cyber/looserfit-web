@@ -44,7 +44,8 @@ const createOrder = async (orderData) => {
         usuario,
         estado: 'Pendiente',
         orderNumber,
-        shippingCost
+        shippingCost,
+        comprobante: orderData.comprobante
     });
 
     await nuevoPedido.save();

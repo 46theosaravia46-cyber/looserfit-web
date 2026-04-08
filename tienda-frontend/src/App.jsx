@@ -20,6 +20,7 @@ import Checkout from './pages/Checkout/Checkout'
 import PedidoExito from './pages/PedidoExito/PedidoExito'
 import MisPedidos from './pages/MisPedidos/MisPedidos'
 import NotFound from './pages/NotFound/NotFound'
+import PendingReceiptAlert from './components/PendingReceiptAlert/PendingReceiptAlert'
 
 function ComingSoonScreen({ launchDate, message, subtitle, onAuthClick }) {
   const [, setTick] = useState(0)
@@ -163,6 +164,7 @@ function App() {
   return (
     <>
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />} 
+      <PendingReceiptAlert />
       <Routes>
 
         {/* ── Rutas públicas (con Navbar y Footer) ── */}
