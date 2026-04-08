@@ -178,10 +178,10 @@ export default function AdminNuevoProducto() {
           data.append(k, v)
         }
       })
-      imagenes.forEach(img => data.append('imagenes', img))
+      imagenes.forEach((img, i) => data.append('imagenes', img, img.name || `producto_${i}.jpg`))
       
       if (guiaTallesImg) {
-        data.append('guiaTallesImg', guiaTallesImg)
+        data.append('guiaTallesImg', guiaTallesImg, guiaTallesImg.name || 'guia_talles.jpg')
       }
 
       const url    = esEdicion

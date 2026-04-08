@@ -195,11 +195,13 @@ export async function updateHeroImages(formData) {
     body: formData,
   })
   if (!res.ok) {
-    let mensaje = 'No se pudo actualizar el hero'
+    let mensaje = `Error ${res.status}: No se pudo actualizar el hero`
     try {
       const data = await res.json()
       mensaje = data.mensaje || data.error || mensaje
-    } catch { /* ignorar */ }
+    } catch { 
+      if (res.status === 413) mensaje = "La imagen es demasiado grande para el servidor (Error 413)."
+    }
     throw new Error(mensaje)
   }
   return res.json()

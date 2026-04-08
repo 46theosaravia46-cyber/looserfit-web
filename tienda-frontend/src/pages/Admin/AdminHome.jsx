@@ -41,7 +41,7 @@ export default function AdminHome() {
       .catch(() => setError('No se pudo cargar el home actual'))
   }, [])
 
-  const compressImage = (file, maxWidth = 1200, quality = 0.8) => {
+  const compressImage = (file, maxWidth = 1000, quality = 0.7) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -159,7 +159,8 @@ export default function AdminHome() {
       heroItems.forEach(item => {
         if (item.file) {
           heroData.push(`NEW_FILE_${newCount}`)
-          formData.append('newHeroImages', item.file)
+          // Importante: pasar el nombre del archivo para que multer lo procese bien
+          formData.append('newHeroImages', item.file, item.file.name || `hero_${newCount}.jpg`)
           newCount++
         } else {
           heroData.push(item.src)
@@ -171,7 +172,8 @@ export default function AdminHome() {
       setMsg('Hero actualizado correctamente')
     } catch (err) {
       console.error('Error saving hero:', err)
-      setError(err.message || 'No se pudo actualizar el hero')
+      // Mostramos el mensaje real que venga del backend
+      setError(err.message || 'Error desconocido al actualizar el hero')
     } finally {
       setLoading(false)
     }
@@ -192,7 +194,7 @@ export default function AdminHome() {
       familyItems.forEach(item => {
         if (item.file) {
           familyData.push({ src: `NEW_FILE_${newCount}`, titulo: item.titulo, descripcion: item.descripcion })
-          formData.append('newFamilyImages', item.file)
+          formData.append('newFamilyImages', item.file, item.file.name || `family_${newCount}.jpg`)
           newCount++
         } else {
           familyData.push({ src: item.src, titulo: item.titulo, descripcion: item.descripcion })
@@ -209,7 +211,7 @@ export default function AdminHome() {
       setFamilyMsg('Family actualizado correctamente')
     } catch (err) {
       console.error('Error saving family:', err)
-      setError(err.message || 'No se pudo actualizar o agregar imagenes family')
+      setError(err.message || 'Error desconocido al actualizar family')
     } finally {
       setFamilyLoading(false)
     }
