@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getHomeContent, updateHeroImages, updateFamilyImages, updateHomeSettings, getProductos, updateFeaturedProducts } from '../../services/api'
 import './Admin.css'
+// v3 - Featured products update verified
 
 export default function AdminHome() {
   const [heroItems, setHeroItems] = useState([])
