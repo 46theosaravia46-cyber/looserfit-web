@@ -186,7 +186,9 @@ export default function AdminNuevoProducto() {
 
       const resData = await res.json()
       if (!res.ok) {
-        throw new Error(resData.mensaje || resData.error || 'Error al guardar producto')
+        // Priorizamos el mensaje más descriptivo que venga del backend
+        const desc = resData.mensaje || resData.error || 'Error al guardar producto'
+        throw new Error(desc)
       }
       setExito(true)
       setTimeout(() => navigate('/admin/productos'), 1500)

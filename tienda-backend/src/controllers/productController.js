@@ -39,7 +39,7 @@ const createProduct = async (req, res) => {
 
         res.status(201).json({ mensaje: 'Producto creado!', nuevoProducto: newProduct });
     } catch (error) {
-        res.status(500).json({ mensaje: 'Error al crear producto', error: error.message });
+        res.status(500).json({ mensaje: error.message || 'Error al crear producto', error: error.message });
     }
 };
 
@@ -80,7 +80,9 @@ const updateProduct = async (req, res) => {
         const updated = await productService.updateProduct(productId, updateData);
         res.json({ mensaje: 'Producto actualizado!', producto: updated });
     } catch (error) {
-        res.status(500).json({ mensaje: 'Error al actualizar producto', error: error.message });
+        // Log para debug si fuera necesario en el servidor
+        console.error('Error en updateProduct:', error);
+        res.status(500).json({ mensaje: error.message || 'Error al actualizar producto', error: error.message });
     }
 };
 
