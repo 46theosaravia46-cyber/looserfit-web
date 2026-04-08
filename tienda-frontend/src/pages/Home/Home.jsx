@@ -125,36 +125,26 @@ export default function Home() {
             const centerIdx = Math.floor((heroImages.length - 1) / 2)
             const isCenter = i === centerIdx
             return (
-              <div key={i} className={`hero__col${isCenter ? ' hero__col--center' : ''}`}>
+              <div key={i} className="hero__col">
                 <img 
                   src={img} 
                   alt={`Hero ${i}`} 
                   className={`hero__img${isCenter ? ' hero__img--ver-todo' : ''} ${heroLoaded[i] ? 'is-loaded' : ''}`}
                   onLoad={() => handleHeroLoad(i)}
                 />
-                {isCenter && (
-                  <div className="hero__cta">
-                    <p className="hero__label">Nueva temporada</p>
-                    <h1 className="hero__title">Nueva<br />Colección</h1>
-                    <Link to="/tienda?ordenar=nuevodrop" className="btn btn-filled" style={{ transition: 'all 0.3s' }}>
-                      Ver Colección →
-                    </Link>
-                  </div>
-                )}
               </div>
             )
           })}
-          {heroImages.length === 0 && (
-            <div className="hero__col hero__col--center">
-              <div className="hero__cta">
-                <p className="hero__label">Nueva temporada</p>
-                <h1 className="hero__title">Nueva<br />Colección</h1>
-                <Link to="/tienda" className="btn btn-filled" style={{ transition: 'all 0.3s' }}>
-                  Ver Colección →
-                </Link>
-              </div>
-            </div>
-          )}
+        </div>
+
+        {/* Overlay y CTA siempre centrados */}
+        <div className="hero__overlay"></div>
+        <div className="hero__cta">
+          <p className="hero__label">Nueva temporada</p>
+          <h1 className="hero__title">Nueva<br />Colección</h1>
+          <Link to="/tienda?ordenar=nuevodrop" className="btn btn-filled" style={{ transition: 'all 0.3s' }}>
+            Ver Colección →
+          </Link>
         </div>
       </section>
 

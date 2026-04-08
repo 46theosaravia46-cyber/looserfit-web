@@ -1,6 +1,6 @@
-/* ── HERO ── */
 .hero {
-  margin-top: 0; /* navbar superpuesta, transparente */
+  position: relative; /* Para el CTA absoluto */
+  margin-top: 0;
   height: 100dvh;
   overflow: hidden;
 }
@@ -40,12 +40,17 @@
   transform: scale(1.02);
 }
 
-/* Columna central con CTA */
-.hero__col--center {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.85) 0%,
+    rgba(0,0,0,0.2) 60%,
+    transparent 100%
+  );
+  z-index: 1;
+  pointer-events: none;
 }
 
 .hero__cta {
@@ -85,20 +90,6 @@
 
 .hero__cta .btn:hover {
   transform: scale(1.07);
-}
-
-/* Overlay oscuro solo en col central */
-.hero__col--center::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0,0,0,0.75) 0%,
-    rgba(0,0,0,0.1) 50%,
-    transparent 100%
-  );
-  z-index: 1;
 }
 
 /* ── PRODUCT GRID ── */
