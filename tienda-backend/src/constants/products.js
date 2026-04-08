@@ -1,8 +1,9 @@
 const SIZES_BY_CATEGORY = {
-  'Abrigos': ['S', 'M', 'L', 'XL', 'XXL', '3XL'],
-  'Remeras': ['S', 'M', 'L', 'XL', 'XXL', '3XL'],
-  'Pantalones': ['40ARG', '42ARG', '44ARG', '46ARG', '48ARG', '50ARG', '52ARG', '+54ARG'],
+  'Abrigos': ['Talle Único', 'S', 'M', 'L', 'XL', 'XXL', '3XL'],
+  'Remeras': ['Talle Único', 'S', 'M', 'L', 'XL', 'XXL', '3XL'],
+  'Pantalones': ['Talle Único', '40ARG', '42ARG', '44ARG', '46ARG', '48ARG', '50ARG', '52ARG', '+54ARG'],
   'Calzado': [
+    'Talle Único',
     '36/36.5', 
     '37/37.5', 
     '38/38.5', 
@@ -13,7 +14,7 @@ const SIZES_BY_CATEGORY = {
     '43/43.5', 
     '+44'
   ],
-  'Accesorios': []
+  'Accesorios': ['Talle Único']
 };
 
 module.exports = { SIZES_BY_CATEGORY };

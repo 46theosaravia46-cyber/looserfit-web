@@ -19,10 +19,6 @@ const validateSizes = async (categoriaId, talles = []) => {
 
     const validSizes = SIZES_BY_CATEGORY[key] || [];
     
-    // Si es accesorios, no debe tener talles
-    if (key === 'Accesorios' && talles.length > 0) {
-        throw new Error('Los accesorios no deben tener talles');
-    }
 
     // Validar que cada talle enviado esté en la lista permitida
     const invalid = talles.filter(t => !validSizes.includes(t));
