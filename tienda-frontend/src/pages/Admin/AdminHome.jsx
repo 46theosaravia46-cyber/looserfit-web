@@ -4,6 +4,7 @@ import './Admin.css'
 // v3 - Featured products update verified
 
 export default function AdminHome() {
+  console.log('RENDERING AdminHome v4')
   const [heroItems, setHeroItems] = useState([])
   const [familyItems, setFamilyItems] = useState([])
   const [loading, setLoading] = useState(false)
@@ -44,7 +45,7 @@ export default function AdminHome() {
           const remainingMinutes = Math.max(Math.ceil((new Date(comingSoon.launchDate).getTime() - Date.now()) / 60000), 0)
           setComingSoonDurationMinutes(remainingMinutes.toString())
         }
-        if (data.featuredProducts) {
+        if (Array.isArray(data.featuredProducts)) {
           setFeaturedIds(data.featuredProducts.map(p => p._id))
         }
       })
@@ -327,7 +328,7 @@ export default function AdminHome() {
     <div>
       <div className="admin-page-header">
         <div>
-          <h2 className="admin-page-title">Contenido Home</h2>
+          <h2 className="admin-page-title">Contenido Home <span style={{color:'red', fontSize:'0.8rem'}}>(v4)</span></h2>
           <p className="admin-page-sub">Seleccioná y editá las imágenes visibles en el home.</p>
         </div>
       </div>
