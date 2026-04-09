@@ -73,13 +73,7 @@ export default function Carrito() {
               </div>
               <button 
                 className="btn btn-filled carrito-resumen__cta" 
-                onClick={() => {
-                  if (!user && !localStorage.getItem('looserfit_user')) {
-                    navigate('/', { state: { openAuth: true } })
-                  } else {
-                    navigate('/checkout')
-                  }
-                }}
+                onClick={() => navigate('/checkout')}
                 disabled={hasNoStock}
               >
                 {hasNoStock ? 'Sin stock' : 'Finalizar compra'}
