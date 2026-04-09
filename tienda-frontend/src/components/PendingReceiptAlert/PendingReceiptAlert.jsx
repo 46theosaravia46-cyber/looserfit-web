@@ -7,24 +7,37 @@ import './PendingReceiptAlert.css'
 export default function PendingReceiptAlert() {
   const { user } = useAuth()
   const [pendingCount, setPendingCount] = useState(0)
+  const [guestOrderId, setGuestOrderId] = useState(null)
   const location = useLocation()
   const isAdmin = user?.role === 'admin'
 
   useEffect(() => {
-    if (!user) return
-
     const checkPending = async () => {
       try {
         let orders = []
-        if (isAdmin) {
-          orders = await getPedidos()
+        if (user) {
+          if (isAdmin) {
+             orders = await getPedidos()
+          } else {
+             orders = await getMisPedidos()
+          }
         } else {
-          orders = await getMisPedidos()
+          // Si no hay user, buscamos token de invitado
+          const guestToken = localStorage.getItem('looserfit_guest_token')
+          if (guestToken) {
+            const { getOrderByToken } = await import('../../services/api')
+            const guestOrder = await getOrderByToken(guestToken)
+            if (guestOrder) orders = [guestOrder]
+          }
         }
         
         // Filtrar pedidos que están "Pendiente" y NO tienen comprobante
         const missing = orders.filter(o => o.estado === 'Pendiente' && !o.comprobante)
         setPendingCount(missing.length)
+        if (!user && missing.length > 0) {
+           // Si es invitado, necesitamos el ID para el link
+           setGuestOrderId(missing[0]._id)
+        }
       } catch (err) {
         console.error('Error checking pending orders:', err)
       }
@@ -37,14 +50,14 @@ export default function PendingReceiptAlert() {
   }, [user, location.pathname, isAdmin])
 
   useEffect(() => {
-    if (user && pendingCount > 0) {
+    if (pendingCount > 0) {
       document.body.classList.add('has-pending-alert')
     } else {
       document.body.classList.remove('has-pending-alert')
     }
-  }, [user, pendingCount])
+  }, [pendingCount])
 
-  if (!user || pendingCount === 0) return null
+  if (pendingCount === 0) return null
 
   return (
     <div className="pending-alert">
@@ -54,7 +67,10 @@ export default function PendingReceiptAlert() {
             ? `Hay ${pendingCount} ${pendingCount === 1 ? 'pedido' : 'pedidos'} sin comprobante.` 
             : `Tenés ${pendingCount} ${pendingCount === 1 ? 'pedido pendiente' : 'pedidos pendientes'} de comprobante.`}
         </p>
-        <Link to={isAdmin ? "/admin/pedidos" : "/mis-pedidos"} className="pending-alert__link">
+        <Link 
+          to={isAdmin ? "/admin/pedidos" : (user ? "/mis-pedidos" : `/pedido-exito?orderId=${guestOrderId}`)} 
+          className="pending-alert__link"
+        >
           {isAdmin ? "Ver pedidos →" : "Subir comprobante ahora →"}
         </Link>
       </div>

@@ -94,6 +94,8 @@ export default function PedidoExito() {
       // Simular login automático
       localStorage.setItem('looserfit_token', data.token)
       localStorage.setItem('looserfit_user', JSON.stringify(data.user))
+      // Limpiar token de invitado ya que ahora tiene cuenta
+      localStorage.removeItem('looserfit_guest_token')
       setRegSuccess(true)
       // Recargar para que el Nav vea al usuario
       window.location.reload()

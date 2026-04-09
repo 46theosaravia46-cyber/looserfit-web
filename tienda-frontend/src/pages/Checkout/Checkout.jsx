@@ -115,6 +115,10 @@ export default function Checkout() {
       // Limpiamos carrito antes de irnos
       clearCart()
 
+      // Si es invitado (o incluso si es user para redundancia), guardamos el token de seguimiento localmente 
+      // para habilitar la barra de notificaciones sin login
+      localStorage.setItem('looserfit_guest_token', resp.pedido.trackingToken)
+
       // Redirigimos al init_point de Mercado Pago
       window.location.href = preference.init_point
     } catch (err) {
