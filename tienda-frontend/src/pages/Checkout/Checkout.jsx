@@ -46,10 +46,14 @@ export default function Checkout() {
   })), [items])
   
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/', { state: { openAuth: true } }) // Redirigir a Home y abrir Auth modal
+    if (user && !form.nombreCompleto) {
+      setForm(prev => ({
+        ...prev,
+        nombreCompleto: user.nombre || '',
+        email: user.email || ''
+      }))
     }
-  }, [user, loading, navigate])
+  }, [user, form.nombreCompleto])
 
   useEffect(() => {
     const shipping = tipoEnvio === 'domicilio' ? 9500 : 6500

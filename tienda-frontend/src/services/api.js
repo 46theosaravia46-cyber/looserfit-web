@@ -194,6 +194,12 @@ export async function getHomeContent() {
   return res.json()
 }
 
+export async function getOrderByToken(token) {
+  const res = await fetch(`${BASE_URL}/orders/track/${token}`)
+  if (!res.ok) throw new Error('Seguimiento no encontrado')
+  return res.json()
+}
+
 export async function updateHeroImages(formData) {
   const res = await fetch(`${BASE_URL}/home/hero`, {
     method: 'PUT',
@@ -295,6 +301,19 @@ export async function register(userData) {
   if (!res.ok) {
     const data = await res.json()
     throw new Error(data.error || 'Error al registrarse')
+  }
+  return res.json()
+}
+
+export async function registerFromOrder(data) {
+  const res = await fetch(`${BASE_URL}/auth/register-from-order`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  if (!res.ok) {
+    const d = await res.json()
+    throw new Error(d.error || 'No se pudo crear la cuenta')
   }
   return res.json()
 }

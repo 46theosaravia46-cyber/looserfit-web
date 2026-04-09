@@ -101,7 +101,12 @@ async function enviarEmailPedido(datosEnvio, pedido) {
                <p style="margin:0 0 6px"><strong>Tipo de envío:</strong> 
                  ${pedido.tipoEnvio === 'sucursal' ? 'Retiro en sucursal' : 'Envío a domicilio'}
                </p>
-               <p style="margin:0"><strong>Provincia:</strong> ${datosEnvio.provincia}, ${datosEnvio.localidad}</p>
+               <p style="margin:0 0 6px"><strong>Provincia:</strong> ${datosEnvio.provincia}, ${datosEnvio.localidad}</p>
+               <p style="margin:0">
+                 <a href="https://looserfit-web.vercel.app/seguimiento/${pedido.trackingToken}" style="color:#0d0d0d;font-weight:bold">
+                    Ver estado de mi pedido sugerido
+                 </a>
+               </p>
              </div>
 
              <p style="margin-top:20px;color:#3d3d3d">

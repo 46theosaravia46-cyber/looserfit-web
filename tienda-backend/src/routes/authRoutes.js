@@ -12,5 +12,6 @@ router.post('/login', userController.login);
 // --- PROFILE ---
 router.get('/profile', protect, userController.getProfile);
 router.put('/profile', protect, userController.updateProfile);
+router.post('/register-from-order', userController.registerFromOrder);
 
 module.exports = router;

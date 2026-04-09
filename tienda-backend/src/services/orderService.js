@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const Product = require('../models/product');
+const crypto = require('crypto');
 const { enviarEmailPedido, enviarEmailSeguimiento, enviarEmailNotificacionAdmin } = require('../config/email');
 
 const createOrder = async (orderData) => {
@@ -35,6 +36,7 @@ const createOrder = async (orderData) => {
     const orderNumber = `#${String(totalPedidos + 1).padStart(3, '0')}`;
     const shippingCost = tipoEnvio === 'domicilio' ? 9500 : 6500;
     const totalFinal = totalCalculado + shippingCost;
+    const trackingToken = crypto.randomBytes(16).toString('hex');
 
     const nuevoPedido = new Order({
         productos: productosPedido,
@@ -44,6 +46,7 @@ const createOrder = async (orderData) => {
         usuario,
         estado: 'Pendiente',
         orderNumber,
+        trackingToken,
         shippingCost,
         comprobante: orderData.comprobante
     });
@@ -66,6 +69,10 @@ const getOrdersByUser = async (usuarioId) => {
 
 const getOrderById = async (id) => {
     return await Order.findById(id);
+};
+
+const getOrderByToken = async (token) => {
+    return await Order.findOne({ trackingToken: token });
 };
 
 const updateOrderStatus = async (id, estado) => {
@@ -112,6 +119,7 @@ module.exports = {
     getAllOrders,
     getOrdersByUser,
     getOrderById,
+    getOrderByToken,
     updateOrderStatus,
     updateTracking,
     uploadComprobante,

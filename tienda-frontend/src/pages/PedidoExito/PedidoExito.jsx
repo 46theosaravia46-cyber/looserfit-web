@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { getPedidoById, subirComprobante } from '../../services/api'
+import { getPedidoById, subirComprobante, registerFromOrder } from '../../services/api'
+import { useAuth } from '../../context/AuthContext'
 import './PedidoExito.css'
 
 const WHATSAPP_NUMBER = '5493484663187'
@@ -19,6 +18,13 @@ export default function PedidoExito() {
   const [errorUpload, setErrorUpload] = useState('')
   const [comprobanteUrl, setComprobanteUrl] = useState(state?.pedido?.comprobante || '')
   const [isDragging, setIsDragging] = useState(false)
+  const { user, login: authLogin } = useAuth()
+
+  // Registration for guests
+  const [password, setPassword] = useState('')
+  const [regLoading, setRegLoading] = useState(false)
+  const [regSuccess, setRegSuccess] = useState(false)
+  const [regError, setRegError] = useState('')
 
   useEffect(() => {
     if (pedido) return
@@ -69,6 +75,32 @@ export default function PedidoExito() {
     setIsDragging(false)
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setFile(e.dataTransfer.files[0])
+    }
+  }
+
+  const handleRegister = async (e) => {
+    e.preventDefault()
+    if (!password || password.length < 6) return setRegError('La contraseña debe tener al menos 6 caracteres')
+    
+    setRegLoading(true)
+    setRegError('')
+    try {
+      const data = await registerFromOrder({
+        email: pedido.datosEnvio.email,
+        nombre: pedido.datosEnvio.nombreCompleto,
+        password,
+        orderId: pedido._id
+      })
+      // Simular login automático
+      localStorage.setItem('looserfit_token', data.token)
+      localStorage.setItem('looserfit_user', JSON.stringify(data.user))
+      setRegSuccess(true)
+      // Recargar para que el Nav vea al usuario
+      window.location.reload()
+    } catch (err) {
+      setRegError(err.message || 'Error al crear cuenta')
+    } finally {
+      setRegLoading(false)
     }
   }
 
@@ -143,6 +175,38 @@ export default function PedidoExito() {
               <p>Estamos buscando tu pedido. Si el problema persiste, volvé a cargar la página o contactanos.</p>
             )}
           </div>
+
+          {/* Registro Post-Compra para invitados */}
+          {!user && pedido && !regSuccess && (
+            <div className="registration-section">
+              <hr />
+              <h3>¿Querés seguir tu pedido y guardar tus datos?</h3>
+              <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1.2rem' }}>
+                Creá una cuenta en 1 segundo ingresando una contraseña.
+              </p>
+              <form onSubmit={handleRegister} className="reg-inline-form">
+                <input 
+                  type="password" 
+                  placeholder="Elegí una contraseña" 
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="reg-input"
+                  required
+                />
+                <button type="submit" className="btn btn-filled" disabled={regLoading}>
+                  {regLoading ? 'Creando...' : 'Crear mi cuenta'}
+                </button>
+              </form>
+              {regError && <p className="error-msg" style={{ marginTop: '0.5rem' }}>{regError}</p>}
+            </div>
+          )}
+
+          {regSuccess && (
+            <div className="registration-section success-box">
+              <hr />
+              <p className="success-msg">✅ ¡Cuenta creada con éxito! Ya podés ver tus pedidos en tu perfil.</p>
+            </div>
+          )}
 
           <div className="pedido-exito-actions">
             {!comprobanteUrl ? (

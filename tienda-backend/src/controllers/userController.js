@@ -38,9 +38,19 @@ const updateProfile = async (req, res) => {
     }
 };
 
+const registerFromOrder = async (req, res) => {
+    try {
+        const result = await userService.registerFromOrder(req.body);
+        res.status(201).json(result);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 module.exports = {
     register,
     login,
     getProfile,
-    updateProfile
+    updateProfile,
+    registerFromOrder
 };

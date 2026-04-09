@@ -4,8 +4,8 @@ const upload = require('../config/cloudinary');
 const orderController = require('../controllers/orderController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
-// --- CREAR UN NUEVO PEDIDO (Solo Usuarios Registrados) ---
-router.post('/create', protect, orderController.createOrder);
+// --- CREAR UN NUEVO PEDIDO (Soporta invitados) ---
+router.post('/create', orderController.createOrder);
 
 // --- VER MIS PEDIDOS ---
 router.get('/mine', protect, orderController.getOrdersMine);
@@ -15,6 +15,9 @@ router.get('/all', protect, adminOnly, orderController.getAllOrders);
 
 // --- VER UN PEDIDO POR ID ---
 router.get('/:id', orderController.getOrderById);
+
+// --- SEGUIMIENTO PÚBLICO (Sin Login) ---
+router.get('/track/:token', orderController.getOrderByToken);
 
 // --- CAMBIAR ESTADO DEL PEDIDO (Solo Admin) ---
 router.patch('/:id/estado', protect, adminOnly, orderController.updateStatus);

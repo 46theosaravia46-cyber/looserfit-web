@@ -9,8 +9,8 @@ const createOrder = async (req, res) => {
             datosEnvio, 
             total, 
             tipoEnvio, 
-            usuario: req.user._id,
-            comprobante: null // Ya no es obligatorio al crear
+            usuario: req.user ? req.user._id : null,
+            comprobante: null 
         };
 
         const order = await orderService.createOrder(orderData);
@@ -46,6 +46,16 @@ const getOrderById = async (req, res) => {
         res.json(order);
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al obtener pedido', error: error.message });
+    }
+};
+
+const getOrderByToken = async (req, res) => {
+    try {
+        const order = await orderService.getOrderByToken(req.params.token);
+        if (!order) return res.status(404).json({ mensaje: 'Link de seguimiento inválido o expirado' });
+        res.json(order);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al consultar seguimiento', error: error.message });
     }
 };
 
@@ -117,6 +127,7 @@ module.exports = {
     getAllOrders,
     getOrdersMine,
     getOrderById,
+    getOrderByToken,
     updateStatus,
     updateTracking,
     uploadComprobante,

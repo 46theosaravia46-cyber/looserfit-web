@@ -19,6 +19,7 @@ import { getHomeContent } from './services/api'
 import Checkout from './pages/Checkout/Checkout'
 import PedidoExito from './pages/PedidoExito/PedidoExito'
 import MisPedidos from './pages/MisPedidos/MisPedidos'
+import TrackingPedido from './pages/Tracking/TrackingPedido'
 import NotFound from './pages/NotFound/NotFound'
 import PendingReceiptAlert from './components/PendingReceiptAlert/PendingReceiptAlert'
 
@@ -214,6 +215,13 @@ function App() {
           <PublicGate {...publicGateProps}>
             <Navbar />
             <main><MisPedidos /></main>
+            <Footer />
+          </PublicGate>
+        }/>
+        <Route path="/seguimiento/:token" element={
+          <PublicGate {...publicGateProps}>
+            <Navbar />
+            <main><TrackingPedido /></main>
             <Footer />
           </PublicGate>
         }/>

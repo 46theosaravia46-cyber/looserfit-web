@@ -34,6 +34,7 @@ const orderSchema = new mongoose.Schema({
     shippingCost: { type: Number, required: true, default: 0 },
     comprobante: { type: String }, // URL de la imagen del comprobante
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Opcional: Para usuarios registrados
+    trackingToken: { type: String, required: true, unique: true }, // Token para seguimiento público sin login
     trackingNumber: { type: String }, // Número de seguimiento Correo Argentino
 }, { timestamps: true });
 

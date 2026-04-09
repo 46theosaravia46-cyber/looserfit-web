@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Order = require('../models/Order');
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -46,9 +47,33 @@ const updateProfile = async (id, updateData) => {
     return await User.findByIdAndUpdate(id, updateData, { new: true }).select('-password');
 };
 
+const registerFromOrder = async (data) => {
+    const { email, password, nombre, orderId } = data;
+
+    let user = await User.findOne({ email });
+    if (user) throw new Error('Ya existe una cuenta con este email. Iniciá sesión para ver tu pedido.');
+
+    // Crear usuario
+    user = new User({ nombre, email, password });
+    await user.save();
+
+    // Vincular pedido
+    if (orderId) {
+        await Order.findByIdAndUpdate(orderId, { usuario: user._id });
+    }
+
+    const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, JWT_SECRET, { expiresIn: '7d' });
+
+    return {
+        token,
+        user: { id: user._id, nombre: user.nombre, email: user.email, isAdmin: user.isAdmin }
+    };
+};
+
 module.exports = {
     register,
     login,
     getUserById,
-    updateProfile
+    updateProfile,
+    registerFromOrder
 };
