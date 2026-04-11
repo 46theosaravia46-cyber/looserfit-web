@@ -42,6 +42,9 @@ const getAllProducts = async (filtros = {}) => {
     if (filtros.publicado !== undefined) query.publicado = filtros.publicado;
     if (filtros.corte) query.tipo = filtros.corte;
     if (filtros.esNuevoDrop !== undefined) query.esNuevoDrop = filtros.esNuevoDrop;
+    if (filtros.q) {
+        query.nombre = { $regex: filtros.q, $options: 'i' };
+    }
 
     return await Product.find(query).populate('categoria').sort({ createdAt: -1 });
 };

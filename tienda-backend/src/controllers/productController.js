@@ -2,12 +2,13 @@ const productService = require('../services/productService');
 
 const getAllProducts = async (req, res) => {
     try {
-        const { categoria, soloPublicados, corte, esNuevoDrop } = req.query;
+        const { categoria, soloPublicados, corte, esNuevoDrop, q } = req.query;
         const filtros = {};
         if (categoria) filtros.categoria = categoria;
         if (soloPublicados === 'true') filtros.publicado = true;
         if (corte) filtros.corte = corte;
         if (esNuevoDrop === 'true' || esNuevoDrop === true) filtros.esNuevoDrop = true;
+        if (q) filtros.q = q;
 
         const products = await productService.getAllProducts(filtros);
         res.json(products);

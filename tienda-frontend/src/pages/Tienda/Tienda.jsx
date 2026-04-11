@@ -22,8 +22,7 @@ export default function Tienda() {
   const [catActiva,  setCatActiva]  = useState(searchParams.get('categoria') || '')
   const [talleActivo,setTalleActivo]= useState('')
   const [orden,      setOrden]      = useState(() => {
-    const o = searchParams.get('ordenar')
-    return o === 'nuevodrop' ? 'nuevodrop' : 'nuevo'
+    return searchParams.get('ordenar') || 'nuevo'
   })
   const q = searchParams.get('q') || ''
 
@@ -47,11 +46,11 @@ export default function Tienda() {
   }
 
   // Encontrar el objeto de categoría basado en el ID o nombre de catActiva
-  const activeCategoryObj = categorias.find(c => 
+  const activeCategoryObj = catActiva ? categorias.find(c => 
     c._id === catActiva || 
     c.name.toLowerCase() === catActiva.toLowerCase() ||
     c.name.toLowerCase().includes(catActiva.toLowerCase())
-  )
+  ) : null
 
   const currentSizesKey = getCatKey(activeCategoryObj?.name)
   const tallesPorCategoria = SIZES_BY_CATEGORY[currentSizesKey] || []
@@ -108,12 +107,16 @@ export default function Tienda() {
     const nueva = catId === catActiva ? '' : catId
     setCatActiva(nueva)
     setTalleActivo('')
-    
-    const params = new URLSearchParams()
-    if (nueva) params.set('categoria', nueva)
-    if (q)     params.set('q', q)
-    setSearchParams(params)
   }
+
+  // Sincronizar estado con URL
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (catActiva) params.set('categoria', catActiva)
+    if (orden && orden !== 'nuevo') params.set('ordenar', orden)
+    if (q) params.set('q', q)
+    setSearchParams(params)
+  }, [catActiva, orden])
 
 
   return (
