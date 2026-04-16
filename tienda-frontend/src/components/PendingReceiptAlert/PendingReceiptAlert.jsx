@@ -9,7 +9,7 @@ export default function PendingReceiptAlert() {
   const [pendingCount, setPendingCount] = useState(0)
   const [guestOrderId, setGuestOrderId] = useState(null)
   const location = useLocation()
-  const isAdmin = user?.role === 'admin'
+  const isAdmin = user?.isAdmin === true
 
   useEffect(() => {
     const checkPending = async () => {
@@ -18,7 +18,7 @@ export default function PendingReceiptAlert() {
         if (user) {
           if (isAdmin) {
              orders = await getPedidos()
-          } else {
+          } else if (user) {
              orders = await getMisPedidos()
           }
         } else {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { siteConfig } from '../../config/siteConfig'
 import './AdminLayout.css'
 
 export default function AdminLayout() {
@@ -25,8 +26,8 @@ export default function AdminLayout() {
   }, [menuOpen])
 
   useEffect(() => {
-    document.title = 'Panel Admin - Looserfit'
-    return () => { document.title = 'Looserfit' }
+    document.title = `Panel Admin - ${siteConfig.name}`
+    return () => { document.title = siteConfig.name }
   }, [])
 
   const handleLogin = async (e) => {
@@ -66,7 +67,7 @@ export default function AdminLayout() {
       <div className="admin-login">
         <div className="admin-login__box">
           <div className="admin-login__logo">
-            <img src="/logo3.0.png" alt="Looserfit" />
+            <img src={siteConfig.assets.logo} alt={siteConfig.name} />
           </div>
           <h2 className="admin-login__title">Panel Admin</h2>
           <p className="admin-login__sub">Ingresá a tu panel de control</p>
@@ -116,7 +117,7 @@ export default function AdminLayout() {
       {/* ── SIDEBAR ── */}
       <aside className="admin-sidebar">
         <div className="admin-sidebar__top">
-          <img src="/logo3.0.png" alt="Looserfit" className="admin-sidebar__logo" />
+          <img src={siteConfig.assets.logo} alt={siteConfig.name} className="admin-sidebar__logo" />
           <span className="admin-sidebar__tag">Admin</span>
           <button className="admin-sidebar__close" onClick={() => setMenuOpen(false)}>✕</button>
         </div>
@@ -193,10 +194,10 @@ export default function AdminLayout() {
             <IconMenu />
           </button>
 
-          <span className="admin-topbar__title">Hola, Looser Fit 👑</span>
+          <span className="admin-topbar__title">Hola, {siteConfig.name} 👑</span>
 
           <div className="admin-topbar__avatar">
-            <img src="/logo3.0.png" alt="LF" />
+            <img src={siteConfig.assets.adminAvatar} alt="LF" />
           </div>
         </div>
 

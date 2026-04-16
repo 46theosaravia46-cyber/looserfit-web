@@ -13,7 +13,11 @@ export default function AdminPedidos() {
     setLoading(true)
     getPedidos()
       .then(data => { setPedidos(data); setLoading(false) })
-      .catch(() => setLoading(false))
+      .catch((err) => { 
+        console.error('Error fetching pedidos:', err);
+        setLoading(false);
+        alert('Error al cargar pedidos: ' + err.message);
+      })
   }
 
   useEffect(() => {

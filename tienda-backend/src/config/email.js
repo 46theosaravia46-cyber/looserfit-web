@@ -59,14 +59,14 @@ function wrapHTML(titulo, contenido) {
     <body style="margin:0;padding:0;background:#f5f3ef;font-family:Arial,sans-serif">
       <div style="max-width:600px;margin:0 auto;padding:24px">
         <div style="background:#0d0d0d;padding:20px;text-align:center;margin-bottom:20px">
-          <p style="color:#fff;font-size:22px;font-weight:bold;letter-spacing:4px;margin:0">LOOSERFIT</p>
+          <p style="color:#fff;font-size:22px;font-weight:bold;letter-spacing:4px;margin:0">${(process.env.SITE_NAME || 'STORE').toUpperCase()}</p>
         </div>
         <div style="background:#fff;padding:28px;border:1px solid #d4d0c8">
           <h2 style="color:#0d0d0d;margin-top:0">${titulo}</h2>
           ${contenido}
         </div>
         <p style="color:#8a8a8a;font-size:11px;text-align:center;margin-top:20px">
-          © 2026 Looserfit · Buenos Aires, Argentina
+          © ${new Date().getFullYear()} ${process.env.SITE_NAME || 'Store'} · ${process.env.SITE_LOCATION || 'Caba, Argentina'}
         </p>
       </div>
     </body>
@@ -102,21 +102,21 @@ async function enviarEmailPedido(datosEnvio, pedido) {
                  ${pedido.tipoEnvio === 'sucursal' ? 'Retiro en sucursal' : 'Envío a domicilio'}
                </p>
                <p style="margin:0 0 6px"><strong>Provincia:</strong> ${datosEnvio.provincia}, ${datosEnvio.localidad}</p>
-               <p style="margin:0">
-                 <a href="https://looserfit-web.vercel.app/seguimiento/${pedido.trackingToken}" style="color:#0d0d0d;font-weight:bold">
-                    Ver estado de mi pedido sugerido
-                 </a>
-               </p>
+                 <p style="margin:0">
+                   <a href="${process.env.SITE_FRONTEND_URL || 'http://localhost:5173'}/seguimiento/${pedido.trackingToken}" style="color:#0d0d0d;font-weight:bold">
+                      Ver estado de mi pedido
+                   </a>
+                 </p>
              </div>
 
-             <p style="margin-top:20px;color:#3d3d3d">
-               Cualquier consulta escribinos por 
-               <a href="https://instagram.com/looser.fit" style="color:#0d0d0d">@looser.fit</a>
-             </p>`
+              <p style="margin-top:20px;color:#3d3d3d">
+                Cualquier consulta escribinos por 
+                <a href="https://instagram.com/${(process.env.SITE_INSTAGRAM || 'instagram').replace('@','')}" style="color:#0d0d0d">@${(process.env.SITE_INSTAGRAM || 'instagram').replace('@','')}</a>
+              </p>`
         );
 
         await transporter.sendMail({
-            from: `"Looserfit" <${process.env.EMAIL_USER}>`,
+            from: `"${process.env.SITE_NAME || 'Store'}" <${process.env.EMAIL_USER}>`,
             to: datosEnvio.email,
             subject: `Pedido recibido — Orden ${pedido.orderNumber}`,
             html
@@ -147,9 +147,9 @@ async function enviarEmailEmpaquetado(datosEnvio, pedido) {
         );
 
         await transporter.sendMail({
-            from: `"Looserfit" <${process.env.EMAIL_USER || 'looserfit2004@gmail.com'}>`,
+            from: `"${process.env.SITE_NAME || 'Store'}" <${process.env.EMAIL_USER || 'looserfit2004@gmail.com'}>`,
             to: datosEnvio.email,
-            subject: `📦 Tu pedido ${pedido.orderNumber} ya está listo - Looserfit`,
+            subject: `📦 Tu pedido ${pedido.orderNumber} ya está listo - ${process.env.SITE_NAME || 'Store'}`,
             html
         });
 
@@ -292,7 +292,7 @@ async function enviarEmailNotificacionAdmin(pedido) {
         );
 
         await transporter.sendMail({
-            from: `"Looserfit Bot" <${process.env.EMAIL_USER}>`,
+            from: `"${process.env.SITE_NAME || 'Store'} Bot" <${process.env.EMAIL_USER}>`,
             to: process.env.EMAIL_USER,
             subject: `🛒 Nuevo pedido ${pedido.orderNumber} — ${pedido.datosEnvio?.nombreCompleto}`,
             html

@@ -32,8 +32,14 @@ const createOrder = async (orderData) => {
     // El stock ya no se descuenta aquí, sino en el webhook tras el pago.
     // Solo mantenemos la verificación inicial de stock arriba.
 
-    const totalPedidos = await Order.countDocuments();
-    const orderNumber = `#${String(totalPedidos + 1).padStart(3, '0')}`;
+    let nextNum = (await Order.countDocuments()) + 1;
+    let orderNumber = `#${String(nextNum).padStart(3, '0')}`;
+    
+    // Verificación de unicidad para evitar colisiones si se borraron pedidos
+    while (await Order.findOne({ orderNumber })) {
+        nextNum++;
+        orderNumber = `#${String(nextNum).padStart(3, '0')}`;
+    }
     const shippingCost = tipoEnvio === 'domicilio' ? 9500 : 6500;
     const totalFinal = totalCalculado + shippingCost;
     const trackingToken = crypto.randomBytes(16).toString('hex');

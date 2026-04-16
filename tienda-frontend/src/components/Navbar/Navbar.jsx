@@ -4,6 +4,7 @@ import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 import { getMisPedidos } from '../../services/api'
 import AuthModal from '../AuthModal/AuthModal'
+import { siteConfig } from '../../config/siteConfig'
 import './Navbar.css'
 
 export default function Navbar() {
@@ -147,7 +148,7 @@ export default function Navbar() {
           {/* Logo centro */}
           <div className="navbar__logo">
             <Link to="/">
-              <img src="/logo3.0.png" alt="Looserfit" className="navbar__logo-img" />
+              <img src={siteConfig.assets.logo} alt={siteConfig.name} className="navbar__logo-img" />
             </Link>
           </div>
 
@@ -179,7 +180,7 @@ export default function Navbar() {
       {/* Drawer mobile */}
       <aside className={`drawer ${drawerOpen ? 'drawer--open' : ''}`}>
         <div className="drawer__header">
-          <img src="/logo3.0.png" alt="Looserfit" className="drawer__logo" />
+          <img src={siteConfig.assets.logo} alt={siteConfig.name} className="drawer__logo" />
           <button className="drawer__close" onClick={closeDrawer}>✕</button>
         </div>
         <ul className="drawer__links">
@@ -188,7 +189,7 @@ export default function Navbar() {
         </ul>
         <div className="drawer__footer">
           Buenos Aires, Argentina<br />
-          @looser.fit
+          {siteConfig.socials.instagram}
         </div>
       </aside>
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { siteConfig } from '../../config/siteConfig'
 import './Footer.css'
 
 const INFOS = {
@@ -27,9 +28,9 @@ export default function Footer() {
 
           <div className="footer__brand">
             <div className="footer__logo-wrap">
-              <img src="/logo3.0.png" alt="Looserfit" className="footer__logo" />
+              <img src={siteConfig.assets.logo} alt={siteConfig.name} className="footer__logo" />
             </div>
-            <p className="footer__location">Buenos Aires, Argentina</p>
+            <p className="footer__location">{siteConfig.contact.address}</p>
           </div>
 
           <div className="footer__nav">
@@ -57,7 +58,7 @@ export default function Footer() {
             <p className="footer__soporte">
               En caso de cualquier inconveniente, contactame al{' '}
               <a
-                href="https://www.instagram.com/looser.fit?igsh=MTFkdXJwNTUxazl3bw=="
+                href={`https://www.instagram.com/${siteConfig.socials.instagram.replace('@', '')}`}
                 target="_blank"
                 rel="noreferrer"
                 className="footer__dm-link"
@@ -70,7 +71,7 @@ export default function Footer() {
           <div className="footer__social">
             <h4 className="footer__nav-title">Seguinos</h4>
             <div className="footer__social-links">
-              <a href="https://www.instagram.com/looser.fit?igsh=MTFkdXJwNTUxazl3bw==" target="_blank" rel="noreferrer">
+              <a href={`https://www.instagram.com/${siteConfig.socials.instagram.replace('@', '')}`} target="_blank" rel="noreferrer">
                 Instagram
               </a>
             </div>
@@ -79,7 +80,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-content">
-          <p>© 2026 Looserfit — Todos los derechos reservados</p>
+          <p>© {new Date().getFullYear()} {siteConfig.name} — Todos los derechos reservados</p>
           <p className="credit">
             Creado por{' '}
             <a href="https://instagram.com/saravia.devv" target="_blank" rel="noreferrer" className="credit__link">
@@ -101,4 +102,5 @@ export default function Footer() {
       )}
     </footer>
   )
+}
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { siteConfig } from '../../config/siteConfig'
 import './AuthModal.css'
 
 export default function AuthModal({ onClose }) {
@@ -48,7 +49,7 @@ export default function AuthModal({ onClose }) {
       <div className="auth-modal" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="auth-modal__header">
-          <img src="/logo3.0.png" alt="Looserfit" className="auth-modal__logo" />
+          <img src={siteConfig.assets.logo} alt={siteConfig.name} className="auth-modal__logo" />
           <button className="auth-modal__close" onClick={onClose} aria-label="Cerrar">✕</button>
         </div>
 
@@ -56,7 +57,7 @@ export default function AuthModal({ onClose }) {
         {user ? (
           <div className="auth-form" style={{ textAlign: 'center', padding: '1rem 0' }}>
             <h3 className="auth-recover__title">¡Hola, {user.nombre}!</h3>
-            <p className="auth-recover__desc">Ya iniciaste sesión en Looserfit.</p>
+            <p className="auth-recover__desc">Ya iniciaste sesión en {siteConfig.name}.</p>
             
             {user.isAdmin && (
               <button 
@@ -188,7 +189,7 @@ export default function AuthModal({ onClose }) {
                 <button type="submit" className="auth-btn">Crear cuenta</button>
                 <p className="auth-legal">
                   Al registrarte, aceptás nuestros términos y condiciones y el envío 
-                  de novedades y promociones de Looserfit.
+                  de novedades y promociones de {siteConfig.name}.
                 </p>
               </form>
             )}

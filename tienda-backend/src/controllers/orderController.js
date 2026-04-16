@@ -4,6 +4,9 @@ const createOrder = async (req, res) => {
     try {
         const { productos, datosEnvio, total, tipoEnvio } = req.body;
         
+        console.log('--- CREATE ORDER REQUEST ---');
+        console.log('Body:', JSON.stringify(req.body, null, 2));
+
         const orderData = { 
             productos, 
             datosEnvio, 
@@ -14,6 +17,7 @@ const createOrder = async (req, res) => {
         };
 
         const order = await orderService.createOrder(orderData);
+        console.log('Order created successfully:', order._id);
         res.status(201).json({ mensaje: 'Ticket generado con éxito', pedido: order });
     } catch (error) {
         console.error('Error createOrder:', error);
@@ -23,9 +27,12 @@ const createOrder = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
     try {
+        console.log('--- GET ALL ORDERS REQUEST ---');
         const orders = await orderService.getAllOrders();
+        console.log(`Found ${orders.length} orders`);
         res.json(orders);
     } catch (error) {
+        console.error('Error getAllOrders:', error);
         res.status(500).json({ mensaje: 'Error al obtener pedidos' });
     }
 };

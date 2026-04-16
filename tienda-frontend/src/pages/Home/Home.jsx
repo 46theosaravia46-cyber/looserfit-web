@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Ticker from '../../components/Ticker/Ticker'
 import ProductCard from '../../components/ProductCard/ProductCard'
 import { getProductos, getHomeContent, getCategories } from '../../services/api'
+import { siteConfig } from '../../config/siteConfig'
 import './Home.css'
 
 // Mapeo de imágenes para las categorías dinámicas
@@ -209,16 +210,16 @@ export default function Home() {
       <section className="family-section">
         <div className="family-section__header container">
           <div>
-            <h2>Looser's Family</h2>
+            <h2>{siteConfig.name}'s Family</h2>
             <p>Nuestros favoritos del mes.</p>
           </div>
           <a
-            href="https://www.instagram.com/looser.fit?igsh=MTFkdXJwNTUxazl3bw=="
+            href={`https://www.instagram.com/${siteConfig.socials.instagram.replace('@', '')}`}
             target="_blank"
             rel="noreferrer"
             className="family-section__ig"
           >
-            <img src="/logo3.0.png" alt="Looserfit" />
+            <img src={siteConfig.assets.logo} alt={siteConfig.name} />
           </a>
         </div>
         <div className="family-carousel-wrap">
@@ -247,7 +248,7 @@ export default function Home() {
             <p>Solo 10 clientes entran cada mes a Looser Family. ¿Querés ser uno?</p>
             <ul>
               <li>Sacate una foto usando tu prenda comprada en nuestra pagina (Evaluamos fondo, outfit y Distinción)</li>
-              <li>Enviame tu foto por DM a @Looser.fit.</li>
+              <li>Enviame tu foto por DM a {siteConfig.socials.instagram}.</li>
             </ul>
             <p className="family-pitch__footer">Los elegidos serán exhibidos en esta sección junto a sus @ de Instagram. Mucha suerte {'<3'}</p>
           </div>

@@ -16,7 +16,8 @@ export const BASE_URL = import.meta.env.VITE_API_URL
 // Helper para obtener el token guardado
 export const getAuthHeaders = () => {
   const token = localStorage.getItem('looserfit_token')
-  return token ? { 'Authorization': `Bearer ${token}` } : {}
+  if (!token || token === 'null' || token === 'undefined') return {}
+  return { 'Authorization': `Bearer ${token}` }
 }
 
 // --- Traer todos los productos ---
