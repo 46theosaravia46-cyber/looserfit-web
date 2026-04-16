@@ -12,7 +12,14 @@ export default function AdminPedidos() {
   const fetchPedidos = () => {
     setLoading(true)
     getPedidos()
-      .then(data => { setPedidos(data); setLoading(false) })
+      .then(data => { 
+        console.log('API RESPONSE (pedidos):', data);
+        if (!Array.isArray(data)) {
+          console.warn('La API no devolvió un array:', data);
+        }
+        setPedidos(data); 
+        setLoading(false);
+      })
       .catch((err) => { 
         console.error('Error fetching pedidos:', err);
         setLoading(false);

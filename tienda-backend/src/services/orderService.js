@@ -66,7 +66,14 @@ const createOrder = async (orderData) => {
 };
 
 const getAllOrders = async () => {
-    return await Order.find().sort({ createdAt: -1 });
+    console.log('--- EXECUTING Order.find() ---');
+    console.log('Connected to DB:', mongoose.connection.db.databaseName);
+    console.log('Model collection name:', Order.collection.name);
+    const count = await Order.countDocuments();
+    console.log('Count in service:', count);
+    const orders = await Order.find().sort({ createdAt: -1 });
+    console.log(`getAllOrders returning ${orders.length} orders`);
+    return orders;
 };
 
 const getOrdersByUser = async (usuarioId) => {
