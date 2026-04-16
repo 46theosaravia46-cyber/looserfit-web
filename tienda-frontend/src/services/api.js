@@ -74,7 +74,14 @@ export async function getPedidos() {
   const res = await fetch(`${BASE_URL}/orders/all`, {
     headers: { ...getAuthHeaders() }
   })
-  if (!res.ok) throw new Error('Error al obtener pedidos')
+  if (!res.ok) {
+    if (res.status === 401) {
+      localStorage.removeItem('looserfit_token')
+      localStorage.removeItem('looserfit_user')
+      window.location.reload() // Recargar para que AuthContext detecte el cierre de sesión
+    }
+    throw new Error('Error al obtener pedidos')
+  }
   return res.json()
 }
 
@@ -132,7 +139,14 @@ export async function getMisPedidos() {
   const res = await fetch(`${BASE_URL}/orders/mine`, {
     headers: { ...getAuthHeaders() }
   })
-  if (!res.ok) throw new Error('Error al obtener tus pedidos')
+  if (!res.ok) {
+    if (res.status === 401) {
+      localStorage.removeItem('looserfit_token')
+      localStorage.removeItem('looserfit_user')
+      window.location.reload()
+    }
+    throw new Error('Error al obtener tus pedidos')
+  }
   return res.json()
 }
 
