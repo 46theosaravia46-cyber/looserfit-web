@@ -27,12 +27,19 @@
 /* Layout */
 .producto-layout {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   gap: 4rem;
   align-items: stretch;
 }
 
 /* Galería */
+.producto-galeria {
+  min-width: 0; 
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden; /* Evita que los hijos expandan el contenedor fuera del grid */
+}
+
 .galeria__main {
   border: var(--border);
   overflow: hidden;
@@ -73,6 +80,8 @@
   margin-top: 0.75rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
+  width: 100%;
+  flex-wrap: nowrap;
 }
 
 .galeria__thumb {
