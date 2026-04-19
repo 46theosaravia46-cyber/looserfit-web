@@ -36,8 +36,8 @@
 .producto-galeria {
   min-width: 0; 
   width: 100%;
-  max-width: 100%;
-  overflow: visible; /* Cambiado a visible para no cortar sombras o badges si los hay, el grid mantendrá el ancho */
+  max-width: 500px; /* Evita que la foto se vea 'gigante' en PC */
+  overflow: visible;
 }
 
 .galeria__main {
@@ -87,7 +87,7 @@
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
   scrollbar-width: thin;
-  scrollbar-color: var(--gray-4) transparent;
+  scrollbar-color: var(--black) var(--gray-4); /* Más visible en PC */
 }
 
 /* Scrollbar para Chrome/Safari */
@@ -334,6 +334,10 @@
 
 /* ── RESPONSIVE REFINEMENTS (iPhone Focus) ── */
 @media (max-width: 900px) {
+  .producto-galeria {
+    max-width: 100%; /* En mobile vuelve a ser ancho completo */
+  }
+
   .producto-layout {
     grid-template-columns: 1fr;
     gap: 1.5rem;
