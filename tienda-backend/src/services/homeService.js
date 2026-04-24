@@ -1,6 +1,7 @@
 const HomeContent = require('../models/HomeContent');
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
+const { deleteFromCloudinary } = require('../utils/cloudinaryUtils');
 
 const createTransport = () => {
     return nodemailer.createTransport({
@@ -59,6 +60,14 @@ const getHomeContent = async () => {
 const updateHero = async (images) => {
     // Ya no obligamos a que sean 3
     const home = await getHomeContent();
+    const oldImages = home.heroImages || [];
+    
+    // Limpiar imágenes eliminadas
+    const removed = oldImages.filter(img => !images.includes(img));
+    for (const imgUrl of removed) {
+        await deleteFromCloudinary(imgUrl);
+    }
+
     home.heroImages = images;
     return await home.save();
 };
@@ -66,6 +75,16 @@ const updateHero = async (images) => {
 const updateFamily = async (familyImages) => {
     let doc = await HomeContent.findOne();
     if (!doc) doc = await HomeContent.create({});
+    
+    const oldImages = doc.familyImages?.map(f => f.src) || [];
+    const newUrls = familyImages.map(f => f.src);
+
+    // Limpiar imágenes eliminadas
+    const removed = oldImages.filter(img => !newUrls.includes(img));
+    for (const imgUrl of removed) {
+        await deleteFromCloudinary(imgUrl);
+    }
+
     doc.familyImages = familyImages;
     return await doc.save();
 };

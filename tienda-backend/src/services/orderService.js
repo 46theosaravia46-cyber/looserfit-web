@@ -2,6 +2,7 @@ const Order = require('../models/Order');
 const Product = require('../models/product');
 const crypto = require('crypto');
 const { enviarEmailPedido, enviarEmailSeguimiento, enviarEmailNotificacionAdmin } = require('../config/email');
+const { deleteFromCloudinary } = require('../utils/cloudinaryUtils');
 
 const createOrder = async (orderData) => {
     const { productos = [], total, tipoEnvio, datosEnvio, usuario } = orderData;
@@ -109,14 +110,28 @@ const updateTracking = async (id, trackingNumber) => {
 };
 
 const uploadComprobante = async (id, comprobantePath) => {
+    const pedido = await Order.findById(id);
+    if (pedido && pedido.comprobante) {
+        await deleteFromCloudinary(pedido.comprobante);
+    }
     return await Order.findByIdAndUpdate(id, { comprobante: comprobantePath }, { new: true });
 };
 
 const deleteOrder = async (id) => {
+    const pedido = await Order.findById(id);
+    if (pedido && pedido.comprobante) {
+        await deleteFromCloudinary(pedido.comprobante);
+    }
     return await Order.findByIdAndDelete(id);
 };
 
 const bulkDeleteOrders = async (ids) => {
+    const pedidos = await Order.find({ _id: { $in: ids } });
+    for (const pedido of pedidos) {
+        if (pedido.comprobante) {
+            await deleteFromCloudinary(pedido.comprobante);
+        }
+    }
     return await Order.deleteMany({ _id: { $in: ids } });
 };
 

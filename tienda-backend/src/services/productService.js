@@ -1,6 +1,7 @@
 const Product = require('../models/product');
 const Category = require('../models/Category');
 const { SIZES_BY_CATEGORY } = require('../constants/products');
+const { deleteFromCloudinary } = require('../utils/cloudinaryUtils');
 
 const validateSizes = async (categoriaId, talles = []) => {
     if (!categoriaId || talles.length === 0) return;
@@ -115,10 +116,35 @@ const updateProduct = async (id, updateData) => {
 
         await validateSizes(cat?._id || cat, finalTalles);
     }
+
+    const existing = await Product.findById(id);
+    if (existing) {
+        // Limpiar imágenes eliminadas de la galería
+        if (updateData.imagenes) {
+            const eliminadas = existing.imagenes.filter(img => !updateData.imagenes.includes(img));
+            for (const imgUrl of eliminadas) {
+                await deleteFromCloudinary(imgUrl);
+            }
+        }
+        // Limpiar guía de talles si cambió
+        if (updateData.guiaTalles && existing.guiaTalles && updateData.guiaTalles !== existing.guiaTalles) {
+            await deleteFromCloudinary(existing.guiaTalles);
+        }
+    }
+
     return await Product.findByIdAndUpdate(id, updateData, { new: true }).populate('categoria');
 };
 
 const deleteProduct = async (id) => {
+    const existing = await Product.findById(id);
+    if (existing) {
+        for (const imgUrl of existing.imagenes) {
+            await deleteFromCloudinary(imgUrl);
+        }
+        if (existing.guiaTalles) {
+            await deleteFromCloudinary(existing.guiaTalles);
+        }
+    }
     return await Product.findByIdAndDelete(id);
 };
 

@@ -10,9 +10,27 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: 'looserfit_productos',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'heic', 'heif'],
+  params: async (req, file) => {
+    let folder = 'looserfit_general';
+    let transformation = [{ quality: 'auto:good', fetch_format: 'auto' }];
+
+    if (file.fieldname === 'imagenes' || file.fieldname === 'guiaTallesImg') {
+      folder = 'looserfit_productos';
+      transformation.push({ width: 800, crop: 'limit' });
+    } else if (file.fieldname === 'newHeroImages' || file.fieldname === 'newFamilyImages') {
+      folder = 'looserfit_banners';
+      transformation.push({ width: 1920, crop: 'limit' });
+    } else if (file.fieldname === 'comprobante') {
+      folder = 'looserfit_comprobantes';
+      transformation.push({ width: 1000, crop: 'limit' });
+    }
+
+    return {
+      folder: folder,
+      allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'heic', 'heif'],
+      transformation: transformation,
+      public_id: `${Date.now()}-${file.originalname.split('.')[0]}`.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+    };
   },
 });
 
