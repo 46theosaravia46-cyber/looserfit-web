@@ -70,25 +70,3 @@ npm install
 cp .env.example .env
 npm run dev
 ```
-
----
-
-## 🔐 Manejo de Variables de Entorno (.env)
-
-**IMPORTANTE:** Por razones de seguridad, el archivo `.env` original **NUNCA** debe ser subido a repositorios públicos como GitHub, ya que contiene claves privadas (Cloudinary, Mercado Pago, Bases de datos, etc.).
-
-### ¿Cómo subir mi proyecto correctamente?
-1. Asegúrate de que el archivo `.env` esté incluido en el `.gitignore`.
-2. Proporciona un archivo llamado `.env.example` en cada carpeta (frontend y backend).
-3. En `.env.example`, coloca solo las **nombres** de las variables sin sus valores reales.
-4. Cuando alguien más descargue tu proyecto (o para tu entrega de TP), solo tendrá que copiar el `.env.example` a un nuevo archivo `.env` y poner sus propias credenciales.
-
----
-
-## 👤 Autor
-Proyecto realizado para el TP de **Looserfit**.
-- **Desarrollo**: [Tu Nombre/Usuario]
-- **Estado**: Funcional / En Desarrollo
-
----
-*Desarrollado con ❤️ para Looserfit.*
