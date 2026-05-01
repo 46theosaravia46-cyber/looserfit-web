@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../config/cloudinary');
+const { upload } = require('../config/storage');
 const orderController = require('../controllers/orderController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 

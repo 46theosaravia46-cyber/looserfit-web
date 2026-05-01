@@ -1,4 +1,5 @@
 const orderService = require('../services/orderService');
+const { subirImagen } = require('../config/storage');
 
 const createOrder = async (req, res) => {
     try {
@@ -89,10 +90,11 @@ const updateTracking = async (req, res) => {
 
 const uploadComprobante = async (req, res) => {
     try {
-        if (!req.file || !req.file.path) {
+        if (!req.file) {
             return res.status(400).json({ mensaje: 'No se recibió el comprobante' });
         }
-        const order = await orderService.uploadComprobante(req.params.id, req.file.path);
+        const url = await subirImagen(req.file, 'looserfit_comprobantes');
+        const order = await orderService.uploadComprobante(req.params.id, url);
         if (!order) return res.status(404).json({ mensaje: 'Pedido no encontrado' });
         res.json({ mensaje: 'Comprobante subido con éxito', pedido: order });
     } catch (error) {

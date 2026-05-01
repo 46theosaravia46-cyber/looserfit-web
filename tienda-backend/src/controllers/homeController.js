@@ -1,4 +1,5 @@
 const homeService = require('../services/homeService');
+const { subirImagen } = require('../config/storage');
 
 const getHome = async (req, res) => {
     try {
@@ -17,14 +18,17 @@ const updateHero = async (req, res) => {
         }
 
         let fileIndex = 0;
-        finalImages = finalImages.map(item => {
+        const mapped = [];
+        for (const item of finalImages) {
             if (item.startsWith('NEW_FILE_') && req.files && req.files[fileIndex]) {
-                const path = req.files[fileIndex].path;
+                const url = await subirImagen(req.files[fileIndex], 'looserfit_banners');
                 fileIndex++;
-                return path;
+                mapped.push(url);
+            } else {
+                mapped.push(item);
             }
-            return item;
-        });
+        }
+        finalImages = mapped;
 
         const doc = await homeService.updateHero(finalImages);
         res.json({ mensaje: 'Hero actualizado', home: doc });
@@ -42,14 +46,15 @@ const updateFamily = async (req, res) => {
         }
 
         let fileIndex = 0;
-        const familyImages = finalConfig.map(item => {
+        const familyImages = [];
+        for (const item of finalConfig) {
             let src = item.src;
             if (src.startsWith('NEW_FILE_') && req.files && req.files[fileIndex]) {
-                src = req.files[fileIndex].path;
+                src = await subirImagen(req.files[fileIndex], 'looserfit_banners');
                 fileIndex++;
             }
-            return { src, titulo: item.titulo || '', descripcion: item.descripcion || '' };
-        });
+            familyImages.push({ src, titulo: item.titulo || '', descripcion: item.descripcion || '' });
+        }
 
         const doc = await homeService.updateFamily(familyImages);
         res.json({ mensaje: 'Family actualizado', home: doc });
