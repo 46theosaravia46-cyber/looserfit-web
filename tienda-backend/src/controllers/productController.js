@@ -1,4 +1,5 @@
 const productService = require('../services/productService');
+const { subirImagen } = require('../config/storage');
 
 const getAllProducts = async (req, res) => {
     try {
@@ -29,8 +30,12 @@ const getProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
     try {
-        const urls = req.files['imagenes'] ? req.files['imagenes'].map(file => file.path) : [];
-        const guiaTallesUrl = req.files['guiaTallesImg'] ? req.files['guiaTallesImg'][0].path : req.body.guiaTalles;
+        const urls = req.files && req.files['imagenes'] 
+            ? await Promise.all(req.files['imagenes'].map(file => subirImagen(file)))
+            : [];
+        const guiaTallesUrl = req.files && req.files['guiaTallesImg'] 
+            ? await subirImagen(req.files['guiaTallesImg'][0]) 
+            : req.body.guiaTalles;
         
         const newProduct = await productService.createProduct({
             ...req.body,
@@ -59,7 +64,7 @@ const updateProduct = async (req, res) => {
         // Fotos nuevas
         let fotosNuevas = [];
         if (req.files && req.files['imagenes']) {
-            fotosNuevas = req.files['imagenes'].map(f => f.path);
+            fotosNuevas = await Promise.all(req.files['imagenes'].map(f => subirImagen(f)));
         }
 
         const totalFinal = [...new Set([...fotosMantener, ...fotosNuevas])].filter(f => f && typeof f === 'string');
@@ -67,7 +72,7 @@ const updateProduct = async (req, res) => {
         // Guía talles
         let guiaTalles = existing.guiaTalles;
         if (req.files && req.files['guiaTallesImg'] && req.files['guiaTallesImg'].length > 0) {
-            guiaTalles = req.files['guiaTallesImg'][0].path;
+            guiaTalles = await subirImagen(req.files['guiaTallesImg'][0]);
         } else if (otrosCampos.guiaTalles) {
             guiaTalles = otrosCampos.guiaTalles;
         }
