@@ -95,6 +95,8 @@ router.post('/webhook', async (req, res) => {
     const topic = req.query.topic || req.query.type || req.body.type || req.body.topic;
     const paymentId = req.query.id || req.query['data.id'] || req.body.id || req.body['data.id'] || req.body.data?.id;
 
+    console.log(`[Webhook MP] ${new Date().toISOString()} - Recibido: topic=${topic}, id=${paymentId}`);
+
     try {
         if (topic === 'payment' && paymentId) {
             const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
@@ -111,16 +113,21 @@ router.post('/webhook', async (req, res) => {
             const paymentData = await response.json();
             const orderId = paymentData.external_reference || req.body.data?.object?.external_reference || req.body.external_reference;
 
-            console.log(`[Webhook MP] Pago ${paymentId} - Estado: ${paymentData.status} - Detalle: ${paymentData.status_detail}`);
+            console.log(`[Webhook MP] Pago ${paymentId} - Estado: ${paymentData.status} - Detalle: ${paymentData.status_detail} - Orden: ${orderId}`);
 
             if (!orderId) {
-                console.warn('Webhook recibido sin external_reference válido:', paymentId);
+                console.warn('[Webhook MP] ⚠️ Webhook recibido sin external_reference válido:', paymentId);
                 return res.sendStatus(200);
             }
 
             if (paymentData.status === 'approved') {
                 const pedido = await Order.findById(orderId);
-                if (pedido && pedido.estado !== 'Pagado') {
+                if (!pedido) {
+                    console.error(`[Webhook MP] ❌ Orden ${orderId} no encontrada en la DB`);
+                    return res.sendStatus(200);
+                }
+
+                if (pedido.estado !== 'Pagado') {
                     // --- DESCONTAR STOCK AL CONFIRMAR PAGO ---
                     for (const item of pedido.productos) {
                         const updated = await Product.findOneAndUpdate(
@@ -131,25 +138,30 @@ router.post('/webhook', async (req, res) => {
                         
                         if (!updated) {
                            console.error(`❌ [Webhook MP] Error critico: No hay stock suficiente para ${item.nombre} al confirmar pago de orden ${orderId}`);
-                           // Aquí idealmente notificaríamos al admin para devolución manual
                         }
                     }
 
                     const orderService = require('../services/orderService');
                     await orderService.updateOrderStatus(orderId, 'Pagado');
-                    console.log(`✅ [Webhook MP] Pedido ${orderId} marcado como Pagado.`);
+                    console.log(`✅ [Webhook MP] Pedido ${orderId} marcado como Pagado y stock descontado.`);
+                } else {
+                    console.log(`[Webhook MP] Pedido ${orderId} ya estaba en estado Pagado, ignorando duplicado.`);
                 }
             } else if (['pending', 'in_process'].includes(paymentData.status)) {
                 console.log(`⏳ [Webhook MP] Pedido ${orderId} está pendiente de acreditación (${paymentData.status_detail})`);
             } else {
                 console.log(`❌ [Webhook MP] Pedido ${orderId} falló o fue rechazado: ${paymentData.status}`);
             }
+        } else {
+            // MP envía otros tipos de notificaciones (merchant_order, etc) que no necesitamos procesar
+            console.log(`[Webhook MP] Notificación ignorada: topic=${topic}, id=${paymentId}`);
         }
 
         res.sendStatus(200);
     } catch (error) {
-        console.error('Error en webhook:', error);
-        res.sendStatus(200);
+        console.error(`[Webhook MP] ❌ Error procesando webhook:`, error.message);
+        // Devolver 500 para que Mercado Pago REINTENTE el webhook
+        res.sendStatus(500);
     }
 });
 

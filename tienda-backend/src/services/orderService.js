@@ -4,6 +4,27 @@ const crypto = require('crypto');
 const { enviarEmailPedido, enviarEmailSeguimiento, enviarEmailNotificacionAdmin } = require('../config/email');
 const { deleteFromCloudinary } = require('../utils/cloudinaryUtils');
 
+// Helper: reintenta una función async hasta N veces con espera creciente
+const enviarConReintentos = async (fn, maxIntentos, label = 'Email') => {
+    for (let intento = 1; intento <= maxIntentos; intento++) {
+        try {
+            const result = await fn();
+            if (result) return true;
+            throw new Error('La función retornó false');
+        } catch (err) {
+            console.warn(`⚠️ [${label}] Intento ${intento}/${maxIntentos} falló: ${err.message}`);
+            if (intento < maxIntentos) {
+                const espera = intento * 5000; // 5s, 10s, 15s
+                console.log(`   ↻ Reintentando en ${espera / 1000}s...`);
+                await new Promise(r => setTimeout(r, espera));
+            } else {
+                console.error(`❌ [${label}] Todos los intentos fallaron.`);
+            }
+        }
+    }
+    return false;
+};
+
 const createOrder = async (orderData) => {
     const { productos = [], total, tipoEnvio, datosEnvio, usuario } = orderData;
     
@@ -93,8 +114,8 @@ const updateOrderStatus = async (id, estado) => {
         } else if (estado === 'Pagado') {
             const { enviarEmailPagoAprobado, enviarEmailNotificacionAdmin } = require('../config/email');
             enviarEmailPagoAprobado(datosEnvio, pedido).catch(console.error);
-            // Notificar al admin también que un pago fue aprobado
-            enviarEmailNotificacionAdmin(pedido).catch(console.error);
+            // Notificar al admin con reintentos — si falla no se pierde la notificación
+            enviarConReintentos(() => enviarEmailNotificacionAdmin(pedido), 3, 'Notificación admin');
         }
     }
     
