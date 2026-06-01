@@ -12,15 +12,22 @@ export default function Carrito() {
   const [stocks, setStocks] = useState({})
 
   useEffect(() => {
-    // Cargar stock actual de los productos en el carrito
+    // Cargar stock actual y sincronizar precios de oferta
     items.forEach(item => {
       getProductoById(item._id)
         .then(data => {
           setStocks(prev => ({ ...prev, [item._id]: data.stock }))
+          // Sincronizar precio por si cambió la oferta
+          const precioActual = (data.precioOferta && data.precioOferta > 0)
+            ? data.precioOferta
+            : data.precio
+          if (precioActual !== item.precio) {
+            updateCantidad(item._id, item.talle, item.cantidad, precioActual)
+          }
         })
         .catch(console.error)
     })
-  }, [items])
+  }, [items.length]) // Only re-run when items count changes, not on every price update
 
   const hasNoStock = items.some(item => (stocks[item._id] ?? 1) <= 0)
 

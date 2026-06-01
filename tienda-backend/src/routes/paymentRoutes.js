@@ -19,26 +19,30 @@ router.post('/create-preference', async (req, res) => {
             return res.status(404).json({ mensaje: 'Pedido no encontrado' });
         }
 
-        // --- VERIFICAR STOCK ANTES DE MERCADO PAGO ---
-        for (const item of pedido.productos) {
-            const productoDB = await Product.findById(item.productoId);
+        // --- VERIFICAR STOCK Y PRECIOS ANTES DE MERCADO PAGO ---
+        const items = [];
+        for (const p of pedido.productos) {
+            const productoDB = await Product.findById(p.productoId);
             if (!productoDB) {
-                return res.status(400).json({ mensaje: `Producto no encontrado: ${item.nombre}` });
+                return res.status(400).json({ mensaje: `Producto no encontrado: ${p.nombre}` });
             }
-            if (productoDB.stock < item.cantidad) {
+            if (productoDB.stock < p.cantidad) {
                 return res.status(400).json({ 
-                    mensaje: `Lo sentimos, ya no queda stock suficiente de "${item.nombre}". Stock disponible: ${productoDB.stock}` 
+                    mensaje: `Lo sentimos, ya no queda stock suficiente de "${p.nombre}". Stock disponible: ${productoDB.stock}` 
                 });
             }
+            // Usar precioOferta si existe y es válido, sino precio base de la DB
+            const precioVerificado = (productoDB.precioOferta && productoDB.precioOferta > 0)
+                ? productoDB.precioOferta
+                : productoDB.precio;
+            items.push({
+                id: p.productoId.toString(),
+                title: p.nombre,
+                quantity: p.cantidad,
+                unit_price: precioVerificado,
+                currency_id: 'ARS'
+            });
         }
-
-        const items = pedido.productos.map(p => ({
-            id: p.productoId.toString(),
-            title: p.nombre,
-            quantity: p.cantidad,
-            unit_price: p.precio,
-            currency_id: 'ARS'
-        }));
 
         if (pedido.shippingCost && pedido.shippingCost > 0) {
             items.push({
