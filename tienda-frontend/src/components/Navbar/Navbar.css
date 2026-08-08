@@ -2,6 +2,42 @@
    NAVBAR.CSS
 ============================================ */
 
+/* ── Brand Switcher (selector Fit / Sport en el drawer) ── */
+.navbar__brand-switcher {
+  display: flex;
+  gap: 8px;
+  padding: 16px 0 8px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: 12px;
+}
+
+.brand-switcher__item {
+  flex: 1;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: all 0.2s ease;
+}
+
+.brand-switcher__item:hover {
+  color: #fff;
+  border-color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.06);
+}
+
+.brand-switcher__item--active {
+  color: #fff;
+  border-color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.1);
+}
+
 .navbar {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -104,26 +140,39 @@ body.has-pending-alert .navbar {
 .navbar__links a:hover { opacity: 0.7; }
 .navbar__links a:hover::after { width: 100%; }
 
-/* Logo */
 .navbar__logo {
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
   z-index: 1;
+  gap: 16px;
 }
 
-.navbar__logo a {
+.navbar__logo-link {
   display: flex;
   padding: 4px;
   background: transparent;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
   position: relative;
   z-index: 1;
 }
 
-.navbar__logo a:hover {
-  transform: scale(1.1);
+.navbar__logo-link--active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.navbar__logo-link--inactive {
+  transform: scale(0.55);
+  opacity: 0.4;
+  filter: grayscale(100%);
+}
+
+.navbar__logo-link--inactive:hover {
+  transform: scale(0.65);
+  opacity: 0.85;
+  filter: grayscale(0%);
 }
 
 .navbar__logo-img {

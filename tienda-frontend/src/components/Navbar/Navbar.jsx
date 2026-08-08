@@ -149,30 +149,29 @@ export default function Navbar() {
               <li><Link to={brand?.slug === 'sport' ? '/sport/tienda' : '/tienda'} onClick={closeDrawer}>Tienda</Link></li>
             </ul>
 
-            {/* Selector de marca */}
-            <div className="navbar__brand-switcher">
-              {ALL_BRANDS.map(b => (
-                <a
-                  key={b.slug}
-                  href={b.basePath}
-                  className={`brand-switcher__item ${brand?.slug === b.slug ? 'brand-switcher__item--active' : ''}`}
-                  onClick={closeDrawer}
-                >
-                  {b.name}
-                </a>
-              ))}
-            </div>
           </div>
 
-          {/* Logo centro — usa el logo de la marca activa */}
+          {/* Logo centro — logo activo grande, logo inactivo como sombra */}
           <div className="navbar__logo">
-            <Link to={brand?.slug === 'sport' ? '/sport' : '/'}>
-              <img
-                src={brandConfig.assets.logo}
-                alt={brandConfig.name}
-                className="navbar__logo-img"
-              />
-            </Link>
+            {ALL_BRANDS.map(b => {
+              const isActive = brand?.slug === b.slug;
+              const config = getBrandConfig(b.slug);
+              
+              return (
+                <Link 
+                  key={b.slug} 
+                  to={b.basePath} 
+                  className={`navbar__logo-link ${isActive ? 'navbar__logo-link--active' : 'navbar__logo-link--inactive'}`}
+                  title={isActive ? config.name : `Cambiar a ${config.name}`}
+                >
+                  <img
+                    src={config.assets.logo}
+                    alt={config.name}
+                    className="navbar__logo-img"
+                  />
+                </Link>
+              )
+            })}
           </div>
 
           {/* Derecha */}
