@@ -25,8 +25,8 @@ export default function BrandLogoSwitcher() {
       aria-label={`Cambiar a ${otherConfig.name}`}
       style={{
         position: 'relative',
-        width: '52px',
-        height: '52px',
+        width: '96px', /* un poco mas de espacio para que quepan las dos caras */
+        height: '96px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -36,42 +36,41 @@ export default function BrandLogoSwitcher() {
         padding: 0
       }}
     >
-      {/* Logo de fondo (la otra marca, como sombra) */}
+      {/* Logo de fondo (Sport) — offset en diagonal, translúcido, nunca clickeable */}
       <img
         src={otherConfig.assets.logo}
         alt=""
         aria-hidden="true"
         style={{
           position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          opacity: 0.2,
-          filter: 'grayscale(100%)',
-          transform: 'scale(0.95)',
+          width: '64px',
+          height: '64px',
+          opacity: 0.35,
+          transform: 'translateX(25%) translateY(-15%) rotate(8deg)',
           pointerEvents: 'none',
           userSelect: 'none',
-          objectFit: 'contain'
+          objectFit: 'contain',
+          zIndex: 0
         }}
       />
 
-      {/* Logo activo, adelante, con animación de entrada/salida y hover */}
+      {/* Logo activo (Fit), adelante, con hover + animación de swap */}
       <AnimatePresence mode="wait">
         <motion.img
           key={currentSlug}
           src={currentConfig.assets.logo}
           alt={currentConfig.name}
-          initial={{ opacity: 0, scale: 0.85, rotateY: 90 }}
-          animate={{ opacity: 1, scale: hovered ? 1.08 : 1, rotateY: 0 }}
-          exit={{ opacity: 0, scale: 0.85, rotateY: -90 }}
-          transition={{ duration: 0.35, ease: 'easeInOut' }}
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: hovered ? 1.08 : 1 }}
+          exit={{ opacity: 0, scale: 0.85 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
           style={{
             position: 'relative',
             zIndex: 10,
-            width: '100%',
-            height: '100%',
+            width: '64px',
+            height: '64px',
             objectFit: 'contain',
-            filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.25))'
+            filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.3))'
           }}
         />
       </AnimatePresence>
