@@ -48,15 +48,21 @@
 }
 
 /* ==== EFECTOS DE HOVER ==== */
-/* Solo si pasamos el mouse por el de ATRÁS */
-.brand-logo-back:hover {
+
+/* Hover sobre el logo ACTIVO (frente): solo se agranda un poquito */
+.brand-logo-switcher.allow-hover .brand-logo-front:hover {
+  transform: translateX(0px) scale(1.08) rotate(0deg);
+}
+
+/* Hover sobre el logo INACTIVO (sombra/atrás): Animación de intercambio */
+.brand-logo-switcher.allow-hover .brand-logo-back:hover {
   opacity: 1;
   z-index: 20;
   transform: translateX(-15px) scale(1.1) rotate(0deg);
 }
 
 /* El frente reacciona cuando se hoverea el de ATRÁS */
-.brand-logo-back:hover ~ .brand-logo-front {
+.brand-logo-switcher.allow-hover .brand-logo-back:hover ~ .brand-logo-front {
   opacity: 0.35;
   z-index: 0;
   transform: translateX(-15px) scale(0.65) rotate(-15deg);
