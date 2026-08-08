@@ -270,7 +270,7 @@ function App() {
       {/* ── Rutas de Looser Sport ── */}
       <Route path="/sport/*" element={
         <BrandProvider brandSlug="sport">
-          <BrandRoutes pathPrefix="/sport" />
+          <BrandRoutes pathPrefix="" />
         </BrandProvider>
       }/>
 

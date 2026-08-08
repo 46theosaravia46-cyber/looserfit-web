@@ -187,7 +187,8 @@ export default function Home() {
             {categorias.map(cat => {
               const images = getCatImg(cat.name)
               // Mostrar solo la parte en español si hay "/"
-              const label = cat.name.includes('/') ? cat.name.split('/')[1].trim() : cat.name
+              let label = cat.name.includes('/') ? cat.name.split('/')[1].trim() : cat.name
+              if (label === 'Sport') label = 'Deportivo'
               
               return (
                 <Link
