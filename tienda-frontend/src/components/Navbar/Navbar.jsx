@@ -7,6 +7,7 @@ import { getMisPedidos } from '../../services/api'
 import AuthModal from '../AuthModal/AuthModal'
 import { getBrandConfig } from '../../config/siteConfig'
 import { ALL_BRANDS } from '../../config/brandConfig'
+import BrandLogoSwitcher from '../BrandLogoSwitcher/BrandLogoSwitcher'
 import './Navbar.css'
 
 export default function Navbar() {
@@ -151,27 +152,9 @@ export default function Navbar() {
 
           </div>
 
-          {/* Logo centro — logo activo grande, logo inactivo como sombra */}
+          {/* Logo centro — usando framer motion */}
           <div className="navbar__logo">
-            {ALL_BRANDS.map(b => {
-              const isActive = brand?.slug === b.slug;
-              const config = getBrandConfig(b.slug);
-              
-              return (
-                <Link 
-                  key={b.slug} 
-                  to={b.basePath} 
-                  className={`navbar__logo-link ${isActive ? 'navbar__logo-link--active' : 'navbar__logo-link--inactive'}`}
-                  title={isActive ? config.name : `Cambiar a ${config.name}`}
-                >
-                  <img
-                    src={config.assets.logo}
-                    alt={config.name}
-                    className="navbar__logo-img"
-                  />
-                </Link>
-              )
-            })}
+            <BrandLogoSwitcher />
           </div>
 
           {/* Derecha */}
