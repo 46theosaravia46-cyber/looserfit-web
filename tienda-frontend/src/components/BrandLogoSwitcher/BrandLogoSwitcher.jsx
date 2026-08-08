@@ -15,15 +15,41 @@ export default function BrandLogoSwitcher() {
   const currentConfig = getBrandConfig(currentSlug);
   const otherConfig = getBrandConfig(otherSlug);
 
-  // Evitar el "hover fantasma": solo permitir hover después de que el usuario mueva el mouse
+  // Evitar el "hover fantasma": exigir que el usuario mueva el mouse una distancia real
   useEffect(() => {
     setAllowHover(false);
-    const handleMouseMove = () => {
-      setAllowHover(true);
+    
+    let startX = null;
+    let startY = null;
+
+    const handleMouseMove = (e) => {
+      if (startX === null || startY === null) {
+        startX = e.clientX;
+        startY = e.clientY;
+        return; // Guardar coordenada inicial
+      }
+
+      // Calcular distancia recorrida
+      const distance = Math.sqrt(
+        Math.pow(e.clientX - startX, 2) + Math.pow(e.clientY - startY, 2)
+      );
+
+      // Si movió el mouse más de 25 píxeles reales, habilitar el hover
+      if (distance > 25) {
+        setAllowHover(true);
+        window.removeEventListener('mousemove', handleMouseMove);
+      }
+    };
+
+    // Ignorar vibraciones residuales del momento del click (200ms)
+    const timer = setTimeout(() => {
+      window.addEventListener('mousemove', handleMouseMove);
+    }, 200);
+
+    return () => {
+      clearTimeout(timer);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [location.pathname]); // Resetear cada vez que cambia la ruta
 
   return (
