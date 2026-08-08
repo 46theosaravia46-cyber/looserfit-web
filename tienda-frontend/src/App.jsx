@@ -1,5 +1,14 @@
+/**
+ * App.jsx — Punto de entrada de rutas del frontend.
+ * Implementa el ruteo multi-marca:
+ * - Looser Fit: rutas en /
+ * - Looser Sport: rutas en /sport
+ * Ambas marcas usan los mismos componentes pero con su BrandProvider propio.
+ */
+
 import { useEffect, useRef, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { BrandProvider, useBrand } from './context/BrandContext'
 import Navbar from './components/Navbar/Navbar'
 import Footer from './components/Footer/Footer'
 import Home from './pages/Home/Home'
@@ -15,13 +24,14 @@ import AdminHome from './pages/Admin/AdminHome'
 import AdminNewsletter from './pages/Admin/AdminNewsletter'
 import Carrito from './pages/Carrito/Carrito'
 import AuthModal from './components/AuthModal/AuthModal'
-import { getHomeContent } from './services/api'
 import Checkout from './pages/Checkout/Checkout'
 import PedidoExito from './pages/PedidoExito/PedidoExito'
 import MisPedidos from './pages/MisPedidos/MisPedidos'
 import TrackingPedido from './pages/Tracking/TrackingPedido'
 import NotFound from './pages/NotFound/NotFound'
 import PendingReceiptAlert from './components/PendingReceiptAlert/PendingReceiptAlert'
+
+// ─── Pantalla de Coming Soon ───────────────────────────────────────────────
 
 function ComingSoonScreen({ launchDate, message, subtitle, onAuthClick }) {
   const [, setTick] = useState(0)
@@ -75,11 +85,12 @@ function ComingSoonScreen({ launchDate, message, subtitle, onAuthClick }) {
   )
 }
 
+// ─── Gate público (maneja coming soon por marca) ───────────────────────────
+
 function PublicGate({ children, homeLoading, comingSoon, onAuthClick }) {
   if (homeLoading) return <div style={{ height: '100vh', background: '#0a0a0a' }} />;
   const active = Boolean(comingSoon?.enabled && comingSoon?.launchDate && new Date(comingSoon.launchDate) > new Date())
   
-  // Si está en modo lanzamiento, mostrar solo Home con overlay bloqueador
   if (active) {
     return (
       <>
@@ -100,54 +111,49 @@ function PublicGate({ children, homeLoading, comingSoon, onAuthClick }) {
   return children
 }
 
-function App() {
+// ─── Rutas de una marca (componente reutilizable) ──────────────────────────
+// pathPrefix: '' para Fit, '/sport' para Sport
+
+function BrandRoutes({ pathPrefix }) {
+  const { brand, loading: brandLoading } = useBrand()
   const [homeContent, setHomeContent] = useState(null)
   const [homeLoading, setHomeLoading] = useState(true)
   const [authOpen, setAuthOpen] = useState(false)
+  const location = useLocation()
 
+  // Cargar el HomeContent de esta marca usando el brand slug del contexto
   useEffect(() => {
-    getHomeContent()
+    if (brandLoading) return
+    const slug = brand?.slug || 'fit'
+    fetch(`/api/home?brand=${slug}`)
+      .then(r => r.json())
       .then(data => setHomeContent(data))
       .catch(() => setHomeContent(null))
       .finally(() => setHomeLoading(false))
-  }, [])
+  }, [brand?.slug, brandLoading])
 
   const comingSoon = homeContent?.comingSoon
   const isLaunchActive = Boolean(comingSoon?.enabled && comingSoon?.launchDate && new Date(comingSoon.launchDate) > new Date())
 
-  // Verificar cada segundo si el lanzamiento terminó
+  // Recargar si el lanzamiento terminó
   useEffect(() => {
     if (!isLaunchActive) return
-
     const interval = setInterval(() => {
       const launchDate = new Date(comingSoon?.launchDate).getTime()
       if (launchDate <= Date.now()) {
-        // El lanzamiento terminó, recargar contenido
-        getHomeContent()
+        const slug = brand?.slug || 'fit'
+        fetch(`/api/home?brand=${slug}`)
+          .then(r => r.json())
           .then(data => setHomeContent(data))
           .catch(() => setHomeContent(null))
       }
     }, 1000)
-
     return () => clearInterval(interval)
-  }, [isLaunchActive, comingSoon?.launchDate])
+  }, [isLaunchActive, comingSoon?.launchDate, brand?.slug])
 
-  const location = useLocation()
-  const publicGateProps = {
-    homeLoading,
-    comingSoon,
-    onAuthClick: () => setAuthOpen(true)
-  }
-
+  // Bloquear scroll en coming soon
   useEffect(() => {
-    if (location.state?.openAuth) {
-      setAuthOpen(true)
-      // Limpiar el estado para que no se abra de nuevo al navegar a otro lado
-      window.history.replaceState({}, document.title)
-    }
-    
     const isAdminRoute = location.pathname.startsWith('/admin')
-
     if (isLaunchActive && !isAdminRoute) {
       document.body.style.overflow = 'hidden'
       document.documentElement.style.overflow = 'hidden'
@@ -155,92 +161,133 @@ function App() {
       document.body.style.overflow = ''
       document.documentElement.style.overflow = ''
     }
-
     return () => {
       document.body.style.overflow = ''
       document.documentElement.style.overflow = ''
     }
   }, [isLaunchActive, location.pathname])
 
+  // Abrir auth si viene en el state de navegación
+  useEffect(() => {
+    if (location.state?.openAuth) {
+      setTimeout(() => setAuthOpen(true), 0)
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state?.openAuth])
+
+  const publicGateProps = { homeLoading, comingSoon, onAuthClick: () => setAuthOpen(true) }
+  const p = pathPrefix // shorthand
+
   return (
     <>
-      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />} 
+      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
       <PendingReceiptAlert />
       <Routes>
-
-        {/* ── Rutas públicas (con Navbar y Footer) ── */}
-        <Route path="/" element={
+        {/* Rutas públicas de esta marca */}
+        <Route path={`${p}/`} element={
           <PublicGate {...publicGateProps}>
             <Navbar />
             <main><Home /></main>
             <Footer />
           </PublicGate>
         }/>
-        <Route path="/tienda" element={
+        <Route path={`${p}/tienda`} element={
           <PublicGate {...publicGateProps}>
             <Navbar />
             <main><Tienda /></main>
             <Footer />
           </PublicGate>
         }/>
-        <Route path="/producto/:id" element={
+        <Route path={`${p}/producto/:id`} element={
           <PublicGate {...publicGateProps}>
             <Navbar />
             <main><Producto /></main>
             <Footer />
           </PublicGate>
         }/>
-        <Route path="/carrito" element={
+        <Route path={`${p}/carrito`} element={
           <PublicGate {...publicGateProps}>
             <Navbar />
             <main><Carrito /></main>
             <Footer />
           </PublicGate>
         }/>
-        <Route path="/checkout" element={
+        <Route path={`${p}/checkout`} element={
           <PublicGate {...publicGateProps}>
             <Navbar />
             <main><Checkout /></main>
             <Footer />
           </PublicGate>
         }/>
-        <Route path="/pedido-exito" element={
+        <Route path={`${p}/pedido-exito`} element={
           <PublicGate {...publicGateProps}>
             <Navbar />
             <main><PedidoExito /></main>
             <Footer />
           </PublicGate>
         }/>
-        <Route path="/mis-pedidos" element={
+        <Route path={`${p}/mis-pedidos`} element={
           <PublicGate {...publicGateProps}>
             <Navbar />
             <main><MisPedidos /></main>
             <Footer />
           </PublicGate>
         }/>
-        <Route path="/seguimiento/:token" element={
+        <Route path={`${p}/seguimiento/:token`} element={
           <PublicGate {...publicGateProps}>
             <Navbar />
             <main><TrackingPedido /></main>
             <Footer />
           </PublicGate>
         }/>
-
-        {/* ── Rutas admin (sin Navbar/Footer públicos) ── */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index          element={<AdminDashboard />} />
-          <Route path="productos"       element={<AdminProductos />} />
-          <Route path="productos/nuevo" element={<AdminNuevoProducto />} />
-          <Route path="productos/editar/:id" element={<AdminNuevoProducto />} />
-          <Route path="home" element={<AdminHome />} />
-          <Route path="pedidos" element={<AdminPedidos />} />
-          <Route path="pedidos/:id" element={<AdminPedido />} />
-          <Route path="newsletter" element={<AdminNewsletter />} />
-        </Route>
-
-        <Route path="*" element={<NotFound />} />
-
       </Routes>
+    </>
+  )
+}
+
+// ─── App principal ─────────────────────────────────────────────────────────
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
+function App() {
+  return (
+    <>
+      <ScrollToTop />
+      <Routes>
+      {/* ── Rutas de Looser Fit (marca principal, pathPrefix vacío) ── */}
+      <Route path="/*" element={
+        <BrandProvider brandSlug="fit">
+          <BrandRoutes pathPrefix="" />
+        </BrandProvider>
+      }/>
+
+      {/* ── Rutas de Looser Sport ── */}
+      <Route path="/sport/*" element={
+        <BrandProvider brandSlug="sport">
+          <BrandRoutes pathPrefix="/sport" />
+        </BrandProvider>
+      }/>
+
+      {/* ── Panel de administración (sin marca pública, sin Navbar/Footer) ── */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="productos" element={<AdminProductos />} />
+        <Route path="productos/nuevo" element={<AdminNuevoProducto />} />
+        <Route path="productos/editar/:id" element={<AdminNuevoProducto />} />
+        <Route path="home" element={<AdminHome />} />
+        <Route path="pedidos" element={<AdminPedidos />} />
+        <Route path="pedidos/:id" element={<AdminPedido />} />
+        <Route path="newsletter" element={<AdminNewsletter />} />
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
     </>
   )
 }
