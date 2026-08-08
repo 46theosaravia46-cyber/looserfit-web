@@ -248,10 +248,10 @@ function BrandRoutes({ pathPrefix }) {
 // ─── App principal ─────────────────────────────────────────────────────────
 
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [pathname, search]);
   return null;
 }
 
