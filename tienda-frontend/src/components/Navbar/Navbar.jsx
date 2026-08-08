@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
+import { useBrand } from '../../context/BrandContext'
 import { getMisPedidos } from '../../services/api'
 import AuthModal from '../AuthModal/AuthModal'
-import { siteConfig } from '../../config/siteConfig'
+import { getBrandConfig } from '../../config/siteConfig'
+import { ALL_BRANDS } from '../../config/brandConfig'
 import './Navbar.css'
 
 export default function Navbar() {
@@ -18,6 +20,9 @@ export default function Navbar() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [misPedidos, setMisPedidos] = useState([])
   const { totalItems } = useCart()
+  // Multi-marca: obtener datos de la marca activa
+  const { brand } = useBrand()
+  const brandConfig = getBrandConfig(brand?.slug)
 
   // Efecto scroll
   useEffect(() => {
@@ -141,14 +146,32 @@ export default function Navbar() {
             )}
             
             <ul className="navbar__links">
-              <li><Link to="/tienda" onClick={closeDrawer}>Tienda</Link></li>
+              <li><Link to={brand?.slug === 'sport' ? '/sport/tienda' : '/tienda'} onClick={closeDrawer}>Tienda</Link></li>
             </ul>
+
+            {/* Selector de marca */}
+            <div className="navbar__brand-switcher">
+              {ALL_BRANDS.map(b => (
+                <a
+                  key={b.slug}
+                  href={b.basePath}
+                  className={`brand-switcher__item ${brand?.slug === b.slug ? 'brand-switcher__item--active' : ''}`}
+                  onClick={closeDrawer}
+                >
+                  {b.name}
+                </a>
+              ))}
+            </div>
           </div>
 
-          {/* Logo centro */}
+          {/* Logo centro — usa el logo de la marca activa */}
           <div className="navbar__logo">
-            <Link to="/">
-              <img src={siteConfig.assets.logo} alt={siteConfig.name} className="navbar__logo-img" />
+            <Link to={brand?.slug === 'sport' ? '/sport' : '/'}>
+              <img
+                src={brandConfig.assets.logo}
+                alt={brandConfig.name}
+                className="navbar__logo-img"
+              />
             </Link>
           </div>
 
@@ -180,7 +203,7 @@ export default function Navbar() {
       {/* Drawer mobile */}
       <aside className={`drawer ${drawerOpen ? 'drawer--open' : ''}`}>
         <div className="drawer__header">
-          <img src={siteConfig.assets.logo} alt={siteConfig.name} className="drawer__logo" />
+          <img src={brandConfig.assets.logo} alt={brandConfig.name} className="drawer__logo" />
           <button className="drawer__close" onClick={closeDrawer}>✕</button>
         </div>
         <ul className="drawer__links">
@@ -189,7 +212,7 @@ export default function Navbar() {
         </ul>
         <div className="drawer__footer">
           Buenos Aires, Argentina<br />
-          {siteConfig.socials.instagram}
+          {brandConfig.socials?.instagram || '@looserfit'}
         </div>
       </aside>
 
