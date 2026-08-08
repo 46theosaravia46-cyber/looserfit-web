@@ -250,10 +250,17 @@ function BrandRoutes({ pathPrefix }) {
 function ScrollToTop() {
   const { pathname, search } = useLocation();
   useEffect(() => {
-    // El setTimeout asegura que el DOM se renderice antes de scrollear
+    // El setTimeout ayuda a que React Router actualice el DOM antes de scrollear
     const timer = setTimeout(() => {
+      // Apagamos smooth scroll temporalmente para forzar el salto instantáneo
+      document.documentElement.style.scrollBehavior = 'auto';
       window.scrollTo(0, 0);
-    }, 50);
+      
+      // Restauramos el smooth scroll
+      setTimeout(() => {
+        document.documentElement.style.scrollBehavior = '';
+      }, 50);
+    }, 10);
     return () => clearTimeout(timer);
   }, [pathname, search]);
   return null;
