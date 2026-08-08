@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useBrand } from '../../context/BrandContext';
 import { getBrandConfig } from '../../config/siteConfig';
 
 export default function BrandLogoSwitcher() {
   const { brand } = useBrand();
-  const [hoverFront, setHoverFront] = useState(false);
+  // Solo necesitamos trackear si el usuario está haciendo hover sobre el logo de fondo
   const [hoverBack, setHoverBack] = useState(false);
 
-  // current slug: brand?.slug
   const currentSlug = brand?.slug || 'fit';
   const otherSlug = currentSlug === 'fit' ? 'sport' : 'fit';
   
@@ -17,9 +15,15 @@ export default function BrandLogoSwitcher() {
   const otherConfig = getBrandConfig(otherSlug);
 
   return (
-    <div style={{ position: 'relative', width: '96px', height: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ 
+      position: 'relative', 
+      width: '120px', 
+      height: '70px', 
+      display: 'flex', 
+      alignItems: 'center' 
+    }}>
       
-      {/* Logo de fondo (Sport) — offset en diagonal, con hover y click */}
+      {/* LOGO INACTIVO (Fondo / Sombra) */}
       <Link
         to={otherSlug === 'fit' ? '/' : '/sport'}
         onMouseEnter={() => setHoverBack(true)}
@@ -27,12 +31,16 @@ export default function BrandLogoSwitcher() {
         aria-label={`Cambiar a ${otherConfig.name}`}
         style={{
           position: 'absolute',
+          left: '35px', /* Desplazado a la derecha por defecto */
           width: '64px',
           height: '64px',
-          opacity: hoverBack ? 0.9 : 0.35,
-          transform: `translateX(25%) translateY(-15%) rotate(8deg) scale(${hoverBack ? 1.1 : 1})`,
+          opacity: hoverBack ? 1 : 0.35,
           zIndex: hoverBack ? 20 : 0,
-          transition: 'all 0.3s ease',
+          /* Animación: De estar chico y a la derecha, pasa a ser grande y al centro */
+          transform: hoverBack 
+            ? 'translateX(-15px) scale(1.1) rotate(0deg)' 
+            : 'translateX(15px) scale(0.65) rotate(15deg)',
+          transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
           display: 'block'
         }}
       >
@@ -43,27 +51,28 @@ export default function BrandLogoSwitcher() {
         />
       </Link>
 
-      {/* Logo activo (Fit), adelante, con hover y click al inicio */}
+      {/* LOGO ACTIVO (Frente) */}
       <Link
         to={currentSlug === 'fit' ? '/' : '/sport'}
-        onMouseEnter={() => setHoverFront(true)}
-        onMouseLeave={() => setHoverFront(false)}
         aria-label={`Ir al inicio de ${currentConfig.name}`}
         style={{
-          position: 'relative',
-          zIndex: 10,
+          position: 'absolute',
+          left: '10px', /* Posición principal (izquierda/centro) */
           width: '64px',
           height: '64px',
+          zIndex: hoverBack ? 0 : 10,
+          /* Animación: Si hoverean el de atrás, este se achica, pierde opacidad y rota a la izquierda */
+          opacity: hoverBack ? 0.35 : 1,
+          transform: hoverBack 
+            ? 'translateX(-15px) scale(0.65) rotate(-15deg)' 
+            : 'translateX(0px) scale(1) rotate(0deg)',
+          transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
           display: 'block'
         }}
       >
-        <motion.img
-          key={currentSlug}
+        <img
           src={currentConfig.assets.logo}
           alt={currentConfig.name}
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: hoverFront ? 1.08 : 1 }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
           style={{
             width: '100%',
             height: '100%',
