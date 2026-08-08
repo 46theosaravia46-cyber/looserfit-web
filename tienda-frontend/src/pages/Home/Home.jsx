@@ -13,6 +13,7 @@ const CATEGORY_IMAGES = {
   'pantalones': { img: '/cat-pantalones.jpg', img2: '/cat-pantalones.jpg' },
   'remeras':    { img: '/cat-remeras.jpg',    img2: '/cat-remeras.jpg' },
   'accesorios': { img: '/cat-accesorios.jpg', img2: '/cat-accesorios.jpg' },
+  'sport':      { img: '/cat-sport.jpg',      img2: '/cat-sport.jpg' },
 }
 const DEFAULT_IMAGE = { img: '/cat-remeras.jpg', img2: '/cat-remeras.jpg' }
 
@@ -23,6 +24,7 @@ const getCatImg = (name) => {
   if (n.includes('pantalones') || n.includes('bottoms')) return CATEGORY_IMAGES.pantalones
   if (n.includes('remeras') || n.includes('tops')) return CATEGORY_IMAGES.remeras
   if (n.includes('accesorios') || n.includes('accessories')) return CATEGORY_IMAGES.accesorios
+  if (n.includes('sport')) return CATEGORY_IMAGES.sport
   return DEFAULT_IMAGE
 }
 
@@ -37,7 +39,6 @@ export default function Home() {
   const [productos,  setProductos]  = useState([])
   const [categorias, setCategorias] = useState([])
   const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState(null)
   const [heroImages, setHeroImages] = useState([])
   const [familyImages, setFamilyImages] = useState([])
   const [heroLoaded, setHeroLoaded] = useState([false, false, false])
@@ -58,7 +59,7 @@ export default function Home() {
         setLoading(prev => (prev ? false : prev))
       })
       .catch(err => {
-        setError(err.message)
+        console.error(err.message)
         setLoading(false)
       })
 

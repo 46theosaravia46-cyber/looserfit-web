@@ -45,7 +45,11 @@ function productosHTML(productos) {
                     ${p.nombre}${p.talle ? ` (${p.talle})` : ''} x${p.cantidad}
                 </td>
                 <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">
-                    $${Number(p.precio).toLocaleString('es-AR')}
+                    ${p.precioOferta ? 
+                      `<span style="text-decoration:line-through;color:#888;font-size:0.9em;margin-right:4px">$${Number(p.precio).toLocaleString('es-AR')}</span>
+                       <span style="color:#d32f2f;font-weight:bold">$${Number(p.precioOferta).toLocaleString('es-AR')}</span>` 
+                      : `$${Number(p.precio).toLocaleString('es-AR')}`
+                    }
                 </td>
             </tr>`)
         .join('');
@@ -75,7 +79,7 @@ function wrapHTML(titulo, contenido) {
 
 // ── Email al cliente cuando confirma el pedido ──
 async function enviarEmailPedido(datosEnvio, pedido) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return false;
+    // removed early return to allow fallback
 
     try {
         const html = wrapHTML(
@@ -116,7 +120,7 @@ async function enviarEmailPedido(datosEnvio, pedido) {
         );
 
         await transporter.sendMail({
-            from: `"${process.env.SITE_NAME || 'Store'}" <${process.env.EMAIL_USER}>`,
+            from: `"${process.env.SITE_NAME || 'Store'}" <${process.env.EMAIL_USER || 'looserfit2004@gmail.com'}>`,
             to: datosEnvio.email,
             subject: `Pedido recibido — Orden ${pedido.orderNumber}`,
             html
@@ -194,7 +198,7 @@ async function enviarEmailPagoAprobado(datosEnvio, pedido) {
 
 // ── Email al cliente con código de seguimiento ──
 async function enviarEmailSeguimiento(datosEnvio, trackingNumber, orderNumber) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return false;
+    // removed early return to allow fallback
 
     try {
         const trackingUrl = `https://www.correoargentino.com.ar/seguimiento-de-envios?codigoSeguimiento=${trackingNumber}`;
@@ -225,7 +229,7 @@ async function enviarEmailSeguimiento(datosEnvio, trackingNumber, orderNumber) {
         );
 
         await transporter.sendMail({
-            from: `"Looserfit" <${process.env.EMAIL_USER}>`,
+            from: `"Looserfit" <${process.env.EMAIL_USER || 'looserfit2004@gmail.com'}>`,
             to: datosEnvio.email,
             subject: `Tu pedido está en camino — Código ${trackingNumber}`,
             html
@@ -241,7 +245,7 @@ async function enviarEmailSeguimiento(datosEnvio, trackingNumber, orderNumber) {
 
 // ── Notificación interna al admin ──
 async function enviarEmailNotificacionAdmin(pedido) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return false;
+    // removed early return to allow fallback
 
     try {
         const html = wrapHTML(
@@ -292,8 +296,8 @@ async function enviarEmailNotificacionAdmin(pedido) {
         );
 
         await transporter.sendMail({
-            from: `"${process.env.SITE_NAME || 'Store'} Bot" <${process.env.EMAIL_USER}>`,
-            to: process.env.EMAIL_USER,
+            from: `"${process.env.SITE_NAME || 'Store'} Bot" <${process.env.EMAIL_USER || 'looserfit2004@gmail.com'}>`,
+            to: process.env.EMAIL_USER || 'looserfit2004@gmail.com',
             subject: `🛒 Nuevo pedido ${pedido.orderNumber} — ${pedido.datosEnvio?.nombreCompleto}`,
             html
         });
