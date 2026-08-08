@@ -250,7 +250,11 @@ function BrandRoutes({ pathPrefix }) {
 function ScrollToTop() {
   const { pathname, search } = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // El setTimeout asegura que el DOM se renderice antes de scrollear
+    const timer = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 50);
+    return () => clearTimeout(timer);
   }, [pathname, search]);
   return null;
 }
