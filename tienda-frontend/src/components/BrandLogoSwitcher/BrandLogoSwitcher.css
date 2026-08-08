@@ -17,8 +17,9 @@
   align-items: center;
   justify-content: center;
   transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-  /* Ajustar hitboxes al tamaño exacto de la imagen */
+  /* Ajustar hitboxes estrictamente a la forma del logo circular para evitar falsos hovers */
   border-radius: 50%;
+  clip-path: circle(48% at 50% 50%);
 }
 
 .brand-logo-back {
