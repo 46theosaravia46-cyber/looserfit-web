@@ -252,7 +252,16 @@ if ('scrollRestoration' in window.history) {
 function ScrollToTop() {
   const { pathname, search } = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Override CSS smooth scrolling for instant jump on route change
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    
+    // Restore smooth scrolling for anchor links after jump
+    const timer = setTimeout(() => {
+      document.documentElement.style.scrollBehavior = '';
+    }, 50);
+
+    return () => clearTimeout(timer);
   }, [pathname, search]);
   return null;
 }
