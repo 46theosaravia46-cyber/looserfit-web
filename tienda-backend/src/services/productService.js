@@ -49,7 +49,12 @@ const getAllProducts = async (filtros = {}) => {
         query.nombre = { $regex: filtros.q, $options: 'i' };
     }
 
-    return await Product.find(query).populate('categoria').populate('brand', 'slug name').sort({ createdAt: -1 });
+    const q = Product.find(query).populate('categoria').sort({ createdAt: -1 });
+    // Solo popular 'brand' si el schema lo tiene (compatibilidad con producción)
+    if (Product.schema.path('brand')) {
+        q.populate('brand', 'slug name');
+    }
+    return await q;
 };
 
 
