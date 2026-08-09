@@ -5,6 +5,8 @@ const getAllProducts = async (req, res) => {
     try {
         const { categoria, soloPublicados, corte, esNuevoDrop, q } = req.query;
         const filtros = {};
+        // Multi-marca: pasar el brandId resuelto por el middleware
+        if (req.brandId) filtros.brand = req.brandId;
         if (categoria) filtros.categoria = categoria;
         if (soloPublicados === 'true') filtros.publicado = true;
         if (corte) filtros.corte = corte;
@@ -40,7 +42,8 @@ const createProduct = async (req, res) => {
         const newProduct = await productService.createProduct({
             ...req.body,
             imagenes: urls,
-            guiaTalles: guiaTallesUrl
+            guiaTalles: guiaTallesUrl,
+            brand: req.brandId  // Multi-marca: asignar la marca activa del admin
         });
 
         res.status(201).json({ mensaje: 'Producto creado!', nuevoProducto: newProduct });
@@ -101,10 +104,30 @@ const deleteProduct = async (req, res) => {
     }
 };
 
+const toggleProductVisibility = async (req, res) => {
+    try {
+        const product = await productService.toggleProductVisibility(req.params.id);
+        res.json({ mensaje: 'Visibilidad actualizada', producto: product });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar visibilidad', error: error.message });
+    }
+};
+
+const toggleProductDrop = async (req, res) => {
+    try {
+        const product = await productService.toggleProductDrop(req.params.id);
+        res.json({ mensaje: 'Estado Drop actualizado', producto: product });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar estado drop', error: error.message });
+    }
+};
+
 module.exports = {
     getAllProducts,
     getProductById,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    toggleProductVisibility,
+    toggleProductDrop
 };
