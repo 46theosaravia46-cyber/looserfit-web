@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getProductos, eliminarProducto, togglePublicadoProducto } from '../../services/api'
+import { getProductos, eliminarProducto, togglePublicadoProducto, toggleDropProducto } from '../../services/api'
+import { useAdminBrand } from '../../context/AdminBrandContext'
 import './Admin.css'
 
 export default function AdminProductos() {
@@ -8,14 +9,19 @@ export default function AdminProductos() {
   const [loading,      setLoading]      = useState(true)
   const [busqueda,     setBusqueda]     = useState('')
   const [seleccionados, setSeleccionados] = useState(new Set())
-  const [openMenu,     setOpenMenu]     = useState(null) // _id del producto con menu abierto
+  const [openMenu,     setOpenMenu]     = useState(null)
   const [openBulkMenu, setOpenBulkMenu] = useState(false)
+  // Multi-marca: obtener la marca activa del selector del admin
+  const { activeBrand } = useAdminBrand()
 
   useEffect(() => {
-    getProductos()
+    setLoading(true)
+    setSeleccionados(new Set())
+    // Pasar el brand activo para filtrar por marca
+    getProductos({}, activeBrand)
       .then(data => { setProductos(data); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [])
+  }, [activeBrand]) // Se recarga cuando cambia la marca
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -92,6 +98,38 @@ export default function AdminProductos() {
     setOpenBulkMenu(false)
   }
 
+  const ponerDropSeleccionados = async () => {
+    if (seleccionados.size === 0) return
+    const ids = [...seleccionados]
+    for (const id of ids) {
+      try {
+        const p = productos.find(x => x._id === id)
+        if(p && !p.esNuevoDrop) {
+          const data = await toggleDropProducto(id)
+          setProductos(prev => prev.map(prod => (prod._id === id ? data.producto : prod)))
+        }
+      } catch { /* ignore */ }
+    }
+    setSeleccionados(new Set())
+    setOpenBulkMenu(false)
+  }
+
+  const sacarDropSeleccionados = async () => {
+    if (seleccionados.size === 0) return
+    const ids = [...seleccionados]
+    for (const id of ids) {
+      try {
+        const p = productos.find(x => x._id === id)
+        if(p && p.esNuevoDrop) {
+          const data = await toggleDropProducto(id)
+          setProductos(prev => prev.map(prod => (prod._id === id ? data.producto : prod)))
+        }
+      } catch { /* ignore */ }
+    }
+    setSeleccionados(new Set())
+    setOpenBulkMenu(false)
+  }
+
   /* ── Acciones individuales ── */
   const handleEliminar = async (id, nombre) => {
     const ok = window.confirm(`Eliminar "${nombre}"? Esta accion no se puede deshacer.`)
@@ -111,6 +149,15 @@ export default function AdminProductos() {
       setProductos(prev => prev.map(p => (p._id === id ? data.producto : p)))
     } catch {
       alert('No se pudo actualizar la visibilidad')
+    }
+  }
+
+  const handleToggleDrop = async (id) => {
+    try {
+      const data = await toggleDropProducto(id)
+      setProductos(prev => prev.map(p => (p._id === id ? data.producto : p)))
+    } catch {
+      alert('No se pudo actualizar el estado drop')
     }
   }
 
@@ -164,6 +211,20 @@ export default function AdminProductos() {
                   onClick={ocultarSeleccionados}
                 >
                   🔒 Ocultar
+                </button>
+                <button
+                  type="button"
+                  className="table-dropdown__item"
+                  onClick={ponerDropSeleccionados}
+                >
+                  🔥 Poner en Drop
+                </button>
+                <button
+                  type="button"
+                  className="table-dropdown__item"
+                  onClick={sacarDropSeleccionados}
+                >
+                  👎 Sacar de Drop
                 </button>
                 <button
                   type="button"
@@ -257,7 +318,20 @@ export default function AdminProductos() {
                       }
                     </td>
                     <td className="table-mono">{p.categoria?.name || p.categoria || 'Sin cat.'}</td>
-                    <td className="table-mono">${p.precio?.toLocaleString('es-AR')}</td>
+                    <td className="table-mono">
+                      {p.precioOferta && p.precioOferta > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ textDecoration: 'line-through', color: '#888', fontSize: '0.8rem' }}>
+                            ${p.precio?.toLocaleString('es-AR')}
+                          </span>
+                          <span style={{ color: '#d32f2f', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                            ${p.precioOferta?.toLocaleString('es-AR')}
+                          </span>
+                        </div>
+                      ) : (
+                        `$${p.precio?.toLocaleString('es-AR')}`
+                      )}
+                    </td>
                     <td>
                       {/* ⋯ dropdown */}
                       <div className="table-actions-menu" onClick={e => e.stopPropagation()}>
@@ -292,6 +366,13 @@ export default function AdminProductos() {
                               onClick={() => { handleToggle(p._id); setOpenMenu(null) }}
                             >
                               {p.publicado ? '🔒 Ocultar' : '🌐 Publicar'}
+                            </button>
+                            <button
+                              type="button"
+                              className="table-dropdown__item"
+                              onClick={() => { handleToggleDrop(p._id); setOpenMenu(null) }}
+                            >
+                              {p.esNuevoDrop ? '👎 Sacar de Drop' : '🔥 Poner en Drop'}
                             </button>
                             <button
                               type="button"

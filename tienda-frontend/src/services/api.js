@@ -20,9 +20,26 @@ export const getAuthHeaders = () => {
   return { 'Authorization': `Bearer ${token}` }
 }
 
+// Multi-marca: helper para obtener el slug de la marca activa desde la URL
+// /sport/* → 'sport'  |  /* → 'fit'
+export const getBrandSlug = () => {
+  const path = window.location.pathname
+  return path.startsWith('/sport') ? 'sport' : 'fit'
+}
+
+// Multi-marca: resolver una marca por slug
+export async function resolveBrand(slug) {
+  const res = await fetch(`${BASE_URL}/brands/resolve?slug=${slug}`)
+  if (!res.ok) throw new Error(`Marca '${slug}' no encontrada`)
+  return res.json()
+}
+
 // --- Traer todos los productos ---
-export async function getProductos(filtros = {}) {
+export async function getProductos(filtros = {}, brandSlug) {
   const params = new URLSearchParams()
+
+  // Multi-marca: siempre enviar el brand
+  params.append('brand', brandSlug || getBrandSlug())
 
   if (filtros.categoria)      params.append('categoria', filtros.categoria)
   if (filtros.corte)          params.append('corte', filtros.corte)
@@ -181,6 +198,15 @@ export async function togglePublicadoProducto(id) {
   return res.json()
 }
 
+export async function toggleDropProducto(id) {
+  const res = await fetch(`${BASE_URL}/products/${id}/toggle-drop`, { 
+    method: 'PATCH',
+    headers: { ...getAuthHeaders() }
+  })
+  if (!res.ok) throw new Error('No se pudo actualizar estado drop')
+  return res.json()
+}
+
 export async function eliminarPedido(id) {
   const res = await fetch(`${BASE_URL}/orders/${id}`, {
     method: 'DELETE',
@@ -203,8 +229,10 @@ export async function eliminarPedidosBulk(ids) {
   return res.json()
 }
 
-export async function getHomeContent() {
-  const res = await fetch(`${BASE_URL}/home?_t=${Date.now()}`)
+export async function getHomeContent(brandSlug) {
+  // Multi-marca: pasar el brand slug para cargar el home de la marca correcta
+  const slug = brandSlug || getBrandSlug()
+  const res = await fetch(`${BASE_URL}/home?brand=${slug}&_t=${Date.now()}`)
   if (!res.ok) throw new Error('No se pudo cargar contenido home')
   return res.json()
 }
@@ -351,8 +379,34 @@ export async function sendNewsletter(asunto, contenido) {
 }
 
 // --- CATEGORIAS ---
-export async function getCategories() {
-  const res = await fetch(`${BASE_URL}/categories`)
+export async function getCategories(brandSlug) {
+  // Multi-marca: filtrar categorías por marca
+  const slug = brandSlug || getBrandSlug()
+  const res = await fetch(`${BASE_URL}/categories?brand=${slug}`)
   if (!res.ok) throw new Error('Error al obtener categorías')
+  return res.json()
+}
+
+// --- PEDIDOS de orden: siempre incluir brand en la creación ---
+export async function crearPedidoConBrand(pedidoData, brandSlug) {
+  const slug = brandSlug || getBrandSlug()
+  const res = await fetch(`${BASE_URL}/orders/create?brand=${slug}`, {
+    method:  'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify(pedidoData)
+  })
+  if (!res.ok) {
+    let mensaje = 'Error al crear el pedido'
+    try {
+      const data = await res.json()
+      mensaje = data.mensaje || data.error || mensaje
+    } catch {
+      // dejamos mensaje por defecto
+    }
+    throw new Error(mensaje)
+  }
   return res.json()
 }
