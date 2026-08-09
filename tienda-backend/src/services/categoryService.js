@@ -6,10 +6,10 @@ const getAllCategories = async (brandId) => {
     if (brandId) query.brand = brandId;
     const categories = await Category.find(query).sort({ name: 1 });
     
-    // Asegurar que "Deportivo" quede siempre al final
+    // Asegurar que "Deportivo" o "Sport" quede siempre al final
     return categories.sort((a, b) => {
-        const aIsDeportivo = a.name.toLowerCase().includes('deportivo');
-        const bIsDeportivo = b.name.toLowerCase().includes('deportivo');
+        const aIsDeportivo = a.name.toLowerCase().includes('deportivo') || a.name.toLowerCase().includes('sport');
+        const bIsDeportivo = b.name.toLowerCase().includes('deportivo') || b.name.toLowerCase().includes('sport');
         if (aIsDeportivo && !bIsDeportivo) return 1;
         if (!aIsDeportivo && bIsDeportivo) return -1;
         return 0;
