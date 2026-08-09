@@ -18,7 +18,6 @@ export default function Tienda() {
   const [productos,  setProductos]  = useState([])
   const [categorias, setCategorias] = useState([])
   const [loading,    setLoading]    = useState(true)
-  const [error,      setError]      = useState(null)
   const [catActiva,  setCatActiva]  = useState(searchParams.get('categoria') || '')
   const [talleActivo,setTalleActivo]= useState('')
   const [orden,      setOrden]      = useState(() => {
@@ -57,37 +56,39 @@ export default function Tienda() {
 
   // Efecto para cargar productos cuando cambian los filtros
   useEffect(() => {
-    setLoading(true)
-    const filtros = { soloPublicados: true }
-    if (orden === 'nuevodrop') filtros.esNuevoDrop = true
-    
-    // Identificar si catActiva ya es un ID
-    const isId = /^[0-9a-fA-F]{24}$/.test(catActiva)
-    
-    // Priorizamos el ID del objeto encontrado, si no el catActiva si parece un ID
-    const categoriaId = activeCategoryObj?._id || (isId ? catActiva : null)
-    
-    if (categoriaId) {
-      filtros.categoria = categoriaId
-    } else if (catActiva && !activeCategoryObj && categorias.length > 0) {
-      // Si hay un filtro por nombre pero no se encontró nada tras cargar categorías,
-      // no mandamos filtro de categoría para no traer [] (o mandamos uno que no exista)
-      // Pero para ser simples, si hay catActiva pero no ID, no filtramos por categoría aún.
+    let active = true
+    const fetchData = async () => {
+      setLoading(true)
+      const filtros = { soloPublicados: true }
+      if (orden === 'nuevodrop') filtros.esNuevoDrop = true
+      
+      const isId = /^[0-9a-fA-F]{24}$/.test(catActiva)
+      const categoriaId = activeCategoryObj?._id || (isId ? catActiva : null)
+      
+      if (categoriaId) {
+        filtros.categoria = categoriaId
+      } else if (catActiva && !activeCategoryObj && categorias.length > 0) {
+        // ...
+      }
+
+      if (q) filtros.q = q
+
+      try {
+        const data = await getProductos(filtros)
+        if (active) {
+          setProductos(data)
+          setLoading(false)
+        }
+      } catch (err) {
+        if (active) {
+          console.error('Error cargando productos:', err)
+          setLoading(false)
+        }
+      }
     }
-
-    if (q) filtros.q = q
-
-    getProductos(filtros)
-      .then(data => {
-        setProductos(data)
-        setLoading(false)
-      })
-      .catch(err => {
-        console.error('Error cargando productos:', err)
-        setError(true)
-        setLoading(false)
-      })
-  }, [catActiva, q, orden, activeCategoryObj])
+    fetchData()
+    return () => { active = false }
+  }, [catActiva, q, orden, activeCategoryObj, categorias.length])
 
   // Filtrar por talle (búsqueda ya viene del backend)
   const filtrados = productos.filter(p => {
@@ -97,8 +98,10 @@ export default function Tienda() {
 
   // Ordenar
   const ordenados = [...filtrados].sort((a, b) => {
-    if (orden === 'asc')       return a.precio - b.precio
-    if (orden === 'desc')      return b.precio - a.precio
+    const precioA = (a.precioOferta && a.precioOferta > 0) ? a.precioOferta : a.precio
+    const precioB = (b.precioOferta && b.precioOferta > 0) ? b.precioOferta : b.precio
+    if (orden === 'asc')       return precioA - precioB
+    if (orden === 'desc')      return precioB - precioA
     if (orden === 'nuevodrop') return new Date(b.createdAt) - new Date(a.createdAt)
     return new Date(b.createdAt) - new Date(a.createdAt)
   })
@@ -116,7 +119,7 @@ export default function Tienda() {
     if (orden && orden !== 'nuevo') params.set('ordenar', orden)
     if (q) params.set('q', q)
     setSearchParams(params)
-  }, [catActiva, orden])
+  }, [catActiva, orden, q, setSearchParams])
 
 
   return (

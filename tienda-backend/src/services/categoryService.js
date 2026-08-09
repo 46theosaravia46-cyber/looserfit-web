@@ -1,7 +1,19 @@
 const Category = require('../models/Category');
 
-const getAllCategories = async () => {
-    return await Category.find().sort({ name: 1 });
+const getAllCategories = async (brandId) => {
+    const query = {};
+    // Multi-marca: si se provee brandId, filtrar por marca
+    if (brandId) query.brand = brandId;
+    const categories = await Category.find(query).sort({ name: 1 });
+    
+    // Asegurar que "Deportivo" quede siempre al final
+    return categories.sort((a, b) => {
+        const aIsDeportivo = a.name.toLowerCase().includes('deportivo');
+        const bIsDeportivo = b.name.toLowerCase().includes('deportivo');
+        if (aIsDeportivo && !bIsDeportivo) return 1;
+        if (!aIsDeportivo && bIsDeportivo) return -1;
+        return 0;
+    });
 };
 
 const getCategoryById = async (id) => {

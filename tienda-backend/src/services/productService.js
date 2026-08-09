@@ -39,6 +39,8 @@ const validateSizes = async (categoriaId, talles = []) => {
 
 const getAllProducts = async (filtros = {}) => {
     let query = {};
+    // Multi-marca: filtrar por brand si se provee
+    if (filtros.brand) query.brand = filtros.brand;
     if (filtros.categoria) query.categoria = filtros.categoria;
     if (filtros.publicado !== undefined) query.publicado = filtros.publicado;
     if (filtros.corte) query.tipo = filtros.corte;
@@ -47,17 +49,10 @@ const getAllProducts = async (filtros = {}) => {
         query.nombre = { $regex: filtros.q, $options: 'i' };
     }
 
-    return await Product.find(query).populate('categoria').sort({ createdAt: -1 });
+    return await Product.find(query).populate('categoria').populate('brand', 'slug name').sort({ createdAt: -1 });
 };
 
-const searchProducts = async (q, categoriaId) => {
-    let filter = { publicado: true };
-    if (categoriaId) filter.categoria = categoriaId;
-    if (q) {
-        filter.nombre = { $regex: q, $options: 'i' };
-    }
-    return await Product.find(filter).populate('categoria').sort({ createdAt: -1 });
-};
+
 
 const getProductById = async (id) => {
     return await Product.findById(id).populate('categoria');
@@ -71,7 +66,7 @@ const _normalizeTalles = (talles) => {
         try {
             const parsed = JSON.parse(talles);
             return Array.isArray(parsed) ? parsed.map(s => String(s).trim()) : [String(parsed).trim()].filter(Boolean);
-        } catch (e) {
+        } catch (_e) {
             return talles.split(',').map(s => s.trim()).filter(Boolean);
         }
     }
@@ -81,6 +76,14 @@ const _normalizeTalles = (talles) => {
 
 const createProduct = async (productData) => {
     productData.talles = _normalizeTalles(productData.talles);
+    
+    // Normalizar precioOferta
+    if (productData.precioOferta === '' || productData.precioOferta === 'null' || productData.precioOferta === undefined || productData.precioOferta === null) {
+        productData.precioOferta = undefined;
+    } else {
+        const parsed = Number(productData.precioOferta);
+        productData.precioOferta = isNaN(parsed) || parsed <= 0 ? undefined : parsed;
+    }
     
     // Auto-corrección básica pre-validación
     if (productData.categoria) {
@@ -98,6 +101,16 @@ const createProduct = async (productData) => {
 const updateProduct = async (id, updateData) => {
     if (updateData.talles !== undefined) {
         updateData.talles = _normalizeTalles(updateData.talles);
+    }
+
+    // Normalizar precioOferta
+    if (updateData.precioOferta !== undefined) {
+        if (updateData.precioOferta === '' || updateData.precioOferta === 'null' || updateData.precioOferta === null) {
+            updateData.precioOferta = null;
+        } else {
+            const parsed = Number(updateData.precioOferta);
+            updateData.precioOferta = isNaN(parsed) || parsed <= 0 ? null : parsed;
+        }
     }
 
     if (updateData.categoria !== undefined || updateData.talles !== undefined) {
@@ -152,12 +165,33 @@ const updateStock = async (id, cantidad) => {
     return await Product.findByIdAndUpdate(id, { $inc: { stock: -cantidad } }, { new: true });
 };
 
+const toggleProductVisibility = async (id) => {
+    const product = await Product.findById(id);
+    if (!product) throw new Error('Producto no encontrado');
+    return await Product.findByIdAndUpdate(
+        id, 
+        { $set: { publicado: !product.publicado } },
+        { new: true }
+    ).populate('categoria');
+};
+
+const toggleProductDrop = async (id) => {
+    const product = await Product.findById(id);
+    if (!product) throw new Error('Producto no encontrado');
+    return await Product.findByIdAndUpdate(
+        id,
+        { $set: { esNuevoDrop: !product.esNuevoDrop } },
+        { new: true }
+    ).populate('categoria');
+};
+
 module.exports = {
     getAllProducts,
-    searchProducts,
     getProductById,
     createProduct,
     updateProduct,
     deleteProduct,
-    updateStock
+    updateStock,
+    toggleProductVisibility,
+    toggleProductDrop
 };

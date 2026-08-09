@@ -245,23 +245,14 @@ function BrandRoutes({ pathPrefix }) {
   )
 }
 
-// ─── App principal ─────────────────────────────────────────────────────────
+if ('scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
 
 function ScrollToTop() {
   const { pathname, search } = useLocation();
   useEffect(() => {
-    // El setTimeout ayuda a que React Router actualice el DOM antes de scrollear
-    const timer = setTimeout(() => {
-      // Apagamos smooth scroll temporalmente para forzar el salto instantáneo
-      document.documentElement.style.scrollBehavior = 'auto';
-      window.scrollTo(0, 0);
-      
-      // Restauramos el smooth scroll
-      setTimeout(() => {
-        document.documentElement.style.scrollBehavior = '';
-      }, 50);
-    }, 10);
-    return () => clearTimeout(timer);
+    window.scrollTo(0, 0);
   }, [pathname, search]);
   return null;
 }
