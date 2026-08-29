@@ -18,9 +18,9 @@ router.post('/create', protect, adminOnly, upload.fields([{ name: 'imagenes', ma
 router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCount: 20 }, { name: 'guiaTallesImg', maxCount: 1 }]), productController.updateProduct);
 
 // --- TOGGLE ESTADOS (Solo Admin) ---
+router.patch('/bulk/toggle-drop', protect, adminOnly, productController.bulkToggleProductDrop);
 router.patch('/:id/toggle', protect, adminOnly, productController.toggleProductVisibility);
 router.patch('/:id/toggle-drop', protect, adminOnly, productController.toggleProductDrop);
-router.patch('/bulk/toggle-drop', protect, adminOnly, productController.bulkToggleProductDrop);
 
 // --- ELIMINAR PRODUCTO (Solo Admin) ---
 router.delete('/:id', protect, adminOnly, productController.deleteProduct);
