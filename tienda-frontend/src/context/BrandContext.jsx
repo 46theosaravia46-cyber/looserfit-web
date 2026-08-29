@@ -71,10 +71,9 @@ export function BrandProvider({ brandSlug, children }) {
     root.style.setProperty('--brand-radius', brand.theme.borderRadius || '0px')
   }, [brand?.theme])
 
-  // Actualizar el title y meta description del documento según la marca
+  // Actualizar el meta description del documento según la marca
   useEffect(() => {
     if (!brand?.seo) return
-    if (brand.seo.title) document.title = brand.seo.title
 
     const metaDesc = document.querySelector('meta[name="description"]')
     if (metaDesc && brand.seo.description) {
