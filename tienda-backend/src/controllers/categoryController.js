@@ -2,7 +2,8 @@ const categoryService = require('../services/categoryService');
 
 const getAllCategories = async (req, res) => {
     try {
-        const categories = await categoryService.getAllCategories();
+        // Multi-marca: filtrar por marca activa
+        const categories = await categoryService.getAllCategories(req.brandId);
         res.json(categories);
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al obtener categorías', error: error.message });
@@ -11,7 +12,8 @@ const getAllCategories = async (req, res) => {
 
 const createCategory = async (req, res) => {
     try {
-        const category = await categoryService.createCategory(req.body);
+        // Multi-marca: asignar la marca activa del middleware
+        const category = await categoryService.createCategory({ ...req.body, brand: req.brandId });
         res.status(201).json(category);
     } catch (error) {
         res.status(400).json({ mensaje: 'Error al crear categoría', error: error.message });

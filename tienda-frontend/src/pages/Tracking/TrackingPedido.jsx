@@ -47,14 +47,24 @@ export default function TrackingPedido() {
         </div>
 
         <div className="tracking-card">
+          {order.estado !== 'Cancelado' && (
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              <p style={{ fontSize: '1rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px' }}>Estado actual de tu pedido</p>
+              <h2 style={{ fontSize: '2rem', margin: '0.5rem 0 0 0' }} className={`status-text-${order.estado.toLowerCase()}`}>
+                {order.estado === 'Empaquetado' ? 'Listo para envío / retiro' : order.estado}
+              </h2>
+            </div>
+          )}
+
           <div className="order-stepper">
             {steps.map((step, index) => {
-              const isCompleted = index <= currentStepIndex
+              const isCompleted = index < currentStepIndex
               const isCurrent = index === currentStepIndex
+              const isFuture = index > currentStepIndex
               const isCancelled = order.estado === 'Cancelado'
 
               return (
-                <div key={step} className={`step ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''} ${isCancelled ? 'cancelled' : ''}`}>
+                <div key={step} className={`step ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''} ${isFuture ? 'future' : ''} ${isCancelled ? 'cancelled' : ''}`}>
                   <div className="step-bullet">
                     {isCompleted ? '✓' : index + 1}
                   </div>

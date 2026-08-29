@@ -26,7 +26,7 @@ const enviarConReintentos = async (fn, maxIntentos, label = 'Email') => {
 };
 
 const createOrder = async (orderData) => {
-    const { productos = [], total, tipoEnvio, datosEnvio, usuario } = orderData;
+    const { productos = [], tipoEnvio, datosEnvio, usuario, brand } = orderData;
     
     const productosPedido = [];
     let totalCalculado = 0;
@@ -39,16 +39,21 @@ const createOrder = async (orderData) => {
         if (cantidad <= 0) throw new Error(`Cantidad inválida para ${productoDB.nombre}`);
         if ((productoDB.stock || 0) < cantidad) throw new Error(`Stock insuficiente para ${productoDB.nombre}`);
 
+        const precioUnitario = (productoDB.precioOferta && productoDB.precioOferta > 0)
+            ? productoDB.precioOferta
+            : productoDB.precio;
+
         productosPedido.push({
             productoId: productoDB._id,
             nombre: productoDB.nombre,
             cantidad,
             precio: productoDB.precio,
+            precioOferta: (productoDB.precioOferta && productoDB.precioOferta > 0) ? productoDB.precioOferta : null,
             talle: item.talle || '',
             imagen: item.imagen || (productoDB.imagenes && productoDB.imagenes[0]) || ''
         });
 
-        totalCalculado += productoDB.precio * cantidad;
+        totalCalculado += precioUnitario * cantidad;
     }
 
     // El stock ya no se descuenta aquí, sino en el webhook tras el pago.
@@ -67,6 +72,7 @@ const createOrder = async (orderData) => {
     const trackingToken = crypto.randomBytes(16).toString('hex');
 
     const nuevoPedido = new Order({
+        brand,              // Multi-marca: marca de la tienda donde se hizo la compra
         productos: productosPedido,
         total: totalFinal,
         tipoEnvio,
@@ -112,7 +118,7 @@ const updateOrderStatus = async (id, estado) => {
             const { enviarEmailEmpaquetado } = require('../config/email');
             enviarEmailEmpaquetado(datosEnvio, pedido).catch(console.error);
         } else if (estado === 'Pagado') {
-            const { enviarEmailPagoAprobado, enviarEmailNotificacionAdmin } = require('../config/email');
+            const { enviarEmailPagoAprobado } = require('../config/email');
             enviarEmailPagoAprobado(datosEnvio, pedido).catch(console.error);
             // Notificar al admin con reintentos — si falla no se pierde la notificación
             enviarConReintentos(() => enviarEmailNotificacionAdmin(pedido), 3, 'Notificación admin');

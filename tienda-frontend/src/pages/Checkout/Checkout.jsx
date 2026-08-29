@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 import { crearPedido, crearPreferenciaPago } from '../../services/api'
@@ -14,12 +14,12 @@ const PROVINCIAS = [
 ]
 
 export default function Checkout() {
-  const navigate = useNavigate()
+
   const { user } = useAuth()
   const { items, subtotal, clearCart } = useCart()
   const [tipoEnvio, setTipoEnvio] = useState('sucursal')
-  const [shippingCost, setShippingCost] = useState(6500)
-  const [totalWithShipping, setTotalWithShipping] = useState(0)
+  const shippingCost = tipoEnvio === 'domicilio' ? 9500 : 6500
+  const totalWithShipping = subtotal + shippingCost
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
@@ -47,19 +47,17 @@ export default function Checkout() {
   
   useEffect(() => {
     if (user && !form.nombreCompleto) {
-      setForm(prev => ({
-        ...prev,
-        nombreCompleto: user.nombre || '',
-        email: user.email || ''
-      }))
+      setTimeout(() => {
+        setForm(prev => ({
+          ...prev,
+          nombreCompleto: user.nombre || '',
+          email: user.email || ''
+        }))
+      }, 0)
     }
   }, [user, form.nombreCompleto])
 
-  useEffect(() => {
-    const shipping = tipoEnvio === 'domicilio' ? 9500 : 6500
-    setShippingCost(shipping)
-    setTotalWithShipping(subtotal + shipping)
-  }, [tipoEnvio, subtotal])
+  // Calculate shipping cost synchronously (derived state)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -247,10 +245,4 @@ export default function Checkout() {
   )
 }
 
-function buildWhatsappText(payload) {
-  const productosTxt = payload.productos
-    .map(p => `- ${p.nombre} x${p.cantidad} ($${p.precio})`)
-    .join('%0A')
 
-  return `Hola! Quiero confirmar este pedido:%0A${productosTxt}%0ATotal: $${payload.total}%0ATipo envio: ${payload.tipoEnvio}%0ANombre: ${payload.datosEnvio.nombreCompleto}`
-}

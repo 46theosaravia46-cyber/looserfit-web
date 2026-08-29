@@ -1,12 +1,20 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
+    // Discriminador de marca — identifica en qué tienda se realizó el pedido
+    brand: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Brand',
+        required: true
+    },
+
     // Datos del Producto (para saber qué compró)
     productos: [{
         productoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
         nombre: String,
         cantidad: Number,
         precio: Number,
+        precioOferta: Number,
         talle: String,
         imagen: String
     }],
@@ -37,5 +45,8 @@ const orderSchema = new mongoose.Schema({
     trackingToken: { type: String, required: true, unique: true }, // Token para seguimiento público sin login
     trackingNumber: { type: String }, // Número de seguimiento Correo Argentino
 }, { timestamps: true });
+
+// Índice compuesto para listar pedidos por marca ordenados por fecha
+orderSchema.index({ brand: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Order', orderSchema);

@@ -20,6 +20,7 @@ router.put('/:id', protect, adminOnly, upload.fields([{ name: 'imagenes', maxCou
 // --- TOGGLE ESTADOS (Solo Admin) ---
 router.patch('/:id/toggle', protect, adminOnly, productController.toggleProductVisibility);
 router.patch('/:id/toggle-drop', protect, adminOnly, productController.toggleProductDrop);
+router.patch('/bulk/toggle-drop', protect, adminOnly, productController.bulkToggleProductDrop);
 
 // --- ELIMINAR PRODUCTO (Solo Admin) ---
 router.delete('/:id', protect, adminOnly, productController.deleteProduct);

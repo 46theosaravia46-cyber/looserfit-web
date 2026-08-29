@@ -24,7 +24,7 @@ const getProfile = async (req, res) => {
         const user = await userService.getUserById(req.user.id);
         if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
         res.json(user);
-    } catch (error) {
+    } catch (_e) {
         res.status(500).json({ error: 'Error al obtener perfil' });
     }
 };
@@ -33,7 +33,7 @@ const updateProfile = async (req, res) => {
     try {
         const user = await userService.updateProfile(req.user.id, req.body);
         res.json(user);
-    } catch (error) {
+    } catch (_e) {
         res.status(400).json({ error: 'Error al actualizar perfil' });
     }
 };

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { siteConfig } from '../../config/siteConfig'
+import { getBrandConfig } from '../../config/siteConfig'
+import { useBrand } from '../../context/BrandContext'
+import { useAuth } from '../../context/AuthContext'
 import './Footer.css'
 
 const INFOS = {
@@ -20,6 +22,11 @@ const INFOS = {
 
 export default function Footer() {
   const [infoOpen, setInfoOpen] = useState(null)
+  const { user } = useAuth()
+  // Multi-marca: usar datos de la marca activa
+  const { brand } = useBrand()
+  const config = getBrandConfig(brand?.slug)
+  const basePath = brand?.slug === 'sport' ? '/sport' : ''
 
   return (
     <footer className="footer">
@@ -28,19 +35,15 @@ export default function Footer() {
 
           <div className="footer__brand">
             <div className="footer__logo-wrap">
-              <img src={siteConfig.assets.logo} alt={siteConfig.name} className="footer__logo" />
+              <img src={config.assets.logo} alt={config.name} className="footer__logo" />
             </div>
-            <p className="footer__location">{siteConfig.contact.address}</p>
+            <p className="footer__location">{config.contact.address}</p>
           </div>
 
           <div className="footer__nav">
             <h4 className="footer__nav-title">Tienda</h4>
             <ul>
-              <li><Link to="/tienda">Todos los productos</Link></li>
-              <li><Link to="/tienda?categoria=abrigos">Abrigos</Link></li>
-              <li><Link to="/tienda?categoria=remeras">Remeras</Link></li>
-              <li><Link to="/tienda?categoria=pantalones">Pantalones</Link></li>
-              <li><Link to="/tienda?categoria=accesorios">Accesorios</Link></li>
+              <li><Link to={`${basePath}/tienda`}>Todos los productos</Link></li>
             </ul>
           </div>
 
@@ -58,7 +61,7 @@ export default function Footer() {
             <p className="footer__soporte">
               En caso de cualquier inconveniente, contactame al{' '}
               <a
-                href={`https://www.instagram.com/${siteConfig.socials.instagram.replace('@', '')}`}
+                href={`https://www.instagram.com/${config.socials.instagram.replace('@', '')}`}
                 target="_blank"
                 rel="noreferrer"
                 className="footer__dm-link"
@@ -71,7 +74,7 @@ export default function Footer() {
           <div className="footer__social">
             <h4 className="footer__nav-title">Seguinos</h4>
             <div className="footer__social-links">
-              <a href={`https://www.instagram.com/${siteConfig.socials.instagram.replace('@', '')}`} target="_blank" rel="noreferrer">
+              <a href={`https://www.instagram.com/${config.socials.instagram.replace('@', '')}`} target="_blank" rel="noreferrer">
                 Instagram
               </a>
             </div>
@@ -80,14 +83,16 @@ export default function Footer() {
         </div>
 
         <div className="footer-content">
-          <p>© {new Date().getFullYear()} {siteConfig.name} — Todos los derechos reservados</p>
+          <p>© {new Date().getFullYear()} {config.name} — Todos los derechos reservados</p>
           <p className="credit">
             Creado por{' '}
             <a href="https://instagram.com/saravia.devv" target="_blank" rel="noreferrer" className="credit__link">
               Theo Saravia <span className="credit__icon">↗</span>
             </a>
           </p>
-          <Link to="/admin" className="footer__admin-link" style={{ display: 'inline-block', marginTop: '10px' }}>Panel Admin</Link>
+          {user?.isAdmin && (
+            <Link to="/admin" className="footer__admin-link" style={{ display: 'inline-block', marginTop: '10px' }}>Panel Admin</Link>
+          )}
         </div>
       </div>
 

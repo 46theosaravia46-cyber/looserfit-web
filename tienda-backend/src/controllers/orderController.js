@@ -11,7 +11,8 @@ const createOrder = async (req, res) => {
             total, 
             tipoEnvio, 
             usuario: req.user ? req.user._id : null,
-            comprobante: null 
+            comprobante: null,
+            brand: req.brandId  // Multi-marca: marca de la tienda donde se generó el pedido
         };
 
         const order = await orderService.createOrder(orderData);
@@ -45,6 +46,36 @@ const getOrderById = async (req, res) => {
     try {
         const order = await orderService.getOrderById(req.params.id);
         if (!order) return res.status(404).json({ mensaje: 'Pedido no encontrado' });
+        
+        // Extraer usuario del token si está presente
+        let tokenUser = null;
+        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+            const token = req.headers.authorization.split(' ')[1];
+            try {
+                const jwt = require('jsonwebtoken');
+                tokenUser = jwt.verify(token, process.env.JWT_SECRET);
+            } catch (e) {
+                // ignorar si el token es inválido aquí, manejamos el fallback
+            }
+        }
+
+        // Si el pedido tiene un usuario registrado (no es invitado)
+        if (order.usuario) {
+            // Requiere que el usuario esté autenticado
+            if (!tokenUser) {
+                return res.status(401).json({ mensaje: 'Acceso no autorizado a este pedido' });
+            }
+            // Requiere que sea el dueño del pedido o un admin
+            if (tokenUser._id !== order.usuario.toString() && !tokenUser.isAdmin) {
+                return res.status(403).json({ mensaje: 'No tenés permiso para ver este pedido' });
+            }
+        } else {
+            // Si el pedido es de invitado (usuario === null)
+            // Permitimos acceso porque se necesita para subir comprobante, 
+            // pero si hay un usuario logueado intentando ver pedidos de invitado que no son suyos...
+            // en este caso el ObjectId actúa como token de acceso público temporal.
+        }
+
         res.json(order);
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al obtener pedido', error: error.message });

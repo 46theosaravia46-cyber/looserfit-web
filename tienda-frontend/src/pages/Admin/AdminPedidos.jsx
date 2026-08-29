@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getPedidos, eliminarPedido, eliminarPedidosBulk } from '../../services/api'
+import { useAdminBrand } from '../../context/AdminBrandContext'
 import './Admin.css'
 
 export default function AdminPedidos() {
@@ -8,6 +9,8 @@ export default function AdminPedidos() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [selectedIds, setSelectedIds] = useState([])
+  // Multi-marca: filtrar pedidos por la marca activa
+  const { activeBrand } = useAdminBrand()
 
   const fetchPedidos = () => {
     setLoading(true)
@@ -28,20 +31,28 @@ export default function AdminPedidos() {
   }
 
   useEffect(() => {
-    fetchPedidos()
+    setTimeout(() => fetchPedidos(), 0)
   }, [])
 
   const filteredPedidos = useMemo(() => {
     const term = search.trim().toLowerCase()
-    if (!term) return pedidos
 
-    return pedidos.filter(p => {
+    // Multi-marca: filtrar por la marca activa del selector
+    // Los pedidos sin brand.slug se asumen de 'fit' (datos migrados)
+    const porMarca = pedidos.filter(p => {
+      const brandSlug = p.brand?.slug || 'fit'
+      return brandSlug === activeBrand
+    })
+
+    if (!term) return porMarca
+
+    return porMarca.filter(p => {
       const orderNumber = p.orderNumber?.toLowerCase() || ''
       const id = p._id?.toLowerCase() || ''
       const cliente = p.datosEnvio?.nombreCompleto?.toLowerCase() || ''
       return orderNumber.includes(term) || id.includes(term) || cliente.includes(term)
     })
-  }, [pedidos, search])
+  }, [pedidos, search, activeBrand])
 
   const toggleSelect = (id) => {
     setSelectedIds(prev => 

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { siteConfig } from '../../config/siteConfig'
+import { AdminBrandProvider, useAdminBrand } from '../../context/AdminBrandContext'
+import { ALL_BRANDS } from '../../config/brandConfig'
+import { getBrandConfig } from '../../config/siteConfig'
 import './AdminLayout.css'
 
 export default function AdminLayout() {
@@ -15,7 +17,7 @@ export default function AdminLayout() {
 
   // Cerrar el drawer cada vez que cambia de página
   useEffect(() => {
-    setMenuOpen(false)
+    setTimeout(() => setMenuOpen(false), 0)
     document.body.style.overflow = ''
   }, [location])
 
@@ -26,8 +28,8 @@ export default function AdminLayout() {
   }, [menuOpen])
 
   useEffect(() => {
-    document.title = `Panel Admin - ${siteConfig.name}`
-    return () => { document.title = siteConfig.name }
+    document.title = `Panel Admin — Looser`
+    return () => { document.title = 'Looser Fit' }
   }, [])
 
   const handleLogin = async (e) => {
@@ -67,7 +69,7 @@ export default function AdminLayout() {
       <div className="admin-login">
         <div className="admin-login__box">
           <div className="admin-login__logo">
-            <img src={siteConfig.assets.logo} alt={siteConfig.name} />
+            <img src="/logo3.0.png" alt="Looser" />
           </div>
           <h2 className="admin-login__title">Panel Admin</h2>
           <p className="admin-login__sub">Ingresá a tu panel de control</p>
@@ -105,6 +107,23 @@ export default function AdminLayout() {
 
   // ── PANEL ──
   return (
+    <AdminBrandProvider>
+      <AdminPanelContent
+        menuOpen={menuOpen}
+        openMenu={openMenu}
+        closeMenu={closeMenu}
+        handleLogout={handleLogout}
+      />
+    </AdminBrandProvider>
+  )
+}
+
+// Componente interno que consume el AdminBrandContext
+function AdminPanelContent({ menuOpen, openMenu, closeMenu, handleLogout }) {
+  const { activeBrand, switchBrand } = useAdminBrand()
+  const brandConfig = getBrandConfig(activeBrand)
+
+  return (
     <div className={`admin-wrapper ${menuOpen ? 'admin-wrapper--menu-open' : ''}`}>
 
       {/* Overlay para cerrar en mobile — solo se renderiza si está abierto */}
@@ -117,9 +136,23 @@ export default function AdminLayout() {
       {/* ── SIDEBAR ── */}
       <aside className="admin-sidebar">
         <div className="admin-sidebar__top">
-          <img src={siteConfig.assets.logo} alt={siteConfig.name} className="admin-sidebar__logo" />
+          <img src={brandConfig.assets.logo} alt={brandConfig.name} className="admin-sidebar__logo" />
           <span className="admin-sidebar__tag">Admin</span>
-          <button className="admin-sidebar__close" onClick={() => setMenuOpen(false)}>✕</button>
+          <button className="admin-sidebar__close" onClick={closeMenu}>✕</button>
+        </div>
+
+        {/* ── Selector de marca ── */}
+        <div className="admin-brand-selector">
+          {ALL_BRANDS.map(b => (
+            <button
+              key={b.slug}
+              type="button"
+              className={`admin-brand-btn ${activeBrand === b.slug ? 'admin-brand-btn--active' : ''}`}
+              onClick={() => switchBrand(b.slug)}
+            >
+              {b.name}
+            </button>
+          ))}
         </div>
 
         <nav className="admin-nav">
@@ -185,7 +218,6 @@ export default function AdminLayout() {
 
         {/* Topbar */}
         <div className="admin-topbar">
-          {/* Hamburger — solo visible en mobile por CSS */}
           <button
             className="admin-menu-toggle"
             onClick={openMenu}
@@ -194,10 +226,12 @@ export default function AdminLayout() {
             <IconMenu />
           </button>
 
-          <span className="admin-topbar__title">Hola, {siteConfig.name} 👑</span>
+          <span className="admin-topbar__title">
+            {brandConfig.name} <span style={{ opacity: 0.45, fontSize: '0.8em' }}>Admin 👑</span>
+          </span>
 
           <div className="admin-topbar__avatar">
-            <img src={siteConfig.assets.adminAvatar} alt="LF" />
+            <img src={brandConfig.assets.adminAvatar} alt={brandConfig.name} />
           </div>
         </div>
 

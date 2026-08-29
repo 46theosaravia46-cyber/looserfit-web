@@ -207,6 +207,19 @@ export async function toggleDropProducto(id) {
   return res.json()
 }
 
+export async function bulkToggleDropProductos(productIds, estado) {
+  const res = await fetch(`${BASE_URL}/products/bulk/toggle-drop`, {
+    method: 'PATCH',
+    headers: { 
+      'Content-Type': 'application/json',
+      ...getAuthHeaders() 
+    },
+    body: JSON.stringify({ productIds, estado })
+  })
+  if (!res.ok) throw new Error('No se pudo actualizar el estado drop masivamente')
+  return res.json()
+}
+
 export async function eliminarPedido(id) {
   const res = await fetch(`${BASE_URL}/orders/${id}`, {
     method: 'DELETE',

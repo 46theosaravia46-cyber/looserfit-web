@@ -1,25 +1,33 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getProductoById } from '../services/api'
+import { CART_STORAGE_KEYS, DEFAULT_BRAND_SLUG } from '../config/brandConfig'
 
-const STORAGE_KEY = 'looserfit_cart'
+// La STORAGE_KEY legacy se mantiene para compatibilidad durante la transición
+const STORAGE_KEY_LEGACY = 'looserfit_cart'
 const CartContext = createContext(null)
 
-function readCart() {
+function readCart(storageKey) {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    return JSON.parse(localStorage.getItem(storageKey) || '[]')
   } catch {
     return []
   }
 }
 
-export function CartProvider({ children }) {
-  const [items, setItems] = useState(() => readCart())
+export function CartProvider({ brandSlug, children }) {
+  // Determinar la clave de storage según la marca (carritos separados por marca)
+  const slug = brandSlug || DEFAULT_BRAND_SLUG
+  const storageKey = CART_STORAGE_KEYS[slug] || CART_STORAGE_KEYS[DEFAULT_BRAND_SLUG]
+
+  const [items, setItems] = useState(() => readCart(storageKey))
   const syncedRef = useRef(false)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+    // Multi-marca: persistir en la clave específica de esta marca
+    localStorage.setItem(storageKey, JSON.stringify(items))
     window.dispatchEvent(new Event('cartUpdated'))
-  }, [items])
+  }, [items, storageKey])
 
   // Sync prices from backend on mount to catch precioOferta changes
   const syncPrices = useCallback(async () => {
@@ -49,9 +57,9 @@ export function CartProvider({ children }) {
   useEffect(() => {
     if (!syncedRef.current && items.length > 0) {
       syncedRef.current = true
-      syncPrices()
+      setTimeout(() => syncPrices(), 0)
     }
-  }, [syncPrices])
+  }, [syncPrices, items.length])
 
   const addItem = (producto, talle, cantidad = 1) => {
     setItems(prev => {

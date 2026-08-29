@@ -7,7 +7,7 @@ const enviarNewsletter = async (req, res) => {
         
         const result = await adminService.enviarNewsletter(asunto, contenido);
         res.json(result);
-    } catch (error) {
+    } catch (_e) {
         res.status(500).json({ error: 'Error al enviar la noticia. Verifica las credenciales de Gmail.' });
     }
 };

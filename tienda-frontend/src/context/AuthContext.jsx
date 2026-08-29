@@ -1,21 +1,19 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState } from 'react'
 import * as api from '../services/api'
 
 const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Restaurar sesión desde localStorage
+  const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('looserfit_user')
     const token = localStorage.getItem('looserfit_token')
     if (savedUser && token) {
-      setUser(JSON.parse(savedUser))
+      try { return JSON.parse(savedUser) } catch { return null }
     }
-    setLoading(false)
-  }, [])
+    return null
+  })
+  const [loading] = useState(false)
 
   const login = async (email, password) => {
     const data = await api.login(email, password)

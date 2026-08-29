@@ -1,13 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useCart } from '../../context/CartContext'
-import { useAuth } from '../../context/AuthContext'
+
 import { getProductoById } from '../../services/api'
 import './Carrito.css'
 
 export default function Carrito() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+
   const { items, subtotal, updateCantidad, removeItem } = useCart()
   const [stocks, setStocks] = useState({})
 
@@ -27,6 +27,7 @@ export default function Carrito() {
         })
         .catch(console.error)
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items.length]) // Only re-run when items count changes, not on every price update
 
   const hasNoStock = items.some(item => (stocks[item._id] ?? 1) <= 0)

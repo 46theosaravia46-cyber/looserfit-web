@@ -122,6 +122,22 @@ const toggleProductDrop = async (req, res) => {
     }
 };
 
+const bulkToggleProductDrop = async (req, res) => {
+    try {
+        const { productIds, estado } = req.body;
+        if (!Array.isArray(productIds)) {
+            return res.status(400).json({ mensaje: 'productIds debe ser un array' });
+        }
+        if (typeof estado !== 'boolean') {
+            return res.status(400).json({ mensaje: 'estado debe ser un booleano' });
+        }
+        const result = await productService.bulkToggleProductDrop(productIds, estado);
+        res.json({ mensaje: 'Estado Drop actualizado masivamente', result });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error en bulk toggle drop', error: error.message });
+    }
+};
+
 module.exports = {
     getAllProducts,
     getProductById,
@@ -129,5 +145,6 @@ module.exports = {
     updateProduct,
     deleteProduct,
     toggleProductVisibility,
-    toggleProductDrop
+    toggleProductDrop,
+    bulkToggleProductDrop
 };

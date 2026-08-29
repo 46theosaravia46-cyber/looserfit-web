@@ -16,7 +16,7 @@ const protect = (req, res, next) => {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
         next();
-    } catch (err) {
+    } catch (_e) {
         return res.status(401).json({ error: 'Token no válido' });
     }
 };

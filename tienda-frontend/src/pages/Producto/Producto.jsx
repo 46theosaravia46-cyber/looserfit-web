@@ -29,7 +29,6 @@ export default function Producto() {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = 'auto'
-      setLbZoom(1)
     }
   }, [lightbox])
 
@@ -196,7 +195,7 @@ export default function Producto() {
 
       {/* Lightbox / Full screen photo */}
       {lightbox && (
-        <div className="lightbox-overlay" onClick={() => setLightbox(false)}>
+        <div className="lightbox-overlay" onClick={() => { setLightbox(false); setLbZoom(1); }}>
           <button className="lightbox-close">✕</button>
           
           {producto.imagenes?.length > 1 && (

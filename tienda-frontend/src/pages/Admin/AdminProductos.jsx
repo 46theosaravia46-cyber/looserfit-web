@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getProductos, eliminarProducto, togglePublicadoProducto, toggleDropProducto } from '../../services/api'
+import { getProductos, eliminarProducto, togglePublicadoProducto, toggleDropProducto, bulkToggleDropProductos } from '../../services/api'
 import { useAdminBrand } from '../../context/AdminBrandContext'
 import './Admin.css'
 
@@ -11,6 +11,7 @@ export default function AdminProductos() {
   const [seleccionados, setSeleccionados] = useState(new Set())
   const [openMenu,     setOpenMenu]     = useState(null)
   const [openBulkMenu, setOpenBulkMenu] = useState(false)
+  const [isBulkActionLoading, setIsBulkActionLoading] = useState(false)
   // Multi-marca: obtener la marca activa del selector del admin
   const { activeBrand } = useAdminBrand()
 
@@ -99,35 +100,35 @@ export default function AdminProductos() {
   }
 
   const ponerDropSeleccionados = async () => {
-    if (seleccionados.size === 0) return
+    if (seleccionados.size === 0 || isBulkActionLoading) return
     const ids = [...seleccionados]
-    for (const id of ids) {
-      try {
-        const p = productos.find(x => x._id === id)
-        if(p && !p.esNuevoDrop) {
-          const data = await toggleDropProducto(id)
-          setProductos(prev => prev.map(prod => (prod._id === id ? data.producto : prod)))
-        }
-      } catch { /* ignore */ }
+    setIsBulkActionLoading(true)
+    try {
+      await bulkToggleDropProductos(ids, true)
+      setProductos(prev => prev.map(prod => (ids.includes(prod._id) ? { ...prod, esNuevoDrop: true } : prod)))
+      setSeleccionados(new Set())
+      setOpenBulkMenu(false)
+    } catch (error) {
+      alert('No se pudo añadir los productos al Nuevo Drop masivamente.')
+    } finally {
+      setIsBulkActionLoading(false)
     }
-    setSeleccionados(new Set())
-    setOpenBulkMenu(false)
   }
 
   const sacarDropSeleccionados = async () => {
-    if (seleccionados.size === 0) return
+    if (seleccionados.size === 0 || isBulkActionLoading) return
     const ids = [...seleccionados]
-    for (const id of ids) {
-      try {
-        const p = productos.find(x => x._id === id)
-        if(p && p.esNuevoDrop) {
-          const data = await toggleDropProducto(id)
-          setProductos(prev => prev.map(prod => (prod._id === id ? data.producto : prod)))
-        }
-      } catch { /* ignore */ }
+    setIsBulkActionLoading(true)
+    try {
+      await bulkToggleDropProductos(ids, false)
+      setProductos(prev => prev.map(prod => (ids.includes(prod._id) ? { ...prod, esNuevoDrop: false } : prod)))
+      setSeleccionados(new Set())
+      setOpenBulkMenu(false)
+    } catch (error) {
+      alert('No se pudo remover los productos del Nuevo Drop masivamente.')
+    } finally {
+      setIsBulkActionLoading(false)
     }
-    setSeleccionados(new Set())
-    setOpenBulkMenu(false)
   }
 
   /* ── Acciones individuales ── */
@@ -191,12 +192,13 @@ export default function AdminProductos() {
             <button
               type="button"
               className="admin-btn-primary admin-btn-sm"
-              style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}
-              onClick={() => setOpenBulkMenu(!openBulkMenu)}
+              style={{display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: isBulkActionLoading ? 0.7 : 1, cursor: isBulkActionLoading ? 'not-allowed' : 'pointer'}}
+              onClick={() => !isBulkActionLoading && setOpenBulkMenu(!openBulkMenu)}
+              disabled={isBulkActionLoading}
             >
-              Acciones ({seleccionados.size}) <span>⋮</span>
+              {isBulkActionLoading ? 'Procesando...' : `Acciones (${seleccionados.size})`} {!isBulkActionLoading && <span>⋮</span>}
             </button>
-            {openBulkMenu && (
+            {openBulkMenu && !isBulkActionLoading && (
               <div className="table-dropdown" style={{top: 'calc(100% + 4px)', right: 'auto', left: 0}}>
                 <button
                   type="button"

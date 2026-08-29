@@ -190,6 +190,14 @@ const toggleProductDrop = async (id) => {
     ).populate('categoria');
 };
 
+const bulkToggleProductDrop = async (productIds, estado) => {
+    if (!Array.isArray(productIds) || productIds.length === 0) return { modifiedCount: 0 };
+    return await Product.updateMany(
+        { _id: { $in: productIds } },
+        { $set: { esNuevoDrop: estado } }
+    );
+};
+
 module.exports = {
     getAllProducts,
     getProductById,
@@ -198,5 +206,6 @@ module.exports = {
     deleteProduct,
     updateStock,
     toggleProductVisibility,
-    toggleProductDrop
+    toggleProductDrop,
+    bulkToggleProductDrop
 };

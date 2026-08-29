@@ -1,16 +1,14 @@
+import { useEffect, useState } from 'react'
+import { useLocation, Link } from 'react-router-dom'
 import { getPedidoById, subirComprobante, registerFromOrder } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import './PedidoExito.css'
-
-const WHATSAPP_NUMBER = '5493484663187'
 
 export default function PedidoExito() {
   const location = useLocation()
   const { state } = location
   const [pedido, setPedido] = useState(state?.pedido || null)
   const [pedidoNotFound, setPedidoNotFound] = useState(false)
-  const whatsappText = state?.whatsappText || 'Hola! Quiero consultar por mi pedido.'
-  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`
 
   const [file, setFile] = useState(null)
   const [uploading, setUploading] = useState(false)
@@ -18,7 +16,7 @@ export default function PedidoExito() {
   const [errorUpload, setErrorUpload] = useState('')
   const [comprobanteUrl, setComprobanteUrl] = useState(state?.pedido?.comprobante || '')
   const [isDragging, setIsDragging] = useState(false)
-  const { user, login: authLogin } = useAuth()
+  const { user } = useAuth()
 
   // Registration for guests
   const [password, setPassword] = useState('')

@@ -3,7 +3,7 @@ const { subirImagen } = require('../config/storage');
 
 const getHome = async (req, res) => {
     try {
-        const doc = await homeService.getHomeContent();
+        const doc = await homeService.getHomeContent(req.brandId);
         res.json(doc);
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al obtener contenido home', error: error.message });
@@ -30,7 +30,7 @@ const updateHero = async (req, res) => {
         }
         finalImages = mapped;
 
-        const doc = await homeService.updateHero(finalImages);
+        const doc = await homeService.updateHero(req.brandId, finalImages);
         res.json({ mensaje: 'Hero actualizado', home: doc });
     } catch (error) {
         console.error('CRITICAL HERO ERROR:', error);
@@ -56,7 +56,7 @@ const updateFamily = async (req, res) => {
             familyImages.push({ src, titulo: item.titulo || '', descripcion: item.descripcion || '' });
         }
 
-        const doc = await homeService.updateFamily(familyImages);
+        const doc = await homeService.updateFamily(req.brandId, familyImages);
         res.json({ mensaje: 'Family actualizado', home: doc });
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al actualizar family', error: error.message });
@@ -65,7 +65,7 @@ const updateFamily = async (req, res) => {
 
 const updateSettings = async (req, res) => {
     try {
-        const doc = await homeService.updateSettings(req.body.comingSoon);
+        const doc = await homeService.updateSettings(req.brandId, req.body.comingSoon);
         res.json({ mensaje: 'Configuración actualizada', home: doc });
     } catch (error) {
         res.status(400).json({ mensaje: 'Error al actualizar configuración', error: error.message });
@@ -78,7 +78,7 @@ const updateFeatured = async (req, res) => {
         if (!Array.isArray(productIds)) {
             return res.status(400).json({ mensaje: 'productIds debe ser un array' });
         }
-        const doc = await homeService.updateFeatured(productIds);
+        const doc = await homeService.updateFeatured(req.brandId, productIds);
         res.json({ mensaje: 'Productos destacados actualizados', home: doc });
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al actualizar destacados', error: error.message });

@@ -98,6 +98,15 @@
   box-shadow: 0 0 0 4px rgba(0,0,0,0.1);
 }
 
+.step.current .step-label {
+  color: #000;
+  font-weight: bold;
+}
+
+.step.future {
+  opacity: 0.3;
+}
+
 .step.cancelled .step-bullet {
   background: #e74c3c;
 }
@@ -137,6 +146,13 @@
 .status-pagado { background: #d4edda; color: #155724; }
 .status-pendiente { background: #fff3cd; color: #856404; }
 .status-enviado { background: #cce5ff; color: #004085; }
+
+.status-text-pagado { color: #155724; }
+.status-text-pendiente { color: #856404; }
+.status-text-enviado { color: #004085; }
+.status-text-empaquetado { color: #28a745; }
+.status-text-entregado { color: #28a745; }
+.status-text-cancelado { color: #dc3545; }
 
 .tracking-code-box {
   margin-top: 1.5rem;

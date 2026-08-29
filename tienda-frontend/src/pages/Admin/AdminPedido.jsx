@@ -128,7 +128,14 @@ export default function AdminPedido() {
             </div>
             <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
               <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>x{p.cantidad}</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 600 }}>${Number(p.precio).toLocaleString('es-AR')}</span>
+              {p.precioOferta ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: '#888', textDecoration: 'line-through' }}>${Number(p.precio).toLocaleString('es-AR')}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 600, color: '#d32f2f' }}>${Number(p.precioOferta).toLocaleString('es-AR')}</span>
+                </div>
+              ) : (
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 600 }}>${Number(p.precio).toLocaleString('es-AR')}</span>
+              )}
             </div>
           </div>
         ))}

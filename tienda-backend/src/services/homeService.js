@@ -41,12 +41,19 @@ const sendLaunchNotification = async (message, subtitle, emailMessage) => {
     }
 }
 
-const getHomeContent = async () => {
-    let doc = await HomeContent.findOne().populate('featuredProducts');
+const getHomeContent = async (brandId) => {
+    // Multi-marca: buscar el HomeContent de la marca activa
+    let query = {};
+    if (brandId) query.brand = brandId;
+
+    let doc = await HomeContent.findOne(query).populate('featuredProducts');
     if (!doc) {
+        // Crear un HomeContent vacío para esta marca si no existe
         doc = await HomeContent.create({
-            heroImages: ['/hero-1.jpg', '/hero-ver-todo.jpg', '/hero-3.jpg']
+            brand: brandId,
+            heroImages: []
         });
+        doc = await HomeContent.findById(doc._id).populate('featuredProducts');
     }
 
     if (doc.comingSoon?.enabled && doc.comingSoon?.launchDate && new Date(doc.comingSoon.launchDate) <= new Date()) {
@@ -57,9 +64,9 @@ const getHomeContent = async () => {
     return doc;
 };
 
-const updateHero = async (images) => {
+const updateHero = async (brandId, images) => {
     // Ya no obligamos a que sean 3
-    const home = await getHomeContent();
+    const home = await getHomeContent(brandId);
     const oldImages = home.heroImages || [];
     
     // Limpiar imágenes eliminadas
@@ -72,9 +79,9 @@ const updateHero = async (images) => {
     return await home.save();
 };
 
-const updateFamily = async (familyImages) => {
-    let doc = await HomeContent.findOne();
-    if (!doc) doc = await HomeContent.create({});
+const updateFamily = async (brandId, familyImages) => {
+    let doc = await HomeContent.findOne({ brand: brandId });
+    if (!doc) doc = await HomeContent.create({ brand: brandId });
     
     const oldImages = doc.familyImages?.map(f => f.src) || [];
     const newUrls = familyImages.map(f => f.src);
@@ -89,9 +96,9 @@ const updateFamily = async (familyImages) => {
     return await doc.save();
 };
 
-const updateSettings = async (comingSoon) => {
-    let doc = await HomeContent.findOne();
-    if (!doc) doc = await HomeContent.create({});
+const updateSettings = async (brandId, comingSoon) => {
+    let doc = await HomeContent.findOne({ brand: brandId });
+    if (!doc) doc = await HomeContent.create({ brand: brandId });
     
     const enabled = Boolean(comingSoon.enabled);
     let launchDate = null;
@@ -112,9 +119,9 @@ const updateSettings = async (comingSoon) => {
     return await doc.save();
 };
 
-const updateFeatured = async (productIds) => {
-    let doc = await HomeContent.findOne();
-    if (!doc) doc = await HomeContent.create({});
+const updateFeatured = async (brandId, productIds) => {
+    let doc = await HomeContent.findOne({ brand: brandId });
+    if (!doc) doc = await HomeContent.create({ brand: brandId });
     doc.featuredProducts = productIds;
     await doc.save();
     return await doc.populate('featuredProducts');

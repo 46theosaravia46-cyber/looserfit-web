@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
+    // Discriminador de marca — identifica a qué marca pertenece este producto
+    brand: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Brand',
+        required: true
+    },
     nombre: { type: String, required: true },
     descripcion: { type: String },
     precio: { type: Number, required: true },
@@ -21,5 +27,10 @@ const productSchema = new mongoose.Schema({
     esNuevoDrop: { type: Boolean, default: false }, // Para la sección de "Últimas novedades"
     guiaTalles: { type: String } // Guía de medidas (texto o URL)
 }, { timestamps: true });
+
+// Índices compuestos para búsquedas multi-marca eficientes
+productSchema.index({ brand: 1, categoria: 1 });
+productSchema.index({ brand: 1, esNuevoDrop: 1 });
+productSchema.index({ brand: 1, publicado: 1 });
 
 module.exports = mongoose.model('Product', productSchema);

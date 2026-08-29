@@ -7,6 +7,12 @@ const familyImageSchema = new mongoose.Schema({
 }, { _id: false });
 
 const homeContentSchema = new mongoose.Schema({
+    // Discriminador de marca — cada marca tiene su propio contenido home
+    brand: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Brand',
+        required: true
+    },
     heroImages: [{ type: String }],
     familyImages: { type: [familyImageSchema], default: [] },
     comingSoon: {
@@ -18,5 +24,8 @@ const homeContentSchema = new mongoose.Schema({
     },
     featuredProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
 }, { timestamps: true });
+
+// Índice único: solo puede existir un HomeContent por marca
+homeContentSchema.index({ brand: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('HomeContent', homeContentSchema);
