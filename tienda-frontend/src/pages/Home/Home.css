@@ -1,7 +1,7 @@
 .hero {
   position: relative; /* Para el CTA absoluto */
   margin-top: 0;
-  height: 100dvh;
+  height: 50dvh;
   overflow: hidden;
 }
 
@@ -402,17 +402,17 @@
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .hero {
-    height: auto;
-    min-height: 100dvh;
+    height: 50dvh;
+    min-height: 50dvh;
   }
 
   .hero__grid {
     grid-template-columns: 1fr;
-    height: auto;
+    height: 100%;
   }
 
   .hero__col {
-    height: 70dvh;
+    height: 50dvh;
   }
 
   .hero__cta {
