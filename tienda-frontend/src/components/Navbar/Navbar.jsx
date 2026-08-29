@@ -152,11 +152,9 @@ export default function Navbar() {
 
           </div>
 
-          {/* Logo centro */}
+          {/* Logo centro — usando framer motion */}
           <div className="navbar__logo">
-            <Link to="/">
-              <img src="/logo3.0.png" alt="Looser Fit" />
-            </Link>
+            <BrandLogoSwitcher />
           </div>
 
           {/* Derecha */}

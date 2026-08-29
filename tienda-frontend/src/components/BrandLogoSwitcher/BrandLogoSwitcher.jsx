@@ -55,11 +55,12 @@ export default function BrandLogoSwitcher() {
   return (
     <div className={`brand-logo-switcher ${allowHover ? 'allow-hover' : ''}`}>
       
-      {/* LOGO INACTIVO (Fondo / Sombra) */}
+      {/* LOGO INACTIVO (Fondo / Sombra) - Oculto temporalmente */}
       <Link
         to={otherSlug === 'fit' ? '/' : '/sport'}
         aria-label={`Cambiar a ${otherConfig.name}`}
         className="brand-logo-back"
+        style={{ display: 'none' }}
       >
         <img
           src={otherConfig.assets.logo}
@@ -73,6 +74,7 @@ export default function BrandLogoSwitcher() {
         to={currentSlug === 'fit' ? '/' : '/sport'}
         aria-label={`Ir al inicio de ${currentConfig.name}`}
         className="brand-logo-front"
+        style={{ pointerEvents: 'none' }} /* Evita click en el activo para no cambiar */
       >
         <img
           src={currentConfig.assets.logo}
